@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作者プロフィール - 作家賽銭</title>
+    <!-- ★追加：Stripeの公式システムを読み込む -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6f8; color: #333; margin: 0; padding: 0; }
+        .header { background-color: #333; color: white; padding: 15px 20px; text-align: center; font-weight: bold; letter-spacing: 1px; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        
+        .profile-card { background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 25px; }
+        .author-name { font-size: 24px; font-weight: bold; margin: 0 0 10px 0; color: #1976d2; }
+        .profile-link { font-size: 14px; color: #666; text-decoration: none; word-break: break-all; }
+        .profile-link:hover { text-decoration: underline; }
+        
+        .section-title { font-size: 18px; font-weight: bold; margin: 30px 0 15px 0; border-left: 4px solid #f57c00; padding-left: 10px; }
+        
+        .support-box { background: #fff8e1; border: 1px solid #ffe0b2; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .support-box p { margin: 0 0 15px 0; font-size: 15px; line-height: 1.6; color: #555;}
+        
+        .work-card { background: white; border-radius: 8px; padding: 20px; border: 1px solid #eee; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .work-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; }
+        .work-url { font-size: 13px; color: #888; margin-bottom: 15px; display: block; text-decoration: none;}
+        
+        .btn-support { display: block; width: 100%; background-color: #f57c00; color: white; border: none; padding: 15px 0; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; transition: background 0.2s; box-shadow: 0 4px 6px rgba(245,124,0,0.2); }
+        .btn-support:hover { background-color: #e65100; transform: translateY(-1px); }
+        .btn-support:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; transform: none; }
+        .btn-support span { display: block; font-size: 12px; font-weight: normal; margin-top: 3px; opacity: 0.9; }
+
+        #errorMessage { color: #d32f2f; text-align: center; font-weight: bold; margin-top: 20px; }
+        .loading { text-align: center; color: #666; margin-top: 50px; }
+        
+        .secret-blur { filter: blur(4px); user-select: none; background: #eee; height: 60px; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: transparent; }
+    </style>
+</head>
+<body>
+
+    <div class="header">作家賽銭</div>
+
+    <div class="container" id="mainContainer" style="display: none;">
+        <div class="profile-card">
+            <h1 class="author-name" id="authorName"></h1>
+            <a href="#" target="_blank" class="profile-link" id="authorUrl">活動サイトのマイページへ</a>
+        </div>
+
+        <!-- 作者への全体支援 -->
+        <div id="generalSupportArea">
+            <h2 class="section-title">作者にお茶を差し入れる（100円〜）</h2>
+            <div class="support-box">
+                <p>支援の特典として、作者の<strong>「ひとことお礼メッセージ（近況など）」</strong>を読むことができます。</p>
+                <div class="secret-blur">ここは決済後に読めるようになります</div>
+                <button class="btn-support" id="btnGeneral" onclick="startCheckout('general', null)">
+                    作者を支援する
+                    <span>※会員登録不要・100円から自由な金額で支援できます</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 作品ごとの支援 -->
+        <h2 class="section-title" id="worksTitle" style="display: none;">作品を指定して支援する</h2>
+        <div id="worksList"></div>
+    </div>
+
+    <div id="errorMessage"></div>
+    <div id="loading" class="loading">情報を読み込んでいます...</div>
+
+    <script>
+        // --- ここを書き換えます ---
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const STRIPE_PUBLIC_KEY = 'pk_test_51ThTKj4XyICGMkd9IU5z99hggK13SiHHFZMffu6rMnMTtNiQ6TNzNeBxhqD7ah8wTed7GATw83rNiJgohFUhuwOg00I0j4UOOM'; // pk_test_ から始まるキー
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Stripeの初期化
+        const stripe = Stripe(STRIPE_PUBLIC_KEY);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetAuthorId = urlParams.get('id');
+
+        window.onload = async function() {
+            if (!targetAuthorId) {
+                showError('作者IDが指定されていません。');
+                return;
+            }
+
+            const { data: creator, error: creatorError } = await supabaseClient
+                .from('creators').select('*').eq('id', targetAuthorId).single();
+
+            if (creatorError || !creator) {
+                showError('作者情報が見つかりませんでした。');
+                return;
+            }
+
+            document.getElementById('authorName').innerText = creator.pen_name;
+            document.getElementById('authorUrl').href = creator.profile_url;
+            document.getElementById('authorUrl').innerText = creator.profile_url;
+
+            if (!creator.general_secret_message) {
+                document.getElementById('generalSupportArea').style.display = 'none';
+            }
+
+            const { data: works, error: worksError } = await supabaseClient
+                .from('works').select('*').eq('creator_id', targetAuthorId).order('created_at', { ascending: false });
+
+            if (!worksError && works.length > 0) {
+                document.getElementById('worksTitle').style.display = 'block';
+                const worksList = document.getElementById('worksList');
+                let html = '';
+                
+                works.forEach(work => {
+                    html += `
+                        <div class="work-card">
+                            <h3 class="work-title">${work.title}</h3>
+                            <a href="${work.work_url}" target="_blank" class="work-url">${work.work_url}</a>
+                            <p style="font-size: 14px; color: #555; margin-bottom: 10px;">支援特典：この作品の<strong>おまけメッセージ</strong></p>
+                            <div class="secret-blur">ここは決済後に読めるようになります</div>
+                            <button class="btn-support" id="btn_${work.id}" onclick="startCheckout('work', '${work.id}')">
+                                この作品を支援する
+                            </button>
+                        </div>
+                    `;
+                });
+                worksList.innerHTML = html;
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'block';
+        };
+
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('errorMessage').innerText = msg;
+        }
+
+        // ★決済開始処理
+        async function startCheckout(supportType, workId) {
+            // ボタンを連打できないようにロックする
+            const btnId = supportType === 'general' ? 'btnGeneral' : `btn_${workId}`;
+            const btn = document.getElementById(btnId);
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerText = '決済画面へ移動中...';
+
+            try {
+                // ここで「Supabaseの裏側（Edge Functions）」に決済セッションの作成を依頼します
+                // ※今はまだ裏側を作っていないので、わざとエラーを出して止まるようにしています
+                const { data, error } = await supabaseClient.functions.invoke('create-checkout', {
+                    body: {
+                        authorId: targetAuthorId,
+                        type: supportType,
+                        workId: workId
+                    }
+                });
+
+                if (error) throw error;
+
+                // 成功したら、Stripeの決済画面へ自動でジャンプ！
+                await stripe.redirectToCheckout({ sessionId: data.sessionId });
+
+            } catch (err) {
+                console.error(err);
+                alert('決済システムの準備中です。裏側のプログラムを構築するまでお待ちください！');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+    </script>
+</body>
+</html>
