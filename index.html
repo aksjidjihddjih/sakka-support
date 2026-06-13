@@ -49,12 +49,12 @@
     </div>
 
     <script>
-        // Supabaseの接続設定
+        // ▼ 先ほど消えてしまっていた可能性が高い、Supabaseの接続設定 ▼
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 検索ボタンを押したときの処理
+        // 検索ボタンを押したときの処理（表記揺れ対応版）
         async function searchAuthor() {
             const url = document.getElementById('searchUrl').value.trim();
             const resultDiv = document.getElementById('searchResult');
@@ -66,23 +66,31 @@
 
             resultDiv.innerHTML = '<p>検索中...</p>';
 
-            // データベースからURLが完全一致する作者を探す
-            const { data, error } = await supabase
-                .from('creators')
-                .select('id, pen_name')
-                .eq('profile_url', url)
-                .single();
+            try {
+                // 部分一致(ilike)で検索
+                const { data, error } = await supabase
+                    .from('creators')
+                    .select('id, pen_name')
+                    .ilike('profile_url', `%${url}%`)
+                    .limit(1);
 
-            if (error || !data) {
-                resultDiv.innerHTML = '<p style="color: #d32f2f; font-weight: bold;">見つかりませんでした。URLが間違っていないか確認してください。</p>';
-            } else {
-                resultDiv.innerHTML = `
-                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #bbdefb;">
-                        <h3 style="margin: 0 0 10px 0; color: #1565c0;">${data.pen_name}</h3>
-                        <p style="font-size: 14px; color: #333; margin-bottom: 10px;">作者の支援ページが見つかりました！</p>
-                        <a href="profile.html?id=${data.id}" class="btn-link">支援ページへ移動する</a>
-                    </div>
-                `;
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    resultDiv.innerHTML = '<p style="color: #d32f2f; font-weight: bold;">見つかりませんでした。URLが間違っていないか確認してください。</p>';
+                } else {
+                    const author = data[0];
+                    resultDiv.innerHTML = `
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #bbdefb;">
+                            <h3 style="margin: 0 0 10px 0; color: #1565c0;">${author.pen_name}</h3>
+                            <p style="font-size: 14px; color: #333; margin-bottom: 10px;">作者の支援ページが見つかりました！</p>
+                            <a href="profile.html?id=${author.id}" class="btn-link">支援ページへ移動する</a>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error(err);
+                resultDiv.innerHTML = `<p style="color: #d32f2f; font-weight: bold;">システムエラーが発生しました: ${err.message}</p>`;
             }
         }
     </script>
