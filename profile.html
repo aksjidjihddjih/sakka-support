@@ -16,7 +16,6 @@
         .profile-link { display: inline-block; background-color: #f5f5f5; padding: 10px 20px; border-radius: 6px; font-size: 14px; color: #1976d2; text-decoration: none; font-weight: bold; border: 1px solid #e0e0e0; transition: 0.2s; }
         .profile-link:hover { background-color: #e3f2fd; border-color: #bbdefb; }
         
-        /* ★追加：本人確認エリアのデザイン */
         .verification-box { background: #ffebee; border: 2px solid #ef9a9a; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
         .verification-box p.title { margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #c62828; }
         .verification-box p.desc { margin: 0 0 12px 0; font-size: 13px; color: #555; line-height: 1.5; }
@@ -32,6 +31,12 @@
         .work-title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; }
         .work-url { font-size: 13px; color: #1976d2; margin-bottom: 15px; display: inline-block; text-decoration: none;}
         .work-url:hover { text-decoration: underline; }
+        
+        /* ★追加：金額入力欄のデザイン */
+        .amount-input-wrapper { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; text-align: center; margin-bottom: 15px; }
+        .amount-input-wrapper label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 8px; color: #444; }
+        .amount-input { width: 120px; padding: 10px; font-size: 18px; text-align: right; border: 2px solid #ccc; border-radius: 4px; font-weight: bold; }
+        .amount-input:focus { border-color: #f57c00; outline: none; }
         
         .btn-support { display: block; width: 100%; background-color: #f57c00; color: white; border: none; padding: 15px 0; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; transition: background 0.2s; box-shadow: 0 4px 6px rgba(245,124,0,0.2); }
         .btn-support:hover { background-color: #e65100; transform: translateY(-1px); }
@@ -64,18 +69,24 @@
         </div>
 
         <div id="generalSupportArea">
-            <h2 class="section-title">作者にお茶を差し入れる（100円）</h2>
+            <h2 class="section-title">作者を支援する</h2>
             <div class="support-box">
-                <p>支援の特典として、作者の<strong>「ひとことお礼メッセージ」</strong>を読むことができます。</p>
+                <p>支援の特典として、作者の<strong>「限定メッセージ」</strong>を読むことができます。</p>
                 <div class="secret-blur">ここは決済後に読めるようになります</div>
+                
+                <div class="amount-input-wrapper">
+                    <label for="amountGeneral">支援金額（100円〜10,000円）</label>
+                    <input type="number" id="amountGeneral" class="amount-input" min="100" max="10000" value="100" step="100"> 円
+                </div>
+
                 <button class="btn-support" id="btnGeneral" onclick="startCheckout('general', null)">
-                    作者を支援する
+                    支援してメッセージを読む
                     <span>※会員登録不要・クレジットカード決済</span>
                 </button>
             </div>
         </div>
 
-        <h2 class="section-title" id="worksTitle" style="display: none;">作品を指定して支援する（100円）</h2>
+        <h2 class="section-title" id="worksTitle" style="display: none;">作品を指定して支援する</h2>
         <div id="worksList"></div>
     </div>
 
@@ -127,10 +138,16 @@
                         <div class="work-card">
                             <h3 class="work-title">${work.title}</h3>
                             <a href="${work.work_url}" target="_blank" class="work-url">作品ページを開く ↗</a>
-                            <p style="font-size: 14px; color: #555; margin-bottom: 10px;">支援特典：この作品の<strong>おまけメッセージ</strong></p>
+                            <p style="font-size: 14px; color: #555; margin-bottom: 10px;">支援特典：この作品の<strong>限定メッセージ</strong></p>
                             <div class="secret-blur">ここは決済後に読めるようになります</div>
+                            
+                            <div class="amount-input-wrapper">
+                                <label for="amount_${work.id}">支援金額（100円〜10,000円）</label>
+                                <input type="number" id="amount_${work.id}" class="amount-input" min="100" max="10000" value="100" step="100"> 円
+                            </div>
+
                             <button class="btn-support" id="btn_${work.id}" onclick="startCheckout('work', '${work.id}')">
-                                この作品を支援する
+                                支援してメッセージを読む
                             </button>
                         </div>
                     `;
@@ -148,11 +165,21 @@
         }
 
         async function startCheckout(supportType, workId) {
-            // ★追加：チェックボックスにチェックが入っているか確認
             const isVerified = document.getElementById('verifyCheck').checked;
             if (!isVerified) {
                 alert('⚠️ 支援を行う前に、上の「本物の作者の支援ページであることを確認しました」にチェックを入れてください。');
-                return; // ここで処理を止める
+                return;
+            }
+
+            // ★追加：入力された金額の取得とバリデーション（画面側でのブロック）
+            const inputId = supportType === 'general' ? 'amountGeneral' : `amount_${workId}`;
+            const amountInput = document.getElementById(inputId);
+            const amount = parseInt(amountInput.value, 10);
+
+            if (isNaN(amount) || amount < 100 || amount > 10000) {
+                alert('金額は100円から10,000円の間で入力してください。');
+                amountInput.focus();
+                return;
             }
 
             const btnId = supportType === 'general' ? 'btnGeneral' : `btn_${workId}`;
@@ -166,7 +193,8 @@
                     body: {
                         authorId: targetAuthorId,
                         type: supportType,
-                        workId: workId // ★修正：ハードコーディング（1）を廃止し、クリックされた本物のIDを渡す
+                        workId: workId,
+                        amount: amount // ★裏側に金額を渡す
                     }
                 });
 
