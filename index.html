@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作家賽銭（仮） - URLで応援しよう</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6f8; color: #333; margin: 0; padding: 0; }
+        .header { background-color: #333; color: white; padding: 15px 20px; text-align: center; font-weight: bold; letter-spacing: 1px; font-size: 20px; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        
+        .hero { text-align: center; margin-bottom: 30px; margin-top: 20px; }
+        .hero h1 { color: #f57c00; margin-bottom: 15px; font-size: 24px; }
+        .hero p { color: #555; line-height: 1.6; }
+
+        .search-card { background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .search-card h2 { margin: 0 0 15px 0; font-size: 18px; color: #1976d2; }
+        
+        .search-input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; }
+        .search-input:focus { border-color: #1976d2; outline: none; }
+        
+        .btn-search { display: block; width: 100%; background-color: #1976d2; color: white; border: none; padding: 12px 0; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-search:hover { background-color: #1565c0; }
+
+        #searchResult { margin-top: 20px; }
+        .btn-link { display: inline-block; background-color: #f57c00; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: bold; }
+        .btn-link:hover { background-color: #e65100; }
+    </style>
+</head>
+<body>
+
+    <div class="header">作家賽銭</div>
+
+    <div class="container">
+        <div class="hero">
+            <h1>大好きな作者にお茶を差し入れよう</h1>
+            <p>会員登録は不要です。<br>活動サイトのマイページURLを入力して、作者の支援ページへ移動します。</p>
+        </div>
+
+        <div class="search-card">
+            <h2>🔍 URLで支援ページを開く</h2>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">支援したい作者の「活動サイトのマイページURL」を正確に入力してください。</p>
+            <input type="url" id="searchUrl" class="search-input" placeholder="例: https://syosetu.com/user/xxxx/">
+            <button class="btn-search" onclick="searchAuthor()">検索する</button>
+            
+            <div id="searchResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // Supabaseの接続設定
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 検索ボタンを押したときの処理
+        async function searchAuthor() {
+            const url = document.getElementById('searchUrl').value.trim();
+            const resultDiv = document.getElementById('searchResult');
+            
+            if (!url) {
+                resultDiv.innerHTML = '<p style="color: #d32f2f; font-weight: bold;">URLを入力してください。</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<p>検索中...</p>';
+
+            // データベースからURLが完全一致する作者を探す
+            const { data, error } = await supabase
+                .from('creators')
+                .select('id, pen_name')
+                .eq('profile_url', url)
+                .single();
+
+            if (error || !data) {
+                resultDiv.innerHTML = '<p style="color: #d32f2f; font-weight: bold;">見つかりませんでした。URLが間違っていないか確認してください。</p>';
+            } else {
+                resultDiv.innerHTML = `
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #bbdefb;">
+                        <h3 style="margin: 0 0 10px 0; color: #1565c0;">${data.pen_name}</h3>
+                        <p style="font-size: 14px; color: #333; margin-bottom: 10px;">作者の支援ページが見つかりました！</p>
+                        <a href="profile.html?id=${data.id}" class="btn-link">支援ページへ移動する</a>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
