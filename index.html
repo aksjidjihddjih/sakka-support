@@ -49,12 +49,11 @@
     </div>
 
     <script>
-        // ▼ 先ほど消えてしまっていた可能性が高い、Supabaseの接続設定 ▼
-        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+       const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 検索ボタンを押したときの処理（表記揺れ対応版）
+        // 検索ボタンを押したときの処理
         async function searchAuthor() {
             const url = document.getElementById('searchUrl').value.trim();
             const resultDiv = document.getElementById('searchResult');
@@ -67,8 +66,8 @@
             resultDiv.innerHTML = '<p>検索中...</p>';
 
             try {
-                // 部分一致(ilike)で検索
-                const { data, error } = await supabase
+                // supabaseClient を使って検索
+                const { data, error } = await supabaseClient
                     .from('creators')
                     .select('id, pen_name')
                     .ilike('profile_url', `%${url}%`)
