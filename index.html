@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>作家賽銭（仮） - URLで応援しよう</title>
+    <!-- Supabaseの読み込み -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6f8; color: #333; margin: 0; padding: 0; }
-        .header { background-color: #333; color: white; padding: 15px 20px; text-align: center; font-weight: bold; letter-spacing: 1px; font-size: 20px; }
+        
+        /* ★ヘッダーを修正：右側にログインボタンを配置 */
+        .header { background-color: #333; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header-title { font-weight: bold; letter-spacing: 1px; font-size: 20px; }
+        .btn-author-login { background-color: transparent; color: #fff; border: 1px solid #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 14px; transition: 0.2s; }
+        .btn-author-login:hover { background-color: rgba(255,255,255,0.1); }
+
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         
         .hero { text-align: center; margin-bottom: 30px; margin-top: 20px; }
@@ -30,11 +37,15 @@
 </head>
 <body>
 
-    <div class="header">作家賽銭</div>
+    <div class="header">
+        <div class="header-title">作家賽銭</div>
+        <!-- ★作者用ログイン画面へのリンクを追加 -->
+        <a href="login.html" class="btn-author-login">作者ログイン / 登録</a>
+    </div>
 
     <div class="container">
         <div class="hero">
-            <h1>大好きな作者にお茶を差し入れよう</h1>
+            <h1>大好きな作者を直接応援しよう</h1>
             <p>会員登録は不要です。<br>活動サイトのマイページURLを入力して、作者の支援ページへ移動します。</p>
         </div>
 
@@ -49,11 +60,10 @@
     </div>
 
     <script>
-       const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 検索ボタンを押したときの処理
         async function searchAuthor() {
             const url = document.getElementById('searchUrl').value.trim();
             const resultDiv = document.getElementById('searchResult');
@@ -66,7 +76,6 @@
             resultDiv.innerHTML = '<p>検索中...</p>';
 
             try {
-                // supabaseClient を使って検索
                 const { data, error } = await supabaseClient
                     .from('creators')
                     .select('id, pen_name')
