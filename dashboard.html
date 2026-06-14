@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理画面 - 作家賽銭</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6f8; color: #333; margin: 0; padding: 0; }
+        .header { background-color: #1976d2; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 20px; }
+        .btn-logout { background-color: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-logout:hover { background-color: rgba(255,255,255,0.1); }
+        
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        
+        .card { background: white; border-radius: 8px; padding: 25px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .card h2 { margin-top: 0; color: #f57c00; border-bottom: 2px solid #fff3e0; padding-bottom: 10px; margin-bottom: 20px; font-size: 20px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
+        .form-group input:focus, .form-group textarea:focus { border-color: #1976d2; outline: none; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        
+        .btn-save { background-color: #f57c00; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-save:hover { background-color: #e65100; }
+        
+        .work-item { border: 1px solid #eee; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #fafafa; }
+        .work-item h3 { margin: 0 0 5px 0; color: #1976d2; font-size: 16px; }
+        .work-item p { margin: 0; font-size: 13px; color: #666; }
+
+        #loading { text-align: center; margin-top: 50px; color: #666; font-weight: bold; }
+        #mainContent { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>作家賽銭 ダッシュボード</h1>
+        <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
+    </div>
+
+    <div id="loading">認証情報を確認しています...</div>
+
+    <div class="container" id="mainContent">
+        
+        <div class="card">
+            <h2>👤 基本設定（プロフィールと全体支援）</h2>
+            <div class="form-group">
+                <label>ペンネーム</label>
+                <input type="text" id="penName" placeholder="例: 小説 太郎">
+            </div>
+            <div class="form-group">
+                <label>活動サイトのマイページURL（※検索に使われます）</label>
+                <input type="url" id="profileUrl" placeholder="例: https://mypage.syosetu.com/xxxx/">
+            </div>
+            <div class="form-group">
+                <label>全体支援（お茶代）の限定お礼メッセージ</label>
+                <textarea id="generalMessage" placeholder="支援してくれた方への感謝の言葉や、ちょっとした裏話などを書いてください。"></textarea>
+            </div>
+            <button class="btn-save" onclick="saveProfile()">基本設定を保存する</button>
+        </div>
+
+        <div class="card">
+            <h2>📕 新しい作品を追加する</h2>
+            <div class="form-group">
+                <label>作品タイトル</label>
+                <input type="text" id="newWorkTitle" placeholder="例: 転生したら〇〇だった件">
+            </div>
+            <div class="form-group">
+                <label>作品のURL</label>
+                <input type="url" id="newWorkUrl" placeholder="例: https://ncode.syosetu.com/xxxx/">
+            </div>
+            <div class="form-group">
+                <label>この作品への支援限定メッセージ</label>
+                <textarea id="newWorkMessage" placeholder="この作品に関するSS（ショートストーリー）や裏話などを書いてください。"></textarea>
+            </div>
+            <button class="btn-save" onclick="addWork()" style="background-color: #1976d2;">作品を追加する</button>
+        </div>
+
+        <div class="card">
+            <h2>📚 登録済みの作品一覧</h2>
+            <div id="worksList">
+                <p style="color: #666; font-size: 14px;">読み込み中...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+
+        // ページを開いたときにログイン状態をチェック
+        window.onload = async function() {
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            
+            if (error || !session) {
+                // ログインしていなければ、強制的にログイン画面へ戻す
+                alert('ログインが必要です。');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = session.user;
+            await loadProfile();
+            await loadWorks();
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+        };
+
+        // プロフィール情報の読み込み
+        async function loadProfile() {
+            const { data, error } = await supabaseClient
+                .from('creators')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (data) {
+                document.getElementById('penName').value = data.pen_name || '';
+                document.getElementById('profileUrl').value = data.profile_url || '';
+                document.getElementById('generalMessage').value = data.general_secret_message || '';
+            }
+        }
+
+        // プロフィールの保存（無ければ新規作成、あれば更新）
+        async function saveProfile() {
+            const penName = document.getElementById('penName').value.trim();
+            const profileUrl = document.getElementById('profileUrl').value.trim();
+            const generalMessage = document.getElementById('generalMessage').value.trim();
+
+            if (!penName || !profileUrl) {
+                alert('ペンネームとマイページURLは必須です。');
+                return;
+            }
+
+            // upsert は「すでにデータがあれば上書き、なければ新規作成」する便利な命令です
+            const { error } = await supabaseClient
+                .from('creators')
+                .upsert({
+                    id: currentUser.id,
+                    pen_name: penName,
+                    profile_url: profileUrl,
+                    general_secret_message: generalMessage
+                });
+
+            if (error) {
+                alert('保存に失敗しました: ' + error.message);
+            } else {
+                alert('基本設定を保存しました！');
+            }
+        }
+
+        // 作品リストの読み込み
+        async function loadWorks() {
+            const { data, error } = await supabaseClient
+                .from('works')
+                .select('*')
+                .eq('creator_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            const listDiv = document.getElementById('worksList');
+            if (error) {
+                listDiv.innerHTML = '<p>作品の読み込みに失敗しました。</p>';
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                listDiv.innerHTML = '<p style="color: #666; font-size: 14px;">まだ登録されている作品はありません。</p>';
+                return;
+            }
+
+            let html = '';
+            data.forEach(work => {
+                html += `
+                    <div class="work-item">
+                        <h3>${work.title}</h3>
+                        <p>🔗 <a href="${work.work_url}" target="_blank">${work.work_url}</a></p>
+                    </div>
+                `;
+            });
+            listDiv.innerHTML = html;
+        }
+
+        // 新しい作品の追加
+        async function addWork() {
+            const title = document.getElementById('newWorkTitle').value.trim();
+            const url = document.getElementById('newWorkUrl').value.trim();
+            const message = document.getElementById('newWorkMessage').value.trim();
+
+            if (!title || !url || !message) {
+                alert('タイトル、URL、限定メッセージはすべて入力してください。');
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('works')
+                .insert({
+                    creator_id: currentUser.id,
+                    title: title,
+                    work_url: url,
+                    secret_message: message
+                });
+
+            if (error) {
+                alert('作品の追加に失敗しました: ' + error.message);
+            } else {
+                alert('作品を追加しました！');
+                // フォームを空にして再読み込み
+                document.getElementById('newWorkTitle').value = '';
+                document.getElementById('newWorkUrl').value = '';
+                document.getElementById('newWorkMessage').value = '';
+                loadWorks();
+            }
+        }
+
+        // ログアウト処理
+        async function handleLogout() {
+            if(confirm('ログアウトしますか？')) {
+                await supabaseClient.auth.signOut();
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>
