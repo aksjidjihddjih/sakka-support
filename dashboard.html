@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理画面 - 作家賽銭</title>
+    <title>管理画面 - KANKETSU</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6f8; color: #333; margin: 0; padding: 0; }
@@ -37,7 +37,7 @@
 <body>
 
     <div class="header">
-        <h1>作家賽銭 ダッシュボード</h1>
+        <h1>KANKETSU ダッシュボード</h1>
         <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
     </div>
 
@@ -56,7 +56,7 @@
                 <input type="url" id="profileUrl" placeholder="例: https://mypage.syosetu.com/xxxx/">
             </div>
             <div class="form-group">
-                <label>全体支援（お茶代）の限定お礼メッセージ</label>
+                <label>作家支援の限定お礼メッセージ</label>
                 <textarea id="generalMessage" placeholder="支援してくれた方への感謝の言葉や、ちょっとした裏話などを書いてください。"></textarea>
             </div>
             <button class="btn-save" onclick="saveProfile()">基本設定を保存する</button>
