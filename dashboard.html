@@ -19,19 +19,25 @@
         
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
         .form-group input:focus, .form-group textarea:focus { border-color: #1976d2; outline: none; }
         .form-group textarea { resize: vertical; min-height: 100px; }
         
-        .btn-save { background-color: #f57c00; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-save { background-color: #f57c00; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; width: 100%; }
         .btn-save:hover { background-color: #e65100; }
+        .btn-save:disabled { background-color: #ccc; cursor: not-allowed; }
         
         .work-item { border: 1px solid #eee; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #fafafa; }
         .work-item h3 { margin: 0 0 5px 0; color: #1976d2; font-size: 16px; }
         .work-item p { margin: 0; font-size: 13px; color: #666; }
 
         #loading { text-align: center; margin-top: 50px; color: #666; font-weight: bold; }
-        #mainContent { display: none; }
+        
+        /* 各ステップのブロック（初期状態は非表示） */
+        .step-block { display: none; }
+        
+        /* 認証コード表示用 */
+        .code-display { background: #f0f7ff; border: 2px dashed #1976d2; padding: 15px; text-align: center; font-size: 24px; font-family: monospace; font-weight: bold; letter-spacing: 2px; margin-bottom: 20px; border-radius: 6px; color: #1976d2;}
     </style>
 </head>
 <body>
@@ -45,119 +51,264 @@
 
     <div class="container" id="mainContent">
         
-        <div class="card">
-            <h2>👤 基本設定（プロフィールと全体支援）</h2>
+        <div id="step-1-setup" class="step-block card">
+            <h2>👤 ステップ1: 作者情報の登録</h2>
+            <p>活動している小説サイトのURLを登録し、本人確認の準備をします。</p>
             <div class="form-group">
                 <label>ペンネーム</label>
-                <input type="text" id="penName" placeholder="例: 小説 太郎">
+                <input type="text" id="setupPenName" placeholder="例: 小説 太郎">
             </div>
             <div class="form-group">
-                <label>活動サイトのマイページURL（※検索に使われます）</label>
-                <input type="url" id="profileUrl" placeholder="例: https://mypage.syosetu.com/xxxx/">
+                <label>活動サイトのマイページURL</label>
+                <input type="url" id="setupProfileUrl" placeholder="例: https://mypage.syosetu.com/xxxx/">
             </div>
-            <div class="form-group">
-                <label>作家支援の限定お礼メッセージ</label>
-                <textarea id="generalMessage" placeholder="支援してくれた方への感謝の言葉や、ちょっとした裏話などを書いてください。"></textarea>
-            </div>
-            <button class="btn-save" onclick="saveProfile()">基本設定を保存する</button>
+            <button class="btn-save" id="btnGenerate" onclick="generateCode()">認証コードを発行する</button>
         </div>
 
-        <div class="card">
-            <h2>📕 新しい作品を追加する</h2>
-            <div class="form-group">
-                <label>作品タイトル</label>
-                <input type="text" id="newWorkTitle" placeholder="例: 転生したら〇〇だった件">
-            </div>
-            <div class="form-group">
-                <label>作品のURL</label>
-                <input type="url" id="newWorkUrl" placeholder="例: https://ncode.syosetu.com/xxxx/">
-            </div>
-            <div class="form-group">
-                <label>この作品への支援限定メッセージ</label>
-                <textarea id="newWorkMessage" placeholder="この作品に関するSS（ショートストーリー）や裏話などを書いてください。"></textarea>
-            </div>
-            <button class="btn-save" onclick="addWork()" style="background-color: #1976d2;">作品を追加する</button>
+        <div id="step-2-verify" class="step-block card">
+            <h2>🛡️ ステップ2: 本人確認</h2>
+            <p>以下の専用認証コードをコピーし、先ほど登録したマイページの「自己紹介欄」に一時的に貼り付けて保存してください。</p>
+            <div class="code-display" id="displayCode"></div>
+            <button class="btn-save" id="btnVerify" onclick="verifyProfile()" style="background-color: #4CAF50;">プロフィールに貼り付けたら検証を開始</button>
+            <p id="verifyMsg" style="margin-top: 15px; font-weight: bold; text-align: center;"></p>
         </div>
 
-        <div class="card">
-            <h2>📚 登録済みの作品一覧</h2>
-            <div id="worksList">
-                <p style="color: #666; font-size: 14px;">読み込み中...</p>
+        <div id="step-3-content" class="step-block card">
+            <h2>✍️ ステップ3: 初回コンテンツの登録</h2>
+            <p>本人確認が完了しました！最後に、読者への全体メッセージや裏設定を登録してアカウントを有効化します。</p>
+            <div class="form-group">
+                <label>作家支援の限定お礼メッセージ（全体向け）</label>
+                <textarea id="setupGeneralMessage" placeholder="支援してくれた方への感謝の言葉や、ちょっとした裏話などを書いてください。"></textarea>
             </div>
+            <button class="btn-save" onclick="completeRegistration()">本登録を完了してダッシュボードへ</button>
+        </div>
+
+        <div id="step-4-main" class="step-block">
+            
+            <div class="card">
+                <h2>📕 新しい作品を追加する</h2>
+                <div class="form-group">
+                    <label>作品タイトル</label>
+                    <input type="text" id="newWorkTitle" placeholder="例: 転生したら〇〇だった件">
+                </div>
+                <div class="form-group">
+                    <label>作品のURL</label>
+                    <input type="url" id="newWorkUrl" placeholder="例: https://ncode.syosetu.com/xxxx/">
+                </div>
+                <div class="form-group">
+                    <label>この作品への支援限定メッセージ</label>
+                    <textarea id="newWorkMessage" placeholder="この作品に関するSS（ショートストーリー）や裏話などを書いてください。"></textarea>
+                </div>
+                <button class="btn-save" onclick="addWork()" style="background-color: #1976d2;">作品を追加する</button>
+            </div>
+
+            <div class="card">
+                <h2>📚 登録済みの作品一覧</h2>
+                <div id="worksList">
+                    <p style="color: #666; font-size: 14px;">読み込み中...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ 基本設定の編集</h2>
+                <div class="form-group">
+                    <label>ペンネーム</label>
+                    <input type="text" id="editPenName">
+                </div>
+                <div class="form-group">
+                    <label>作家支援の限定お礼メッセージ</label>
+                    <textarea id="editGeneralMessage"></textarea>
+                </div>
+                <button class="btn-save" onclick="updateProfile()" style="width: auto;">変更を保存</button>
+            </div>
+            
         </div>
 
     </div>
 
     <script>
+        // Supabaseの設定（ご提供いただいた情報そのまま）
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
 
-        // ページを開いたときにログイン状態をチェック
+        // ページを開いたときの処理
         window.onload = async function() {
             const { data: { session }, error } = await supabaseClient.auth.getSession();
             
             if (error || !session) {
-                // ログインしていなければ、強制的にログイン画面へ戻す
                 alert('ログインが必要です。');
                 window.location.href = 'login.html';
                 return;
             }
 
             currentUser = session.user;
-            await loadProfile();
-            await loadWorks();
-            
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
+            await checkUserStatus();
         };
 
-        // プロフィール情報の読み込み
-        async function loadProfile() {
-            const { data, error } = await supabaseClient
+        // ユーザーの状態を確認して画面を切り替える
+        async function checkUserStatus() {
+            // creatorsテーブルからデータを取得
+            const { data: creator, error } = await supabaseClient
                 .from('creators')
                 .select('*')
                 .eq('id', currentUser.id)
                 .single();
 
-            if (data) {
-                document.getElementById('penName').value = data.pen_name || '';
-                document.getElementById('profileUrl').value = data.profile_url || '';
-                document.getElementById('generalMessage').value = data.general_secret_message || '';
+            document.getElementById('loading').style.display = 'none';
+
+            // データが存在しない、またはURL・コードがない場合 -> ステップ1
+            if (!creator || !creator.profile_url || !creator.verify_code) {
+                if(creator) {
+                    document.getElementById('setupPenName').value = creator.pen_name || '';
+                }
+                showStep('step-1-setup');
+            } 
+            // コードはあるが検証が終わっていない -> ステップ2
+            else if (!creator.is_verified) {
+                document.getElementById('displayCode').innerText = creator.verify_code;
+                showStep('step-2-verify');
+            } 
+            // 検証済みだが、全体メッセージが未登録（本承認前） -> ステップ3
+            else if (!creator.is_active) {
+                showStep('step-3-content');
+            } 
+            // 全て完了している -> ステップ4（メインダッシュボード）
+            else {
+                // メイン画面用の初期値セット
+                document.getElementById('editPenName').value = creator.pen_name || '';
+                document.getElementById('editGeneralMessage').value = creator.general_secret_message || '';
+                await loadWorks();
+                showStep('step-4-main');
             }
         }
 
-        // プロフィールの保存（無ければ新規作成、あれば更新）
-        async function saveProfile() {
-            const penName = document.getElementById('penName').value.trim();
-            const profileUrl = document.getElementById('profileUrl').value.trim();
-            const generalMessage = document.getElementById('generalMessage').value.trim();
+        // 表示するブロックを切り替える関数
+        function showStep(stepId) {
+            document.querySelectorAll('.step-block').forEach(el => el.style.display = 'none');
+            document.getElementById(stepId).style.display = 'block';
+        }
+
+        // --- ステップ1: コード発行処理 ---
+        async function generateCode() {
+            const penName = document.getElementById('setupPenName').value.trim();
+            const profileUrl = document.getElementById('setupProfileUrl').value.trim();
+            const btn = document.getElementById('btnGenerate');
 
             if (!penName || !profileUrl) {
                 alert('ペンネームとマイページURLは必須です。');
                 return;
             }
 
-            // upsert は「すでにデータがあれば上書き、なければ新規作成」する便利な命令です
+            btn.disabled = true;
+            btn.innerText = '発行中...';
+
+            // ランダムコード生成
+            const uniqueString = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const verifyCode = 'KANKETSU-VERIFY-' + uniqueString;
+
             const { error } = await supabaseClient
                 .from('creators')
                 .upsert({
                     id: currentUser.id,
                     pen_name: penName,
                     profile_url: profileUrl,
-                    general_secret_message: generalMessage
+                    verify_code: verifyCode,
+                    is_verified: false,
+                    is_active: false
                 });
 
             if (error) {
                 alert('保存に失敗しました: ' + error.message);
+                btn.disabled = false;
+                btn.innerText = '認証コードを発行する';
             } else {
-                alert('基本設定を保存しました！');
+                // DB更新成功したらステップ2へ
+                await checkUserStatus();
             }
         }
 
-        // 作品リストの読み込み
+        // --- ステップ2: プロフィール検証処理 ---
+        async function verifyProfile() {
+            const btn = document.getElementById('btnVerify');
+            const msg = document.getElementById('verifyMsg');
+            
+            btn.disabled = true;
+            btn.innerText = 'サイトにアクセスして検証中...';
+            msg.innerText = '';
+            msg.style.color = '#333';
+
+            try {
+                // Edge Functionの呼び出し
+                const { data, error } = await supabaseClient.functions.invoke('verify-profile', {
+                    body: { userId: currentUser.id }
+                });
+
+                if (error) throw error;
+
+                if (data.verified) {
+                    msg.style.color = '#4CAF50';
+                    msg.innerText = '✅ 認証に成功しました！画面を切り替えます...';
+                    
+                    // Supabaseのis_verifiedをtrueにする
+                    await supabaseClient.from('creators').update({ is_verified: true }).eq('id', currentUser.id);
+                    
+                    setTimeout(() => checkUserStatus(), 1500);
+                } else {
+                    msg.style.color = '#f44336';
+                    msg.innerText = '❌ コードが見つかりませんでした。プロフィールが保存されているか確認してください。';
+                    btn.disabled = false;
+                    btn.innerText = 'プロフィールに貼り付けたら検証を開始';
+                }
+            } catch (err) {
+                msg.style.color = '#f44336';
+                msg.innerText = 'エラーが発生しました: ' + err.message;
+                btn.disabled = false;
+                btn.innerText = 'プロフィールに貼り付けたら検証を開始';
+            }
+        }
+
+        // --- ステップ3: 本登録完了処理 ---
+        async function completeRegistration() {
+            const generalMessage = document.getElementById('setupGeneralMessage').value.trim();
+
+            if (!generalMessage) {
+                alert('限定お礼メッセージを入力してください。');
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('creators')
+                .update({
+                    general_secret_message: generalMessage,
+                    is_active: true // これで本承認完了！
+                })
+                .eq('id', currentUser.id);
+
+            if (error) {
+                alert('エラー: ' + error.message);
+            } else {
+                alert('本登録が完了しました！ダッシュボードへ移動します。');
+                await checkUserStatus();
+            }
+        }
+
+        // --- ステップ4の機能群（既存機能を移植） ---
+        
+        async function updateProfile() {
+            const penName = document.getElementById('editPenName').value.trim();
+            const generalMessage = document.getElementById('editGeneralMessage').value.trim();
+            
+            const { error } = await supabaseClient.from('creators')
+                .update({ pen_name: penName, general_secret_message: generalMessage })
+                .eq('id', currentUser.id);
+                
+            if (error) alert('更新エラー: ' + error.message);
+            else alert('設定を保存しました。');
+        }
+
         async function loadWorks() {
             const { data, error } = await supabaseClient
                 .from('works')
@@ -166,15 +317,8 @@
                 .order('created_at', { ascending: false });
 
             const listDiv = document.getElementById('worksList');
-            if (error) {
-                listDiv.innerHTML = '<p>作品の読み込みに失敗しました。</p>';
-                return;
-            }
-
-            if (!data || data.length === 0) {
-                listDiv.innerHTML = '<p style="color: #666; font-size: 14px;">まだ登録されている作品はありません。</p>';
-                return;
-            }
+            if (error) { listDiv.innerHTML = '<p>作品の読み込みに失敗しました。</p>'; return; }
+            if (!data || data.length === 0) { listDiv.innerHTML = '<p>まだ作品はありません。</p>'; return; }
 
             let html = '';
             data.forEach(work => {
@@ -182,37 +326,25 @@
                     <div class="work-item">
                         <h3>${work.title}</h3>
                         <p>🔗 <a href="${work.work_url}" target="_blank">${work.work_url}</a></p>
-                    </div>
-                `;
+                    </div>`;
             });
             listDiv.innerHTML = html;
         }
 
-        // 新しい作品の追加
         async function addWork() {
             const title = document.getElementById('newWorkTitle').value.trim();
             const url = document.getElementById('newWorkUrl').value.trim();
             const message = document.getElementById('newWorkMessage').value.trim();
 
-            if (!title || !url || !message) {
-                alert('タイトル、URL、限定メッセージはすべて入力してください。');
-                return;
-            }
+            if (!title || !url || !message) { alert('すべて入力してください。'); return; }
 
-            const { error } = await supabaseClient
-                .from('works')
-                .insert({
-                    creator_id: currentUser.id,
-                    title: title,
-                    work_url: url,
-                    secret_message: message
-                });
+            const { error } = await supabaseClient.from('works').insert({
+                creator_id: currentUser.id, title: title, work_url: url, secret_message: message
+            });
 
-            if (error) {
-                alert('作品の追加に失敗しました: ' + error.message);
-            } else {
+            if (error) { alert('エラー: ' + error.message); } 
+            else {
                 alert('作品を追加しました！');
-                // フォームを空にして再読み込み
                 document.getElementById('newWorkTitle').value = '';
                 document.getElementById('newWorkUrl').value = '';
                 document.getElementById('newWorkMessage').value = '';
@@ -220,7 +352,6 @@
             }
         }
 
-        // ログアウト処理
         async function handleLogout() {
             if(confirm('ログアウトしますか？')) {
                 await supabaseClient.auth.signOut();
