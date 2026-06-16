@@ -76,8 +76,15 @@ window.onload = async function() {
                 document.getElementById('btnHome').href = `profile.html?id=${data.authorId}`;
 
             } catch (err) {
-                // 生のエラーメッセージをそのまま画面に出す
-                document.getElementById('secretMessage').innerText = '決済の確認に失敗しました:\n' + err.message;
+                // 1回使い切りの制限に引っかかった場合や、エラーが発生した場合の表示
+                document.getElementById('secretMessage').innerHTML = `
+                    <span style="color: #d32f2f; font-weight: bold;">
+                        ${err.message || 'メッセージの取得に失敗しました。'}
+                    </span><br><br>
+                    <span style="font-size: 13px; color: #666;">
+                        ※セキュリティと無断転載防止のため、限定メッセージは一度閉じたりリロードしたりすると再表示できない仕様となっています。
+                    </span>
+                `;
             }
         };    </script>
 </body>
