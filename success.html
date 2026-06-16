@@ -42,36 +42,31 @@
     </div>
 
     <script>
-    // --- ここを書き換えます ---
-const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// URLからStripeのセッションIDを取得
-const urlParams = new URLSearchParams(window.location.search);
-const sessionId = urlParams.get('session_id');
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
 
-window.onload = async function() {
+        window.onload = async function() {
             if (!sessionId) {
                 document.getElementById('secretMessage').innerText = '不正なアクセスです。決済情報が見つかりません。';
                 return;
             }
 
             try {
-                // 裏側の検証用関数を呼び出す
                 const { data, error } = await supabaseClient.functions.invoke('verify-payment', {
                     body: { sessionId: sessionId }
                 });
 
-                // ★エラーの正体を画面に直接出力するように変更
                 if (error) {
-                    throw new Error(`[システム通信エラー] ${error.message} (verify-payment関数が存在しないか、サーバー側でクラッシュしています)`);
+                    throw new Error(`システム通信エラー: ${error.message}`);
                 }
                 if (data && data.error) {
-                    throw new Error(`[データ検証エラー] ${data.error}`);
+                    throw new Error(`データ検証エラー: ${data.error}`);
                 }
 
-                // 認証に成功したらメッセージと戻るボタンのリンク先を表示
                 document.getElementById('secretMessage').innerText = data.message;
                 document.getElementById('btnHome').href = `profile.html?id=${data.authorId}`;
 
@@ -86,6 +81,7 @@ window.onload = async function() {
                     </span>
                 `;
             }
-        };    </script>
+        };
+    </script>
 </body>
 </html>
