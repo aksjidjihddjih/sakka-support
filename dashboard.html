@@ -53,6 +53,25 @@
         </div>
         
         <div class="card">
+            <h2>💰 売上と振込設定</h2>
+            
+            <div style="background: #f0f7ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <p style="margin: 0; color: #666; font-size: 14px;">現在の引き出し可能残高</p>
+                <h3 id="currentBalance" style="margin: 5px 0 0 0; font-size: 32px; color: #1976d2;">¥0</h3>
+            </div>
+
+            <div class="warning-box" id="stripeWarning" style="background-color: #f9f9f9; border-left-color: #666;">
+                <strong>口座登録は後からでOKです</strong><br>
+                読者からの支援金は、口座登録前であってもこのダッシュボードに自動的に貯まっていきます。<br>
+                売上を引き出す（ご自身の銀行口座に振り込む）段階になりましたら、以下のボタンから本人確認と口座登録を行ってください。
+            </div>
+
+            <button class="btn-save" id="btnStripeConnect" onclick="startStripeConnect()" style="background-color: #4CAF50;">
+                売上の振込先を登録する（本人確認）
+            </button>
+        </div>
+
+        <div class="card">
             <h2>👤 基本設定</h2>
             <div class="form-group">
                 <label>ペンネーム</label>
@@ -130,6 +149,44 @@
                 document.getElementById('penName').value = data.pen_name || '';
                 document.getElementById('profileUrl').value = data.profile_url || '';
                 document.getElementById('generalMessage').value = data.general_secret_message || '';
+                
+                // 【重要】すでにStripeアカウントが裏で作られている場合のUI最適化
+                if (data.stripe_account_id) {
+                    const btn = document.getElementById('btnStripeConnect');
+                    btn.innerText = '振込先情報の確認・変更（Stripeを開く）';
+                    btn.style.backgroundColor = '#1976d2';
+                    
+                    const warning = document.getElementById('stripeWarning');
+                    warning.innerHTML = '<strong>Stripeとの連携が完了しています。</strong><br>登録情報の確認や変更、売上の管理は下のボタンからStripeの専用画面へ安全に進むことができます。';
+                    warning.style.backgroundColor = '#e8f5e9';
+                    warning.style.borderLeftColor = '#4caf50';
+                }
+            }
+        }
+
+        // 【新規追加】🚀 Stripe Express の登録画面へ安全にリダイレクトさせる関数
+        async function startStripeConnect() {
+            const btn = document.getElementById('btnStripeConnect');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Stripeへ接続中...';
+
+            try {
+                // ブラウザから直接Supabaseのエッジ関数を呼び出す（認証ヘッダーも自動付与されます）
+                const { data, error } = await supabaseClient.functions.invoke('create-stripe-account', {
+                    body: { userId: currentUser.id, email: currentUser.email }
+                });
+
+                if (error) throw error;
+                if (!data || !data.url) throw new Error('Stripeの登録URLを取得できませんでした。');
+
+                // 1回使い切りのStripe登録用URLへ画面をジャンプさせる
+                window.location.href = data.url;
+
+            } catch (error) {
+                alert('Stripe連携に失敗しました: ' + error.message);
+                btn.disabled = false;
+                btn.innerText = originalText;
             }
         }
 
@@ -145,7 +202,7 @@
                     pen_name: penName,
                     profile_url: profileUrl,
                     general_secret_message: generalMessage,
-                    is_active: true // 認証をなくしたので、保存と同時にアクティブにする
+                    is_active: true
                 });
 
             if (error) alert('保存に失敗しました: ' + error.message);
