@@ -139,18 +139,27 @@
             document.getElementById('mainContent').style.display = 'block';
         };
 
-        // 💰 【新規追加】未出金の売上を自動計算して画面に表示する関数
+        // 💰 未出金の売上（手数料引き後）を自動計算して画面に表示する関数
         async function loadBalance() {
             const { data, error } = await supabaseClient
                 .from('donations')
-                .select('amount')
+                .select('net_amount') // amountからnet_amountに変更
                 .eq('creator_id', currentUser.id)
-                .eq('status', 'pending'); // pending（未出金）のものだけを取得
+                .eq('status', 'pending');
 
             if (error) {
                 console.error('売上の取得に失敗しました:', error);
                 return;
             }
+
+            // 手数料が引かれた後の金額（net_amount）をすべて足し算する
+            let totalBalance = 0;
+            if (data && data.length > 0) {
+                totalBalance = data.reduce((sum, item) => sum + Number(item.net_amount), 0);
+            }
+
+            document.getElementById('currentBalance').innerText = `¥${totalBalance.toLocaleString()}`;
+        }
 
             // 取得した支援金の金額をすべて足し算する
             let totalBalance = 0;
