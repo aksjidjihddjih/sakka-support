@@ -51,6 +51,9 @@
             <strong>【重要】読者へのご案内について</strong><br>
             なりすまし防止のため、作成したご自身のKANKETSUページのURLは、必ず「ご本人の公式SNS」や「小説サイトの活動報告」などからのみリンクを貼るようにしてください。
         </div>
+
+        <div id="statusAlert" class="warning-box" style="display: none; margin-bottom: 30px;">
+            </div>
         
         <div class="card">
             <h2>💰 売上と振込設定</h2>
@@ -132,18 +135,54 @@
 
             currentUser = session.user;
             await loadProfile();
-            await loadBalance(); // 💰 売上残高をロードする関数を追加
+            await loadBalance();
             await loadWorks();
+            await updateApprovalStatus(); // 初回ロード時に状態をチェック
             
             document.getElementById('loading').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
         };
 
-        // 💰 未出金の売上（手数料引き後）を自動計算して画面に表示する関数
+        // 設定状況をチェックし、自動で公開/非公開を切り替える関数
+        async function updateApprovalStatus() {
+            const { data: creator } = await supabaseClient.from('creators').select('general_secret_message, is_active').eq('id', currentUser.id).single();
+            const { data: works } = await supabaseClient.from('works').select('id').eq('creator_id', currentUser.id);
+
+            const hasGeneralMessage = creator && creator.general_secret_message && creator.general_secret_message.trim() !== '';
+            const hasWorks = works && works.length > 0;
+            const isActive = creator ? creator.is_active : false;
+
+            const meetsRequirements = hasGeneralMessage && hasWorks;
+            const statusAlert = document.getElementById('statusAlert');
+            statusAlert.style.display = 'block';
+
+            if (meetsRequirements) {
+                if (!isActive) {
+                    await supabaseClient.from('creators').update({ is_active: true }).eq('id', currentUser.id);
+                }
+                statusAlert.style.backgroundColor = '#e8f5e9';
+                statusAlert.style.borderLeftColor = '#4caf50';
+                statusAlert.innerHTML = `<strong>✅ 現在のステータス：公開中（支援受付中）</strong><br>必要な設定が完了し、支援ページが公開されています。読者にマイページURLを共有しましょう！`;
+            } else {
+                if (isActive) {
+                    await supabaseClient.from('creators').update({ is_active: false }).eq('id', currentUser.id);
+                }
+                statusAlert.style.backgroundColor = '#ffebee';
+                statusAlert.style.borderLeftColor = '#f44336';
+                
+                let missing = [];
+                if (!hasGeneralMessage) missing.push('「基本設定」の限定お礼メッセージの入力');
+                if (!hasWorks) missing.push('「新しい作品」の追加とメッセージ設定（最低1つ）');
+                
+                statusAlert.innerHTML = `<strong>⚠️ 現在のステータス：未公開（準備中）</strong><br>支援を受け付けるには、以下の設定を完了させてください。<br>・${missing.join('<br>・')}`;
+            }
+        }
+
+        // 未出金の売上（手数料引き後）を自動計算して画面に表示する関数
         async function loadBalance() {
             const { data, error } = await supabaseClient
                 .from('donations')
-                .select('net_amount') // amountからnet_amountに変更
+                .select('net_amount')
                 .eq('creator_id', currentUser.id)
                 .eq('status', 'pending');
 
@@ -152,7 +191,6 @@
                 return;
             }
 
-            // 手数料が引かれた後の金額（net_amount）をすべて足し算する
             let totalBalance = 0;
             if (data && data.length > 0) {
                 totalBalance = data.reduce((sum, item) => sum + Number(item.net_amount), 0);
@@ -161,15 +199,6 @@
             document.getElementById('currentBalance').innerText = `¥${totalBalance.toLocaleString()}`;
         }
 
-            // 取得した支援金の金額をすべて足し算する
-            let totalBalance = 0;
-            if (data && data.length > 0) {
-                totalBalance = data.reduce((sum, item) => sum + Number(item.amount), 0);
-            }
-
-            // 画面の「¥0」の部分を、計算した金額（カンマ区切り表記）に書き換える
-            document.getElementById('currentBalance').innerText = `¥${totalBalance.toLocaleString()}`;
-        }
         async function loadProfile() {
             const { data, error } = await supabaseClient
                 .from('creators')
@@ -182,7 +211,6 @@
                 document.getElementById('profileUrl').value = data.profile_url || '';
                 document.getElementById('generalMessage').value = data.general_secret_message || '';
                 
-                // 【重要】すでにStripeアカウントが裏で作られている場合のUI最適化
                 if (data.stripe_account_id) {
                     const btn = document.getElementById('btnStripeConnect');
                     btn.innerText = '振込先情報の確認・変更（Stripeを開く）';
@@ -196,7 +224,6 @@
             }
         }
 
-        // 【新規追加】🚀 Stripe Express の登録画面へ安全にリダイレクトさせる関数
         async function startStripeConnect() {
             const btn = document.getElementById('btnStripeConnect');
             const originalText = btn.innerText;
@@ -204,7 +231,6 @@
             btn.innerText = 'Stripeへ接続中...';
 
             try {
-                // ブラウザから直接Supabaseのエッジ関数を呼び出す（認証ヘッダーも自動付与されます）
                 const { data, error } = await supabaseClient.functions.invoke('create-stripe-account', {
                     body: { userId: currentUser.id, email: currentUser.email }
                 });
@@ -212,7 +238,6 @@
                 if (error) throw error;
                 if (!data || !data.url) throw new Error('Stripeの登録URLを取得できませんでした。');
 
-                // 1回使い切りのStripe登録用URLへ画面をジャンプさせる
                 window.location.href = data.url;
 
             } catch (error) {
@@ -233,12 +258,15 @@
                     id: currentUser.id,
                     pen_name: penName,
                     profile_url: profileUrl,
-                    general_secret_message: generalMessage,
-                    is_active: true
+                    general_secret_message: generalMessage
+                    // is_active は自動判定システムに任せるためここでは書き込まない
                 });
 
             if (error) alert('保存に失敗しました: ' + error.message);
-            else alert('基本設定を保存しました！');
+            else {
+                alert('基本設定を保存しました！');
+                await updateApprovalStatus(); // 保存後に状態を再判定
+            }
         }
 
         async function loadWorks() {
@@ -280,7 +308,8 @@
                 document.getElementById('newWorkTitle').value = '';
                 document.getElementById('newWorkUrl').value = '';
                 document.getElementById('newWorkMessage').value = '';
-                loadWorks();
+                await loadWorks();
+                await updateApprovalStatus(); // 作品追加後に状態を再判定
             }
         }
 
