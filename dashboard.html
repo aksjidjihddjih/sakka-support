@@ -132,12 +132,35 @@
 
             currentUser = session.user;
             await loadProfile();
+            await loadBalance(); // 💰 売上残高をロードする関数を追加
             await loadWorks();
             
             document.getElementById('loading').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
         };
 
+        // 💰 【新規追加】未出金の売上を自動計算して画面に表示する関数
+        async function loadBalance() {
+            const { data, error } = await supabaseClient
+                .from('donations')
+                .select('amount')
+                .eq('creator_id', currentUser.id)
+                .eq('status', 'pending'); // pending（未出金）のものだけを取得
+
+            if (error) {
+                console.error('売上の取得に失敗しました:', error);
+                return;
+            }
+
+            // 取得した支援金の金額をすべて足し算する
+            let totalBalance = 0;
+            if (data && data.length > 0) {
+                totalBalance = data.reduce((sum, item) => sum + Number(item.amount), 0);
+            }
+
+            // 画面の「¥0」の部分を、計算した金額（カンマ区切り表記）に書き換える
+            document.getElementById('currentBalance').innerText = `¥${totalBalance.toLocaleString()}`;
+        }
         async function loadProfile() {
             const { data, error } = await supabaseClient
                 .from('creators')
