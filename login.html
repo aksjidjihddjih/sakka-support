@@ -23,17 +23,23 @@
         .btn-signup { background-color: white; color: #1976d2; border: 2px solid #1976d2; }
         .btn-signup:hover { background-color: #e3f2fd; }
 
-        #message { text-align: center; font-size: 14px; font-weight: bold; margin-top: 15px; }
+        #message { text-align: center; font-size: 14px; font-weight: bold; margin-top: 15px; line-height: 1.5; }
         .error { color: #d32f2f; }
         .success { color: #2e7d32; }
+        
+        .info-box { background-color: #e3f2fd; padding: 15px; border-radius: 6px; font-size: 13px; color: #1565c0; margin-bottom: 20px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="header">KANKETSU - 作者管理システム</div>
+    <div class="header">KANKETSU - クリエイター管理システム</div>
 
     <div class="container">
         <h1>作者ログイン / 新規登録</h1>
+        
+        <div class="info-box">
+            セキュリティ保護のため、登録には有効なメールアドレスが必要です。
+        </div>
         
         <div class="form-group">
             <label for="email">メールアドレス</label>
@@ -41,7 +47,7 @@
         </div>
         
         <div class="form-group">
-            <label for="password">パスワード（6文字以上）</label>
+            <label for="password">パスワード（8文字以上の英数字）</label>
             <input type="password" id="password" placeholder="••••••••">
         </div>
 
@@ -52,7 +58,6 @@
     </div>
 
     <script>
-        // Supabaseの接続設定
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -62,17 +67,16 @@
         const messageDiv = document.getElementById('message');
 
         function showMessage(text, isError = false) {
-            messageDiv.textContent = text;
+            messageDiv.innerHTML = text; // HTMLタグを許容するためinnerHTMLに変更
             messageDiv.className = isError ? 'error' : 'success';
         }
 
-        // 新規登録処理
         async function handleSignUp() {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 
-            if (!email || !password) {
-                showMessage('メールアドレスとパスワードを入力してください。', true);
+            if (!email || password.length < 8) {
+                showMessage('有効なメールアドレスと、8文字以上のパスワードを入力してください。', true);
                 return;
             }
 
@@ -85,13 +89,13 @@
             if (error) {
                 showMessage(`登録エラー: ${error.message}`, true);
             } else {
-                showMessage('登録が完了しました！管理画面へ移動します...', false);
-                // ※あとで dashboard.html へ移動する処理を書きます
-                setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+                // Confirm email がONの場合の案内
+                showMessage('✅ 仮登録が完了しました。<br>入力したメールアドレスに確認メールを送信しましたので、メール内のリンクをクリックして登録を完了させてください。', false);
+                emailInput.value = '';
+                passwordInput.value = '';
             }
         }
 
-        // ログイン処理
         async function handleLogin() {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
@@ -108,10 +112,13 @@
             });
 
             if (error) {
-                showMessage(`ログイン失敗: ${error.message}`, true);
+                if (error.message.includes('Email not confirmed')) {
+                    showMessage('ログイン失敗: メールアドレスの認証が完了していません。受信トレイを確認してください。', true);
+                } else {
+                    showMessage(`ログイン失敗: ${error.message} (パスワードが間違っている可能性があります)`, true);
+                }
             } else {
                 showMessage('ログイン成功！管理画面へ移動します...', false);
-                // ※あとで dashboard.html へ移動する処理を書きます
                 setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
             }
         }
