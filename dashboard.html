@@ -83,6 +83,7 @@
             <div class="form-group">
                 <label>活動サイトのマイページURL</label>
                 <input type="url" id="profileUrl" placeholder="例: https://mypage.syosetu.com/xxxx/">
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">※対応サイト：小説家になろう、アルファポリス、ハーメルン、カクヨム</p>
             </div>
             <div class="form-group">
                 <label>作家支援の限定お礼メッセージ（全体向け）</label>
@@ -100,6 +101,7 @@
             <div class="form-group">
                 <label>作品のURL</label>
                 <input type="url" id="newWorkUrl" placeholder="例: https://ncode.syosetu.com/xxxx/">
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">※対応サイト：小説家になろう、アルファポリス、ハーメルン、カクヨム</p>
             </div>
             <div class="form-group">
                 <label>この作品への支援限定メッセージ</label>
@@ -123,7 +125,32 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
-        let isStripeConnected = false; // 連携フラグを追加
+        let isStripeConnected = false;
+
+        // --- 許可されたドメインのリスト ---
+        const ALLOWED_DOMAINS = [
+            'syosetu.com',      // 小説家になろう
+            'alphapolis.co.jp', // アルファポリス
+            'syosetu.org',      // ハーメルン
+            'kakuyomu.jp'       // カクヨム
+            // 'pixiv.net',     // PIXIV (将来追加用)
+            // 'estar.jp',      // エブリスタ (将来追加用)
+            // 'novelup.plus'   // ノベルアップ＋ (将来追加用)
+        ];
+
+        // URLが許可された小説サイトのものかチェックする関数
+        function isValidPlatformUrl(inputUrl) {
+            if (!inputUrl) return true; // 空欄の場合はスルー（必須チェックは別途行うため）
+            try {
+                const urlObj = new URL(inputUrl);
+                // サブドメイン（mypage.syosetu.com等）も許可するため、endsWithを使用
+                return ALLOWED_DOMAINS.some(domain => 
+                    urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
+                );
+            } catch (e) {
+                return false; // URLの形式でない場合は弾く
+            }
+        }
 
         window.onload = async function() {
             const { data: { session }, error } = await supabaseClient.auth.getSession();
@@ -199,7 +226,7 @@
                     btn.style.border = '1px solid #ccc';
                     
                     const warning = document.getElementById('stripeWarning');
-                    warning.style.display = 'none'; // 連携済みなら警告は消す
+                    warning.style.display = 'none';
                 }
             }
         }
@@ -223,13 +250,11 @@
 
             document.getElementById('currentBalance').innerText = `¥${totalBalance.toLocaleString()}`;
 
-            // 残高があり、かつStripe連携済みの場合のみ「引き出しボタン」を表示
             if (totalBalance > 0 && isStripeConnected) {
                 document.getElementById('btnWithdraw').style.display = 'block';
             }
         }
 
-        // 新規追加：売上の引き出しリクエストを送る関数
         async function requestWithdrawal() {
             if (!confirm('現在の売上残高をすべてご指定の口座に振り込みます。よろしいですか？')) return;
 
@@ -247,14 +272,14 @@
                 if (data.error) throw new Error(data.error);
 
                 alert(`¥${data.amount.toLocaleString()} の振込手続きが完了しました！Stripe口座へ送金されます。`);
-                await loadBalance(); // 残高を0に更新するためリロード
+                await loadBalance();
 
             } catch (err) {
                 alert('振込エラー: ' + err.message);
             } finally {
                 btn.disabled = false;
                 btn.innerText = originalText;
-                btn.style.display = 'none'; // 処理が終わったら隠す
+                btn.style.display = 'none';
             }
         }
 
@@ -285,6 +310,12 @@
             const penName = document.getElementById('penName').value.trim();
             const profileUrl = document.getElementById('profileUrl').value.trim();
             const generalMessage = document.getElementById('generalMessage').value.trim();
+
+            // ★ URLのバリデーションを実行
+            if (profileUrl && !isValidPlatformUrl(profileUrl)) {
+                alert('エラー：許可されていないサイトのURLです。\n（現在は 小説家になろう、アルファポリス、ハーメルン、カクヨム のみ対応しています）');
+                return;
+            }
 
             const { error } = await supabaseClient
                 .from('creators')
@@ -329,6 +360,12 @@
             const message = document.getElementById('newWorkMessage').value.trim();
 
             if (!title || !url) { alert('タイトルとURLは必須です。'); return; }
+
+            // ★ URLのバリデーションを実行
+            if (!isValidPlatformUrl(url)) {
+                alert('エラー：許可されていないサイトのURLです。\n（現在は 小説家になろう、アルファポリス、ハーメルン、カクヨム のみ対応しています）');
+                return;
+            }
 
             const { error } = await supabaseClient.from('works').insert({
                 creator_id: currentUser.id, title: title, work_url: url, secret_message: message
