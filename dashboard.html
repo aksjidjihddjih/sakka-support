@@ -127,28 +127,22 @@
         let currentUser = null;
         let isStripeConnected = false;
 
-        // --- 許可されたドメインのリスト ---
         const ALLOWED_DOMAINS = [
-            'syosetu.com',      // 小説家になろう
-            'alphapolis.co.jp', // アルファポリス
-            'syosetu.org',      // ハーメルン
-            'kakuyomu.jp'       // カクヨム
-            // 'pixiv.net',     // PIXIV (将来追加用)
-            // 'estar.jp',      // エブリスタ (将来追加用)
-            // 'novelup.plus'   // ノベルアップ＋ (将来追加用)
+            'syosetu.com',
+            'alphapolis.co.jp',
+            'syosetu.org',
+            'kakuyomu.jp'
         ];
 
-        // URLが許可された小説サイトのものかチェックする関数
         function isValidPlatformUrl(inputUrl) {
-            if (!inputUrl) return true; // 空欄の場合はスルー（必須チェックは別途行うため）
+            if (!inputUrl) return true;
             try {
                 const urlObj = new URL(inputUrl);
-                // サブドメイン（mypage.syosetu.com等）も許可するため、endsWithを使用
                 return ALLOWED_DOMAINS.some(domain => 
                     urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
                 );
             } catch (e) {
-                return false; // URLの形式でない場合は弾く
+                return false;
             }
         }
 
@@ -162,6 +156,13 @@
             }
 
             currentUser = session.user;
+
+            // ★追加：エラー防止のため、ログイン時に作者データ枠が存在するか確認し、なければ作成する
+            const { data: creatorExists } = await supabaseClient.from('creators').select('id').eq('id', currentUser.id).single();
+            if (!creatorExists) {
+                await supabaseClient.from('creators').insert({ id: currentUser.id });
+            }
+
             await loadProfile();
             await loadBalance();
             await loadWorks();
@@ -311,19 +312,20 @@
             const profileUrl = document.getElementById('profileUrl').value.trim();
             const generalMessage = document.getElementById('generalMessage').value.trim();
 
-            // ★ URLのバリデーションを実行
             if (profileUrl && !isValidPlatformUrl(profileUrl)) {
                 alert('エラー：許可されていないサイトのURLです。\n（現在は 小説家になろう、アルファポリス、ハーメルン、カクヨム のみ対応しています）');
                 return;
             }
 
+            // ★変更：updateからupsertに戻し、確実にデータを保存・作成できるようにしました
             const { error } = await supabaseClient
                 .from('creators')
-                .update({
+                .upsert({
+                    id: currentUser.id,
                     pen_name: penName,
                     profile_url: profileUrl,
                     general_secret_message: generalMessage
-                }).eq('id', currentUser.id);
+                });
 
             if (error) alert('保存に失敗しました: ' + error.message);
             else {
@@ -361,7 +363,6 @@
 
             if (!title || !url) { alert('タイトルとURLは必須です。'); return; }
 
-            // ★ URLのバリデーションを実行
             if (!isValidPlatformUrl(url)) {
                 alert('エラー：許可されていないサイトのURLです。\n（現在は 小説家になろう、アルファポリス、ハーメルン、カクヨム のみ対応しています）');
                 return;
