@@ -16,11 +16,12 @@
         .profile-link { display: inline-block; background-color: #f5f5f5; padding: 10px 20px; border-radius: 6px; font-size: 14px; color: #1976d2; text-decoration: none; font-weight: bold; border: 1px solid #e0e0e0; transition: 0.2s; }
         .profile-link:hover { background-color: #e3f2fd; border-color: #bbdefb; }
         
-        .verification-box { background: #ffebee; border: 2px solid #ef9a9a; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
-        .verification-box p.title { margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #c62828; }
-        .verification-box p.desc { margin: 0 0 12px 0; font-size: 13px; color: #555; line-height: 1.5; }
-        .check-label { display: flex; align-items: center; font-size: 14px; font-weight: bold; cursor: pointer; color: #333; }
-        .check-label input { width: 18px; height: 18px; margin-right: 8px; cursor: pointer; }
+        /* ★警告ボックスをより目立たせる */
+        .verification-box { background: #fff3e0; border: 2px solid #f57c00; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(245,124,0,0.1); }
+        .verification-box p.title { margin: 0 0 10px 0; font-size: 16px; font-weight: bold; color: #e65100; display: flex; align-items: center; }
+        .verification-box p.desc { margin: 0 0 15px 0; font-size: 14px; color: #444; line-height: 1.6; }
+        .check-label { display: flex; align-items: flex-start; font-size: 15px; font-weight: bold; cursor: pointer; color: #c62828; background: #ffebee; padding: 12px; border-radius: 6px; }
+        .check-label input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
 
         .section-title { font-size: 18px; font-weight: bold; margin: 30px 0 15px 0; border-left: 4px solid #f57c00; padding-left: 10px; }
         
@@ -59,11 +60,14 @@
         </div>
 
         <div class="verification-box">
-            <p class="title">⚠️ 支援の前に必ずご確認ください</p>
-            <p class="desc">上のボタンから活動サイトを開き、作者のマイページや活動報告に<b>「この支援ページのURL」が記載されているか</b>を確認してください。（なりすまし詐欺を防ぐためのお願いです）</p>
+            <p class="title">⚠️ なりすまし詐欺にご注意ください</p>
+            <p class="desc">
+                当サイトには検索機能がありません。第三者が勝手に作成した偽物のページの可能性があります。<br>
+                <strong>今開いているこのページが、作者本人の「公式SNS」や「小説サイトの活動報告」に直接貼られていたリンクから飛んできたものであること</strong>を必ず確認してください。
+            </p>
             <label class="check-label">
                 <input type="checkbox" id="verifyCheck">
-                本物の作者の支援ページであることを確認しました
+                <span>公式リンクからアクセスした、本物の作者の支援ページであることを確認しました</span>
             </label>
         </div>
 
@@ -105,7 +109,7 @@
 
         window.onload = async function() {
             if (!targetAuthorId) {
-                showError('作者IDが指定されていません。トップページから検索してください。');
+                showError('作者のIDが指定されていません。作者の公式リンクから再度アクセスしてください。');
                 return;
             }
 
@@ -113,11 +117,10 @@
                 .from('creators').select('*').eq('id', targetAuthorId).single();
 
             if (creatorError || !creator) {
-                showError('作者情報が見つかりませんでした。');
+                showError('作者情報が見つかりませんでした。リンクが間違っているか、削除された可能性があります。');
                 return;
             }
 
-            // 未承認（非公開）の場合はここで弾く
             if (!creator.is_active) {
                 showError('この作者の支援ページは現在準備中です。公開されるまでお待ちください。');
                 return;
@@ -172,7 +175,7 @@
         async function startCheckout(supportType, workId) {
             const isVerified = document.getElementById('verifyCheck').checked;
             if (!isVerified) {
-                alert('⚠️ 支援を行う前に、上の「本物の作者の支援ページであることを確認しました」にチェックを入れてください。');
+                alert('⚠️ 支援を行う前に、上の「公式リンクからアクセスした〜」のチェックボックスにチェックを入れてください。');
                 return;
             }
 
