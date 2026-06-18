@@ -328,15 +328,22 @@
                     if (!session) { window.location.href = 'login.html'; return; }
                     currentUserId = session.user.id;
 
-                    // ★重要修正：SQL設定漏れがあっても画面が止まらないよう、明示的にエラーをキャッチしてアラートを出します
+                    // ★絶対解決の修正: pen_name が NULL のまま作れないエラーを、ここで確実に塞ぎます。
                     const { error: upsertErr } = await supabaseClient.from('creators').upsert(
-                        { id: currentUserId }, 
+                        { id: currentUserId, pen_name: '未設定' }, // 空っぽを許さないので仮の文字を入れます
                         { onConflict: 'id', ignoreDuplicates: true }
                     );
                     
                     if (upsertErr) {
-                        alert("【データベース権限エラー】\n作者の基本データを作成できませんでした。SupabaseのSQLエディタで権限設定を行ってください。\n\n詳細: " + upsertErr.message);
-                        return; // ここで処理を止めることで、リンク作成時のFKEYエラーを未然に防ぎます
+                        // もしカラム名が penname だった場合のバックアップ
+                        const { error: upsertErr2 } = await supabaseClient.from('creators').upsert(
+                            { id: currentUserId, penname: '未設定' },
+                            { onConflict: 'id', ignoreDuplicates: true }
+                        );
+                        if (upsertErr2) {
+                            alert("【データベース権限エラー】\n作者の基本データを作成できませんでした。\n詳細: " + upsertErr.message);
+                            return; 
+                        }
                     }
 
                     let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', currentUserId).single();
@@ -348,12 +355,12 @@
                     const avatarDisplay = document.getElementById('userAvatar');
                     const profileCardDisplay = document.getElementById('profilePennameDisplay');
                     
-                    if(nameDisplay) nameDisplay.innerText = penname || "未設定";
-                    if(avatarDisplay) avatarDisplay.innerText = penname ? penname.charAt(0) : "？";
-                    if(profileCardDisplay) profileCardDisplay.innerText = penname || "未設定";
+                    if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
+                    if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
+                    if(profileCardDisplay) profileCardDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
                     
                     if(document.getElementById('pennameInput')) {
-                        document.getElementById('pennameInput').value = penname;
+                        document.getElementById('pennameInput').value = (penname === '未設定' ? "" : penname);
                     }
 
                     const { data: donations } = await supabaseClient.from('donations').select('net_amount').eq('creator_id', currentUserId).eq('status', 'pending');
@@ -371,7 +378,8 @@
             };
 
             function renderOnboarding(creator, linksCount, msgsCount, worksCount) {
-                const hasPenName = creator && (creator.pen_name || creator.penname) && (creator.pen_name || creator.penname).trim() !== '';
+                const penname = creator && (creator.pen_name || creator.penname);
+                const hasPenName = penname && penname.trim() !== '' && penname !== '未設定';
                 
                 let completedCount = 0;
                 if (hasPenName) completedCount++;
