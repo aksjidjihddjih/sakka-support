@@ -32,7 +32,7 @@
         
         .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: #fff; text-decoration: none; padding: 0 24px; margin-bottom: 40px; display: block;}
 
-        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
+        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; transition: opacity 0.3s ease; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--sidebar-text); text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 8px; transition: all 0.2s; cursor: pointer; border: none; background: transparent; text-align: left; width: 100%; box-sizing: border-box; }
         .nav-item:hover, .nav-item.active { background-color: #1f2937; color: #fff; }
         .nav-divider { height: 1px; background-color: #374151; margin: 12px 16px; }
@@ -56,7 +56,7 @@
         .popup-item:hover { background-color: var(--bg-color); }
         .popup-item.text-danger { color: #dc2626; }
 
-        .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column;}
+        .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; position: relative;}
         @media (min-width: 768px) { .main-content { padding: 48px; } }
 
         .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
@@ -98,6 +98,10 @@
         .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; border-top: 1px solid var(--border-light); padding-top: 24px; }
 
         .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
+        
+        /* 切り替え用のアニメーション */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -115,7 +119,7 @@
         <aside class="sidebar" id="sidebar">
             <a href="dashboard.html" class="brand-logo" style="display: none;">KANKETSU</a>
             
-            <nav class="sidebar-nav">
+            <nav class="sidebar-nav" id="sidebarNavMenu">
                 <a href="dashboard.html" class="nav-item active">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     ホーム
@@ -151,73 +155,102 @@
         </aside>
 
         <main class="main-content">
-            <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
             
-            <div id="setupContainer"></div>
-
-            <div class="card" style="text-align: center; padding: 48px 20px;">
-                <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">BALANCE</p>
-                <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
-                <div style="max-width: 280px; margin: 0 auto;">
-                    <button class="btn btn-primary" onclick="window.requestWithdrawal(event)">売上を引き出す</button>
+            <div id="onboardingView" style="display: none; max-width: 600px; margin: 40px auto; width: 100%;">
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 8px;">あと少しで準備完了です。</h1>
+                    <p style="color: var(--text-sub);">支援受付を開始するために、以下の必須項目を設定してください。</p>
                 </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">プロフィール</h2>
-                        <p class="card-desc">読者に公開されるペンネーム</p>
+                
+                <div class="card" style="padding: 32px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
+                        <span style="font-size: 14px; font-weight: 700; color: var(--text-sub);">進捗状況 (<span id="onboardingCount">0</span>/4)</span>
+                        <span style="font-size: 16px; font-weight: 800;" id="onboardingPercent">0%</span>
                     </div>
-                    <button class="btn btn-outline btn-sm" onclick="window.openModal('profileModal')">編集</button>
-                </div>
-                <div class="item-list">
-                    <div class="item-card" onclick="window.openModal('profileModal')">
-                        <div class="item-info">
-                            <h4 id="profilePennameDisplay">未設定</h4>
-                            <p>ペンネーム</p>
+                    <div style="height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 32px; border: 1px solid var(--border-light);">
+                        <div id="onboardingProgressBar" style="height: 100%; background: #000; width: 0%; transition: width 0.5s ease;"></div>
+                    </div>
+                    
+                    <div class="task-list" id="onboardingTaskList">
                         </div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
-                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">活動サイトリンク</h2>
-                        <p class="card-desc">読者に表示するあなたのマイページURL</p>
-                    </div>
-                    <button class="btn btn-outline btn-sm" onclick="window.openModal('linkModal')">+ 追加</button>
+            <div id="mainDashboardView" style="display: none;" class="fade-in">
+                <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
+                
+                <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                    <span style="display:inline-block; width:8px; height:8px; background:#16a34a; border-radius:50%;"></span> 公開中 (支援受付ページURL)
+                </p>
+                <div class="share-box" style="margin-bottom: 32px;">
+                    <div class="share-url" id="profileUrlText">取得中...</div>
+                    <button class="btn btn-primary btn-sm" onclick="window.copyUrl()">コピー</button>
                 </div>
-                <div class="item-list" id="linksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">支援へのお礼メッセージ</h2>
-                        <p class="card-desc">作品指定がない支援に対する共通メッセージ</p>
+                <div class="card" style="text-align: center; padding: 48px 20px;">
+                    <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">BALANCE</p>
+                    <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
+                    <div style="max-width: 280px; margin: 0 auto;">
+                        <button class="btn btn-primary" onclick="window.requestWithdrawal(event)">売上を引き出す</button>
                     </div>
-                    <button class="btn btn-outline btn-sm" onclick="window.openModal('msgModal')">+ 設定</button>
                 </div>
-                <div class="item-list" id="messagesList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <h2 class="card-title">作品と専用メッセージ</h2>
-                        <p class="card-desc">特定の作品に対する支援と、その限定の裏話など</p>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">プロフィール</h2>
+                            <p class="card-desc">読者に公開されるペンネーム</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="window.openModal('profileModal')">編集</button>
                     </div>
-                    <button class="btn btn-outline btn-sm" onclick="window.openModal('workModal')">+ 追加</button>
+                    <div class="item-list">
+                        <div class="item-card" onclick="window.openModal('profileModal')">
+                            <div class="item-info">
+                                <h4 id="profilePennameDisplay">未設定</h4>
+                                <p>ペンネーム</p>
+                            </div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="item-list" id="worksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
-            </div>
 
-            <footer class="site-footer">
-                <p>&copy; 2026 KANKETSU</p>
-            </footer>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">活動サイトリンク</h2>
+                            <p class="card-desc">読者に表示するあなたのマイページURL</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="window.openModal('linkModal')">+ 追加</button>
+                    </div>
+                    <div class="item-list" id="linksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">支援へのお礼メッセージ</h2>
+                            <p class="card-desc">作品指定がない支援に対する共通メッセージ</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="window.openModal('msgModal')">+ 設定</button>
+                    </div>
+                    <div class="item-list" id="messagesList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">作品と専用メッセージ</h2>
+                            <p class="card-desc">特定の作品に対する支援と、その限定の裏話など</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="window.openModal('workModal')">+ 追加</button>
+                    </div>
+                    <div class="item-list" id="worksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
+                </div>
+
+                <footer class="site-footer">
+                    <p>&copy; 2026 KANKETSU</p>
+                </footer>
+            </div>
         </main>
     </div>
 
@@ -328,7 +361,6 @@
                     if (!session) { window.location.href = 'login.html'; return; }
                     currentUserId = session.user.id;
 
-                    // ★絶対解決の修正: pen_name, profile_url, general_secret_message 全ての過去のNOT NULL制約をダミーデータで突破します。
                     const { error: upsertErr } = await supabaseClient.from('creators').upsert(
                         { 
                             id: currentUserId, 
@@ -376,17 +408,22 @@
                     let totalBalance = donations ? donations.reduce((sum, d) => sum + Number(d.net_amount), 0) : 0;
                     const balanceText = document.getElementById('balanceText');
                     if(balanceText) balanceText.innerText = `¥${totalBalance.toLocaleString()}`;
+                    
+                    if (document.getElementById('profileUrlText')) {
+                        document.getElementById('profileUrlText').innerText = `${window.location.origin}/profile.html?id=${currentUserId}`;
+                    }
 
                     const linksCount = await loadLinks();
                     const msgsCount = await loadMessages();
                     const worksCount = await loadWorks();
 
-                    renderOnboarding(creator, linksCount, msgsCount, worksCount);
+                    renderView(creator, linksCount, msgsCount, worksCount);
 
                 } catch (error) { console.error("Error:", error); }
             };
 
-            function renderOnboarding(creator, linksCount, msgsCount, worksCount) {
+            // ★追加：設定状況に応じて画面とサイドバーの機能を完全に切り替える関数
+            function renderView(creator, linksCount, msgsCount, worksCount) {
                 const penname = creator && (creator.pen_name || creator.penname);
                 const hasPenName = penname && penname.trim() !== '' && penname !== '未設定';
                 
@@ -396,40 +433,39 @@
                 if (msgsCount > 0) completedCount++;
                 if (worksCount > 0) completedCount++;
 
-                const container = document.getElementById('setupContainer');
-                if (!container) return;
+                const isCompleted = completedCount === 4;
 
-                if (completedCount === 4) {
-                    container.innerHTML = `
-                        <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            <span style="display:inline-block; width:8px; height:8px; background:#16a34a; border-radius:50%;"></span> 公開中 (支援受付ページURL)
-                        </p>
-                        <div class="share-box" style="margin-bottom: 32px;">
-                            <div class="share-url" id="profileUrlText">${window.location.origin}/profile.html?id=${currentUserId}</div>
-                            <button class="btn btn-primary btn-sm" onclick="window.copyUrl()">コピー</button>
-                        </div>
-                    `;
+                const onboardingView = document.getElementById('onboardingView');
+                const mainDashboardView = document.getElementById('mainDashboardView');
+                const sidebarNav = document.getElementById('sidebarNavMenu');
+
+                if (isCompleted) {
+                    // 全て設定完了：本来のダッシュボードを表示、サイドバーを解禁
+                    onboardingView.style.display = 'none';
+                    mainDashboardView.style.display = 'block';
+                    if (sidebarNav) {
+                        sidebarNav.style.pointerEvents = 'auto';
+                        sidebarNav.style.opacity = '1';
+                    }
                 } else {
+                    // 未完了：必須タスク画面を表示、サイドバーのリンク機能を封印
+                    onboardingView.style.display = 'block';
+                    mainDashboardView.style.display = 'none';
+                    if (sidebarNav) {
+                        sidebarNav.style.pointerEvents = 'none';
+                        sidebarNav.style.opacity = '0.3';
+                    }
+
                     const percent = (completedCount / 4) * 100;
-                    container.innerHTML = `
-                        <div style="background: #fff; border: 1px solid var(--border-light); border-radius: 12px; padding: 24px; box-shadow: 2px 2px 0px rgba(0,0,0,1); margin-bottom: 32px;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
-                                <div>
-                                    <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 800;">支援の受付準備 (${completedCount}/4)</h3>
-                                    <p style="margin: 0; font-size: 13px; color: var(--text-sub);">支援ページを公開するために、以下の4つの必須設定を完了してください。</p>
-                                </div>
-                                <div style="font-size: 16px; font-weight: 800;">${percent}%</div>
-                            </div>
-                            <div style="height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 24px; border: 1px solid var(--border-light);">
-                                <div style="height: 100%; background: #000; width: ${percent}%; transition: width 0.5s ease;"></div>
-                            </div>
-                            <div class="task-list">
-                                ${getTaskHtml(hasPenName, 'ペンネームを設定する', 'profileModal')}
-                                ${getTaskHtml(linksCount > 0, '活動サイトリンクを追加する', 'linkModal')}
-                                ${getTaskHtml(msgsCount > 0, '支援へのお礼メッセージを設定する', 'msgModal')}
-                                ${getTaskHtml(worksCount > 0, '作品を追加する', 'workModal')}
-                            </div>
-                        </div>
+                    document.getElementById('onboardingCount').innerText = completedCount;
+                    document.getElementById('onboardingPercent').innerText = `${percent}%`;
+                    document.getElementById('onboardingProgressBar').style.width = `${percent}%`;
+
+                    document.getElementById('onboardingTaskList').innerHTML = `
+                        ${getTaskHtml(hasPenName, 'ペンネームを設定する', 'profileModal')}
+                        ${getTaskHtml(linksCount > 0, '活動サイトリンクを追加する', 'linkModal')}
+                        ${getTaskHtml(msgsCount > 0, '支援へのお礼メッセージを設定する', 'msgModal')}
+                        ${getTaskHtml(worksCount > 0, '作品を追加する', 'workModal')}
                     `;
                 }
             }
