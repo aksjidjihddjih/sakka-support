@@ -4,28 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>支援履歴 - KANKETSU</title>
+    
     <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        /* dashboard.htmlと同一のスタイルを省略せず記載してください */
-        :root { --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --sidebar-bg: #000000; --sidebar-text: #d1d5db; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; }
+        /* dashboard.htmlと完全に同一のCSS */
+        :root {
+            --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563;
+            --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px;
+            --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151;
+            --sidebar-bg: #000000; --sidebar-text: #d1d5db;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; display: inline-block; vertical-align: middle; }
+
         .app-container { display: flex; min-height: 100vh; flex-direction: column; }
         .mobile-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--sidebar-bg); color: #fff; position: sticky; top: 0; z-index: 20; }
+        .mobile-header .brand-logo { margin: 0; padding: 0; }
         .hamburger { background: transparent; border: none; color: #fff; cursor: pointer; padding: 4px; }
+
         .sidebar { background-color: var(--sidebar-bg); color: var(--sidebar-text); width: 260px; height: 100vh; padding: 32px 0 24px 0; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 30; transform: translateX(-100%); transition: transform 0.3s ease; box-sizing: border-box; }
         .sidebar.open { transform: translateX(0); }
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 25; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.show { display: block; opacity: 1; }
+        
         .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: #fff; text-decoration: none; padding: 0 24px; margin-bottom: 40px; display: block;}
+
         .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--sidebar-text); text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 8px; transition: all 0.2s; cursor: pointer; border: none; background: transparent; text-align: left; width: 100%; box-sizing: border-box; }
         .nav-item:hover, .nav-item.active { background-color: #1f2937; color: #fff; }
-        @media (min-width: 768px) { .app-container { flex-direction: row; } .mobile-header { display: none; } .sidebar { position: sticky; transform: translateX(0); } }
+
+        @media (min-width: 768px) {
+            .app-container { flex-direction: row; }
+            .mobile-header { display: none; }
+            .sidebar { position: sticky; transform: translateX(0); }
+        }
+
         .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column;}
         @media (min-width: 768px) { .main-content { padding: 48px; } }
         .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); overflow: hidden; }
+        
         .table-container { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
         th { text-align: left; padding: 16px; border-bottom: 2px solid var(--border-color); color: var(--text-sub); font-weight: 600; }
@@ -37,7 +57,8 @@
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="app-container" id="sales-container">
+        
         <header class="mobile-header">
             <a href="dashboard.html" class="brand-logo">KANKETSU</a>
             <button class="hamburger" onclick="window.toggleSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
@@ -61,10 +82,13 @@
 
         <main class="main-content">
             <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">支援履歴（売上明細）</h1>
+            
             <div class="card" style="padding: 0;">
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>日時</th><th>支援金額</th><th>手数料(10%)</th><th>手取り額</th><th>状態</th></tr></thead>
+                        <thead>
+                            <tr><th>日時</th><th>支援金額</th><th>手数料(10%)</th><th>手取り額</th><th>状態</th></tr>
+                        </thead>
                         <tbody id="salesTableBody">
                             <tr><td colspan="5" style="text-align: center; color: var(--text-sub);">読み込み中...</td></tr>
                         </tbody>
@@ -72,6 +96,7 @@
                 </div>
             </div>
         </main>
+
     </div>
 
     <script>
@@ -79,10 +104,9 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function initSales() {
-            // ★エラー修正：支援履歴用のテーブルが存在するか確認（dashboard.htmlからの誤作動防止）
-            const tbody = document.getElementById('salesTableBody');
-            if (!tbody) return;
+        // ★追加：Turboでの画面遷移時の安全装置
+        window.initSales = async function() {
+            if (!document.getElementById('sales-container')) return; // salesページでない場合は実行しない
 
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.href = 'login.html'; return; }
@@ -90,6 +114,7 @@
             const { data: donations } = await supabaseClient.from('donations')
                 .select('*').eq('creator_id', session.user.id).order('created_at', { ascending: false });
 
+            const tbody = document.getElementById('salesTableBody');
             if (!donations || donations.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">まだ支援履歴はありません。</td></tr>';
                 return;
@@ -97,14 +122,23 @@
 
             tbody.innerHTML = donations.map(d => {
                 const date = new Date(d.created_at).toLocaleString('ja-JP', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
-                const statusHtml = d.status === 'pending' ? '<span class="status-badge status-pending">引出可能</span>' : '<span class="status-badge status-transferred">振込済</span>';
+                const statusHtml = d.status === 'pending' 
+                    ? '<span class="status-badge status-pending">引出可能</span>' 
+                    : '<span class="status-badge status-transferred">振込済</span>';
                 return `<tr><td>${date}</td><td>¥${d.amount.toLocaleString()}</td><td>-¥${d.fee.toLocaleString()}</td><td><strong>¥${d.net_amount.toLocaleString()}</strong></td><td>${statusHtml}</td></tr>`;
             }).join('');
-        }
+        };
 
-        document.addEventListener('turbo:load', initSales);
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSales); else initSales();
-        window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
+        if (!window.hasRegisteredSales) {
+            document.addEventListener('turbo:load', window.initSales);
+            window.hasRegisteredSales = true;
+        }
+        window.initSales(); // 初回実行
+
+        window.toggleSidebar = function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        };
     </script>
 </body>
 </html>
