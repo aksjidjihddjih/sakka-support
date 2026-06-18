@@ -328,20 +328,29 @@
                     if (!session) { window.location.href = 'login.html'; return; }
                     currentUserId = session.user.id;
 
-                    // ★絶対解決の修正: pen_name が NULL のまま作れないエラーを、ここで確実に塞ぎます。
+                    // ★絶対解決の修正: pen_name, profile_url, general_secret_message 全ての過去のNOT NULL制約をダミーデータで突破します。
                     const { error: upsertErr } = await supabaseClient.from('creators').upsert(
-                        { id: currentUserId, pen_name: '未設定' }, // 空っぽを許さないので仮の文字を入れます
+                        { 
+                            id: currentUserId, 
+                            pen_name: '未設定',
+                            profile_url: 'https://kanketsu.site/setup',
+                            general_secret_message: '未設定'
+                        }, 
                         { onConflict: 'id', ignoreDuplicates: true }
                     );
                     
                     if (upsertErr) {
-                        // もしカラム名が penname だった場合のバックアップ
                         const { error: upsertErr2 } = await supabaseClient.from('creators').upsert(
-                            { id: currentUserId, penname: '未設定' },
+                            { 
+                                id: currentUserId, 
+                                penname: '未設定',
+                                profile_url: 'https://kanketsu.site/setup',
+                                general_secret_message: '未設定'
+                            },
                             { onConflict: 'id', ignoreDuplicates: true }
                         );
                         if (upsertErr2) {
-                            alert("【データベース権限エラー】\n作者の基本データを作成できませんでした。\n詳細: " + upsertErr.message);
+                            alert("【データベース権限エラー】\n作者の基本データを作成できませんでした。\n詳細: " + upsertErr2.message);
                             return; 
                         }
                     }
