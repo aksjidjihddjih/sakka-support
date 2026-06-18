@@ -46,7 +46,6 @@
         .btn-primary:hover { background-color: var(--btn-hover); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-        /* エラー表示用のスタイル */
         #loadingState { text-align: center; padding: 40px; color: var(--text-sub); font-weight: 600; }
         #errorState { display: none; background: #fee2e2; border: 2px solid #ef4444; border-radius: 8px; padding: 24px; margin: 40px 0; text-align: center; }
         #errorState h2 { color: #b91c1c; margin-top: 0; font-size: 18px; }
@@ -59,24 +58,18 @@
     <div class="container">
         <div id="loadingState">クリエイター情報を読み込み中...</div>
         
-        <!-- エラーが発生した場合に表示されるエリア -->
         <div id="errorState">
             <h2>読み込みエラー</h2>
             <p id="errorMessage"></p>
-            <p style="font-size: 12px; color: #991b1b; margin-top: 16px;">
-                ※この画面が出た場合、URLが間違っているか、キーの設定にミスがあります。
-            </p>
         </div>
 
         <div id="mainContent">
-            <!-- ヘッダー（作者情報） -->
             <div class="header">
                 <div class="avatar" id="authorAvatar">？</div>
                 <h1 class="creator-name" id="authorName">読み込み中...</h1>
                 <p style="color: var(--text-sub); margin: 0; font-size: 14px;">このクリエイターの創作活動を支援します</p>
             </div>
 
-            <!-- 活動サイト一覧 -->
             <div class="card" id="linksCard" style="display: none;">
                 <h2 class="section-title">活動サイト</h2>
                 <div class="link-list" id="linksList"></div>
@@ -110,15 +103,13 @@
     <script>
         // =======================================================================
         // 【重要】ここの3行を、ご自身のものに慎重に書き換えてください。
-        // シングルクォーテーション（'）を消すとシステムがフリーズします。
         // =======================================================================
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const STRIPE_PUBLIC_KEY = 'pk_test_51ThTKj4XyICGMkd9IU5z99hggK13SiHHFZMffu6rMnMTtNiQ6TNzNeBxhqD7ah8wTed7GATw83rNiJgohFUhuwOg00I0j4UOOM';
 
-        // プログラムのフリーズを検知する自己診断機能
         window.onerror = function(msg, url, line) {
-            showError("致命的なシステムエラーが発生しました。<br>詳細: " + msg + "<br>※キーの入力時に「'」や「;」を消していませんか？");
+            showError("致命的なシステムエラーが発生しました。<br>詳細: " + msg);
             return false;
         };
 
@@ -134,35 +125,24 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // 1. Supabaseの初期化チェック
-                if (!SUPABASE_URL.startsWith('http')) {
-                    throw new Error("SupabaseのURLが正しくありません。（https://から始まっていません）");
-                }
+                if (!SUPABASE_URL.startsWith('http')) throw new Error("SupabaseのURLが正しくありません。");
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                // 2. URLから作者IDを取得
                 const params = new URLSearchParams(window.location.search);
                 authorId = params.get('id');
+                if (!authorId) throw new Error("URLが正しくありません。");
 
-                if (!authorId) {
-                    throw new Error("URLが正しくありません。<br>ダッシュボードでコピーした「?id=...」が含まれるURLでアクセスしてください。");
-                }
-
-                // 3. 作者情報の取得
                 const { data: creator, error: creatorError } = await supabaseClient
                     .from('creators').select('*').eq('id', authorId).single();
                 
                 if (creatorError) throw new Error("データベース接続エラー: " + creatorError.message);
-                if (!creator) throw new Error("指定されたクリエイター（ID: " + authorId + "）が見つかりません。");
+                if (!creator) throw new Error("指定されたクリエイターが見つかりません。");
 
                 const penname = creator.penname || "名無し作者";
                 document.getElementById('authorName').innerText = penname;
                 document.getElementById('authorAvatar').innerText = penname.charAt(0);
 
-                // 4. 活動サイトリンクの取得
-                const { data: links, error: linksError } = await supabaseClient
-                    .from('creator_links').select('*').eq('creator_id', authorId).order('created_at');
-                
+                const { data: links } = await supabaseClient.from('creator_links').select('*').eq('creator_id', authorId).order('created_at');
                 if (links && links.length > 0) {
                     const linksList = document.getElementById('linksList');
                     links.forEach(link => {
@@ -176,10 +156,7 @@
                     document.getElementById('linksCard').style.display = 'block';
                 }
 
-                // 5. 作品一覧の取得
-                const { data: works, error: worksError } = await supabaseClient
-                    .from('works').select('*').eq('creator_id', authorId).order('created_at');
-                
+                const { data: works } = await supabaseClient.from('works').select('*').eq('creator_id', authorId).order('created_at');
                 if (works && works.length > 0) {
                     const worksList = document.getElementById('worksList');
                     works.forEach(work => {
@@ -195,7 +172,6 @@
                     });
                 }
 
-                // すべて成功したらメイン画面を表示
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
 
@@ -204,42 +180,40 @@
             }
         });
 
-        // 決済処理
         async function processCheckout() {
             const btn = document.getElementById('checkoutBtn');
             const amount = parseInt(document.getElementById('amountInput').value, 10);
             const selectedWork = document.querySelector('input[name="selectedWork"]:checked').value;
 
-            if (isNaN(amount) || amount < 100) {
-                return alert('支援金額は100円以上で入力してください。');
-            }
+            if (isNaN(amount) || amount < 100) return alert('支援金額は100円以上で入力してください。');
 
             try {
-                // Stripeの初期化（ここで初めて実行することで、キーミスによる画面フリーズを防ぐ）
-                if (!STRIPE_PUBLIC_KEY.startsWith('pk_')) {
-                    throw new Error("Stripeの公開キーが正しく設定されていません。");
-                }
+                if (!STRIPE_PUBLIC_KEY.startsWith('pk_')) throw new Error("Stripeの公開キーが正しくありません。");
                 const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
                 btn.disabled = true;
                 btn.innerText = '決済画面へ移動中...';
 
-                // 【重要】自分のプロジェクトIDに書き換えてください
-                const response = await fetch('https://cfeejhwshvluyecqvgjd.supabase.co/functions/v1/create-checkout', {
+                // =======================================================================
+                // 【重要】ご自身のプロジェクトIDに書き換えてください。
+                // =======================================================================
+                const response = await fetch('https://cfeejhwshvluyecqvgjd.supabase.co/functions/v1/creat-checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        amount: amount, 
-                        authorId: authorId,
-                        workId: selectedWork 
-                    })
+                    body: JSON.stringify({ amount: amount, authorId: authorId, workId: selectedWork })
                 });
 
-                const session = await response.json();
-                if (session.error) throw new Error(session.error);
+                const sessionData = await response.json();
+                if (sessionData.error) throw new Error(sessionData.error);
 
-                // 決済画面へ飛ぶ
-                const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
+                // ★修正箇所：Edge Functionが 'id' で返しても 'sessionId' で返しても対応できるように統合
+                const checkoutSessionId = sessionData.id || sessionData.sessionId;
+
+                if (!checkoutSessionId) {
+                    throw new Error("セッションIDが取得できませんでした。サーバーからの返答: " + JSON.stringify(sessionData));
+                }
+
+                const { error } = await stripe.redirectToCheckout({ sessionId: checkoutSessionId });
                 if (error) throw error;
 
             } catch (error) {
