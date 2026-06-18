@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ダッシュボード - KANKETSU</title>
     
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -19,7 +20,6 @@
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; display: inline-block; vertical-align: middle; }
         .icon-sm { width: 16px; height: 16px; }
 
-        /* レイアウト */
         .app-container { display: flex; min-height: 100vh; flex-direction: column; }
         .mobile-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--sidebar-bg); color: #fff; position: sticky; top: 0; z-index: 20; }
         .mobile-header .brand-logo { margin: 0; padding: 0; }
@@ -50,12 +50,15 @@
         .avatar { width: 32px; height: 32px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 14px; }
         .account-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; text-align: left;}
 
+        .account-popup { position: absolute; bottom: calc(100% + 8px); left: 12px; right: 12px; background: #fff; border: var(--border-width) solid var(--border-color); border-radius: 8px; box-shadow: 2px 2px 0px rgba(0,0,0,1); padding: 8px 0; display: none; z-index: 100; }
+        .account-popup.show { display: block; }
+        .popup-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 16px; background: transparent; border: none; text-align: left; font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: background 0.2s; box-sizing: border-box; text-decoration: none;}
+        .popup-item:hover { background-color: var(--bg-color); }
+        .popup-divider { height: 1px; background-color: var(--border-light); margin: 4px 0; }
+        .popup-item.text-danger { color: #dc2626; }
+
         .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column;}
         @media (min-width: 768px) { .main-content { padding: 48px; } }
-        
-        .view-section { display: none; animation: fadeIn 0.3s ease-out forwards; }
-        .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
         @media (min-width: 768px) { .card { padding: 32px; } }
@@ -85,9 +88,7 @@
         .item-info h4 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; }
         .item-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
 
-        .warning-box { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin-bottom: 24px; border-radius: 4px; font-size: 14px; color: #92400e; }
-        
-        /* モーダル */
+        /* モーダルのスタイル */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.2s ease; }
         .modal-overlay.show { display: flex; opacity: 1; }
         .modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 12px; padding: 32px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; box-sizing: border-box; margin: 20px;}
@@ -95,133 +96,155 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .modal-title { font-size: 18px; font-weight: 600; margin: 0; }
         .modal-close { background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer; line-height: 1; }
+        .modal-close:hover { color: var(--text-main); }
         .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; border-top: 1px solid var(--border-light); padding-top: 24px; }
 
-        #loadingScreen { position: fixed; inset: 0; background: var(--bg-color); z-index: 999; display: flex; justify-content: center; align-items: center; font-weight: bold; }
+        .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
+        .site-footer a { color: var(--text-sub); text-decoration: none; margin: 0 8px; cursor: pointer;}
+        .site-footer a:hover { text-decoration: underline; color: var(--text-main); }
     </style>
 </head>
 <body>
 
-    <div id="loadingScreen">データを読み込んでいます...</div>
-
     <div class="app-container">
         <header class="mobile-header">
-            <a href="#" class="brand-logo">KANKETSU</a>
-            <button class="hamburger" onclick="toggleSidebar()">
+            <a href="dashboard.html" class="brand-logo">KANKETSU</a>
+            <button class="hamburger" onclick="window.toggleSidebar()">
                 <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
         </header>
 
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
 
         <aside class="sidebar" id="sidebar">
-            <a href="#" class="brand-logo" style="display: none;">KANKETSU</a>
+            <a href="dashboard.html" class="brand-logo" style="display: none;">KANKETSU</a>
             
             <nav class="sidebar-nav">
-                <button class="nav-item active" onclick="switchView('homeView', this)">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> ホーム
-                </button>
-                <button class="nav-item" onclick="switchView('stripeView', this)">
-                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 振込先・口座管理
-                </button>
+                <a href="dashboard.html" class="nav-item active">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    ホーム
+                </a>
+                <a href="notice.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    お知らせ
+                </a>
+                <a href="sales.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg>
+                    支援履歴（売上明細）
+                </a>
+                <a href="stripe.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                    振込先・口座管理
+                </a>
+                
                 <div class="nav-divider"></div>
-                <button class="nav-item" onclick="logout()">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト
-                </button>
+                
+                <a href="guide.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    使い方ガイド
+                </a>
+                <a href="faq.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    よくある質問 (FAQ)
+                </a>
+                <a href="contact.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    お問い合わせ
+                </a>
             </nav>
 
             <div class="account-wrapper">
-                <div class="account-btn">
+                <div class="account-popup" id="accountPopup">
+                    <a href="settings.html" class="popup-item">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        アカウント設定
+                    </a>
+                    <div class="popup-divider"></div>
+                    <button class="popup-item text-danger" onclick="window.logout()">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        ログアウト
+                    </button>
+                </div>
+                <button class="account-btn" onclick="window.toggleAccountPopup(event)">
                     <div class="account-info">
-                        <div class="avatar" id="userAvatar">作</div>
+                        <div class="avatar" id="userAvatar">？</div>
                         <span class="account-name" id="userNameDisplay">読み込み中...</span>
                     </div>
-                </div>
+                    <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
             </div>
         </aside>
 
         <main class="main-content">
+            <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
+            
+            <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">あなたの支援受付ページURL</p>
+            <div class="share-box">
+                <div class="share-url" id="profileUrlText">取得中...</div>
+                <button class="btn btn-primary btn-sm" onclick="window.copyUrl()">コピー</button>
+            </div>
 
-            <!-- 1. ホーム画面 -->
-            <section id="homeView" class="view-section active">
-                <div id="statusAlert" class="warning-box" style="display: none;"></div>
-
-                <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
-                
-                <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">あなたの支援受付ページURL</p>
-                <div class="share-box">
-                    <div class="share-url" id="profileUrlText">取得中...</div>
-                    <button class="btn btn-primary btn-sm" onclick="copyUrl()">コピー</button>
+            <div class="card" style="text-align: center; padding: 48px 20px;">
+                <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Balance</p>
+                <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
+                <div style="max-width: 280px; margin: 0 auto;">
+                    <button class="btn btn-primary" onclick="window.requestWithdrawal(event)">売上を引き出す</button>
                 </div>
+            </div>
 
-                <div class="card" style="text-align: center; padding: 48px 20px;">
-                    <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">引き出し可能残高</p>
-                    <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
-                    <div style="max-width: 280px; margin: 0 auto;">
-                        <button class="btn btn-primary" id="btnWithdraw" style="display:none;" onclick="requestWithdrawal(event)">売上を引き出す</button>
-                        <button class="btn btn-outline" id="btnStripeNav" onclick="switchView('stripeView', document.querySelectorAll('.nav-item')[1])">口座を登録して引き出す</button>
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">活動サイトリンク</h2>
+                        <p class="card-desc">読者に表示するあなたのマイページURL</p>
                     </div>
+                    <button class="btn btn-outline btn-sm" onclick="window.openModal('linkModal')">+ 追加</button>
                 </div>
+                <div class="item-list" id="linksList">
+                    <p style="font-size: 14px; color: var(--text-sub);">現在登録されているサイトはありません。</p>
+                </div>
+            </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2 class="card-title">活動サイトリンク</h2>
-                            <p class="card-desc">読者に表示するあなたのマイページURL</p>
-                        </div>
-                        <button class="btn btn-outline btn-sm" onclick="openModal('linkModal')">+ 追加</button>
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">支援へのお礼メッセージ</h2>
+                        <p class="card-desc">作品指定がない支援に対する共通メッセージ</p>
                     </div>
-                    <div class="item-list" id="linksList"><p style="font-size: 14px; color: var(--text-sub);">現在登録されているサイトはありません。</p></div>
+                    <button class="btn btn-outline btn-sm" onclick="window.openModal('msgModal')">+ 追加</button>
                 </div>
+                <div class="item-list" id="messagesList">
+                    <p style="font-size: 14px; color: var(--text-sub);">現在登録されているメッセージはありません。</p>
+                </div>
+            </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2 class="card-title">支援へのお礼メッセージ</h2>
-                            <p class="card-desc">作品指定がない支援に対する共通メッセージ</p>
-                        </div>
-                        <button class="btn btn-outline btn-sm" onclick="openModal('msgModal')">+ 追加</button>
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">作品と専用メッセージ</h2>
+                        <p class="card-desc">特定の作品に対する支援と、その限定の裏話など</p>
                     </div>
-                    <div class="item-list" id="messagesList"><p style="font-size: 14px; color: var(--text-sub);">現在登録されているメッセージはありません。</p></div>
+                    <button class="btn btn-outline btn-sm" onclick="window.openModal('workModal')">+ 追加</button>
                 </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2 class="card-title">作品と専用メッセージ</h2>
-                            <p class="card-desc">特定の作品に対する支援と、その限定の裏話など</p>
-                        </div>
-                        <button class="btn btn-outline btn-sm" onclick="openModal('workModal')">+ 追加</button>
-                    </div>
-                    <div class="item-list" id="worksList"><p style="font-size: 14px; color: var(--text-sub);">現在登録されている作品はありません。</p></div>
+                <div class="item-list" id="worksList">
+                    <p style="font-size: 14px; color: var(--text-sub);">現在登録されている作品はありません。</p>
                 </div>
-            </section>
+            </div>
 
-            <!-- 2. Stripe口座管理画面 -->
-            <section id="stripeView" class="view-section">
-                <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">振込先・口座管理</h1>
-                <div class="card">
-                    <h2 class="card-title" style="margin-bottom: 8px;">Stripe連携設定</h2>
-                    <p class="card-desc" style="margin-bottom: 24px;">売上を銀行口座へ引き出すための本人確認・口座登録を行います。</p>
-                    
-                    <div id="stripeConnectedStatus" style="display:none; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px; border-radius: 8px; margin-bottom: 24px; align-items: center; gap: 8px;">
-                        <svg class="icon icon-sm" style="color: #16a34a;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #166534;">現在、口座は正常に連携されています。</p>
-                    </div>
-
-                    <button class="btn btn-primary" id="btnStripeConnect" onclick="startStripeConnect(event)">売上の振込先を登録する</button>
-                </div>
-            </section>
-
+            <footer class="site-footer">
+                <a href="tokushoho.html">特定商取引法に基づく表記</a> | 
+                <a href="privacy.html">プライバシーポリシー</a> | 
+                <a href="terms.html">利用規約</a>
+                <p style="margin-top: 12px;">&copy; 2026 KANKETSU</p>
+            </footer>
         </main>
     </div>
 
-    <!-- モーダル群 -->
     <div class="modal-overlay" id="linkModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">活動サイトを追加</h3>
-                <button class="modal-close" onclick="closeModal('linkModal')">&times;</button>
+                <button class="modal-close" onclick="window.closeModal('linkModal')">&times;</button>
             </div>
             <div class="form-group">
                 <label>サイト名 (例: 小説家になろう)</label>
@@ -232,8 +255,8 @@
                 <input type="url" id="linkUrl" class="form-control" placeholder="https://...">
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline btn-sm" onclick="closeModal('linkModal')">キャンセル</button>
-                <button class="btn btn-primary btn-sm" onclick="saveLink()">保存する</button>
+                <button class="btn btn-outline btn-sm" onclick="window.closeModal('linkModal')">キャンセル</button>
+                <button class="btn btn-primary btn-sm" onclick="window.saveLink()">保存する</button>
             </div>
         </div>
     </div>
@@ -242,7 +265,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">お礼メッセージを追加</h3>
-                <button class="modal-close" onclick="closeModal('msgModal')">&times;</button>
+                <button class="modal-close" onclick="window.closeModal('msgModal')">&times;</button>
             </div>
             <div class="form-group">
                 <label>管理用タイトル (読者には見えません)</label>
@@ -253,8 +276,8 @@
                 <textarea id="msgContent" class="form-control" placeholder="支援へのお礼を書きましょう"></textarea>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline btn-sm" onclick="closeModal('msgModal')">キャンセル</button>
-                <button class="btn btn-primary btn-sm" onclick="saveMessage()">保存する</button>
+                <button class="btn btn-outline btn-sm" onclick="window.closeModal('msgModal')">キャンセル</button>
+                <button class="btn btn-primary btn-sm" onclick="window.saveMessage()">保存する</button>
             </div>
         </div>
     </div>
@@ -263,7 +286,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">作品を追加</h3>
-                <button class="modal-close" onclick="closeModal('workModal')">&times;</button>
+                <button class="modal-close" onclick="window.closeModal('workModal')">&times;</button>
             </div>
             <div class="form-group">
                 <label>作品タイトル</label>
@@ -274,184 +297,234 @@
                 <input type="url" id="workUrl" class="form-control" placeholder="https://...">
             </div>
             <div class="form-group">
-                <label>この作品専用の限定メッセージ</label>
+                <label>この作品専用の限定メッセージ (任意)</label>
                 <textarea id="workMessage" class="form-control" placeholder="作品の裏話などを書きましょう"></textarea>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline btn-sm" onclick="closeModal('workModal')">キャンセル</button>
-                <button class="btn btn-primary btn-sm" onclick="saveWork()">保存する</button>
+                <button class="btn btn-outline btn-sm" onclick="window.closeModal('workModal')">キャンセル</button>
+                <button class="btn btn-primary btn-sm" onclick="window.saveWork()">保存する</button>
             </div>
         </div>
     </div>
 
     <script>
+        // ==============================================================================
+        // 【重要】ここの2行は必ずご自身のSupabaseのURLとANON_KEYに書き換えてください！
+        // シングルクォーテーション（'）を消さないように注意してください。
+        // ==============================================================================
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let currentUser = null;
-        let isStripeConnected = false;
-
-        window.onload = async function() {
-            const { data: { session }, error } = await supabaseClient.auth.getSession();
-            if (error || !session) {
-                window.location.href = 'login.html';
-                return;
-            }
-            currentUser = session.user;
-            document.getElementById('userNameDisplay').innerText = currentUser.email;
-
-            // クリエイター情報枠の確認・作成
-            const { data: creatorExists } = await supabaseClient.from('creators').select('id, stripe_account_id').eq('id', currentUser.id).single();
-            if (!creatorExists) {
-                await supabaseClient.from('creators').insert({ id: currentUser.id });
-            } else if (creatorExists.stripe_account_id) {
-                isStripeConnected = true;
-                document.getElementById('stripeConnectedStatus').style.display = 'flex';
-                document.getElementById('btnStripeConnect').innerText = '振込先情報の確認・変更（Stripeを開く）';
-                document.getElementById('btnStripeConnect').className = 'btn btn-outline';
-            }
-
-            document.getElementById('profileUrlText').innerText = `${window.location.origin}/profile.html?id=${currentUser.id}`;
-
-            await loadBalance();
-            await loadLinks();
-            await loadMessages();
-            await loadWorks();
-            await updateApprovalStatus();
-            
-            document.getElementById('loadingScreen').style.display = 'none';
-        };
-
-        // UI操作系
-        function switchView(viewId, clickedItem) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if (clickedItem) clickedItem.classList.add('active');
-            if (window.innerWidth < 768) toggleSidebar();
-            window.scrollTo(0, 0);
-        }
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('sidebarOverlay').classList.toggle('show');
-        }
-        function openModal(id) { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; }
-        function copyUrl() { navigator.clipboard.writeText(document.getElementById('profileUrlText').innerText).then(() => alert("URLをコピーしました！")); }
-        async function logout() { await supabaseClient.auth.signOut(); window.location.href = 'login.html'; }
-
-        // データ読み込み・判定系
-        async function updateApprovalStatus() {
-            const { data: links } = await supabaseClient.from('creator_links').select('id').eq('creator_id', currentUser.id);
-            const { data: msgs } = await supabaseClient.from('creator_messages').select('id').eq('creator_id', currentUser.id);
-            const { data: works } = await supabaseClient.from('works').select('id').eq('creator_id', currentUser.id);
-
-            const isReady = (links && links.length > 0) && (msgs && msgs.length > 0) && (works && works.length > 0);
-            const statusAlert = document.getElementById('statusAlert');
-            statusAlert.style.display = 'block';
-
-            if (isReady) {
-                await supabaseClient.from('creators').update({ is_active: true }).eq('id', currentUser.id);
-                statusAlert.style.backgroundColor = '#d1fae5'; statusAlert.style.borderColor = '#059669'; statusAlert.style.color = '#065f46';
-                statusAlert.innerHTML = `<strong>✅ 公開中</strong><br>必要な設定が完了し、支援ページが公開されています。URLを読者に共有しましょう！`;
-            } else {
-                await supabaseClient.from('creators').update({ is_active: false }).eq('id', currentUser.id);
-                statusAlert.style.backgroundColor = '#fef3c7'; statusAlert.style.borderColor = '#d97706'; statusAlert.style.color = '#92400e';
-                statusAlert.innerHTML = `<strong>⚠️ 準備中（未公開）</strong><br>支援を受け付けるには「活動サイト」「お礼メッセージ」「作品」をそれぞれ1つ以上登録してください。`;
-            }
+        
+        let supabaseClient;
+        try {
+            // URLが初期値のままだったり、形式が間違っているとここでエラーになり停止します。
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            alert("【システムエラー】\nSupabaseのURLまたはキーが正しく設定されていません。\nコードの一番下にある設定部分を見直してください。\n詳細: " + e.message);
         }
 
-        async function loadBalance() {
-            const { data } = await supabaseClient.from('donations').select('net_amount').eq('creator_id', currentUser.id).eq('status', 'pending');
-            let total = data ? data.reduce((sum, d) => sum + Number(d.net_amount), 0) : 0;
-            document.getElementById('balanceText').innerText = `¥${total.toLocaleString()}`;
-            
-            if (total > 0) {
-                if (isStripeConnected) {
-                    document.getElementById('btnWithdraw').style.display = 'block';
-                    document.getElementById('btnStripeNav').style.display = 'none';
-                } else {
-                    document.getElementById('btnWithdraw').style.display = 'none';
-                    document.getElementById('btnStripeNav').style.display = 'block';
+        let currentUserId = null;
+
+        // システム初期化（エラーが起きても画面が固まらないようにtry-catchを追加）
+        async function initDashboard() {
+            try {
+                if (!supabaseClient) return;
+
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                
+                if (sessionError || !session) {
+                    alert("ログイン情報が見つかりません。ログイン画面へ戻ります。");
+                    window.location.href = 'index.html';
+                    return;
                 }
-            } else {
-                document.getElementById('btnWithdraw').style.display = 'none';
-                document.getElementById('btnStripeNav').style.display = 'none';
+                currentUserId = session.user.id;
+
+                // ユーザー情報表示
+                const { data: creator, error: creatorError } = await supabaseClient.from('creators').select('*').eq('id', currentUserId).single();
+                if (creator) {
+                    const penname = creator.penname || "名無し作者";
+                    document.getElementById('userNameDisplay').innerText = penname;
+                    document.getElementById('userAvatar').innerText = penname.charAt(0);
+                }
+
+                // URL生成
+                document.getElementById('profileUrlText').innerText = `${window.location.origin}/profile.html?id=${currentUserId}`;
+
+                // 残高計算
+                const { data: donations } = await supabaseClient.from('donations')
+                    .select('net_amount').eq('creator_id', currentUserId).eq('status', 'pending');
+                let totalBalance = donations ? donations.reduce((sum, d) => sum + Number(d.net_amount), 0) : 0;
+                document.getElementById('balanceText').innerText = `¥${totalBalance.toLocaleString()}`;
+
+                // 各種データのロード
+                await loadLinks();
+                await loadMessages();
+                await loadWorks();
+                
+            } catch (error) {
+                console.error(error);
+                alert("ダッシュボードの読み込み中にエラーが発生しました。\n詳細: " + error.message);
             }
         }
 
+        document.addEventListener('turbo:load', initDashboard);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDashboard);
+        } else {
+            initDashboard();
+        }
+
+        /* データの読み込み表示機能 */
         async function loadLinks() {
-            const { data } = await supabaseClient.from('creator_links').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false });
+            const { data } = await supabaseClient.from('creator_links').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
+            const list = document.getElementById('linksList');
             if (data && data.length > 0) {
-                document.getElementById('linksList').innerHTML = data.map(i => `<div class="item-card"><div class="item-info"><h4>${i.title}</h4><p>${i.url}</p></div></div>`).join('');
+                list.innerHTML = data.map(item => `
+                    <div class="item-card">
+                        <div class="item-info"><h4>${item.title}</h4><p>${item.url}</p></div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
+                    </div>
+                `).join('');
             }
         }
 
         async function loadMessages() {
-            const { data } = await supabaseClient.from('creator_messages').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false });
+            const { data } = await supabaseClient.from('creator_messages').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
+            const list = document.getElementById('messagesList');
             if (data && data.length > 0) {
-                document.getElementById('messagesList').innerHTML = data.map(i => `<div class="item-card"><div class="item-info"><h4>${i.title}</h4><p>${i.content.substring(0, 30)}...</p></div></div>`).join('');
+                list.innerHTML = data.map(item => `
+                    <div class="item-card">
+                        <div class="item-info"><h4>${item.title}</h4><p>${item.content.substring(0, 30)}...</p></div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
+                    </div>
+                `).join('');
             }
         }
 
         async function loadWorks() {
-            const { data } = await supabaseClient.from('works').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false });
+            const { data } = await supabaseClient.from('works').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
+            const list = document.getElementById('worksList');
             if (data && data.length > 0) {
-                document.getElementById('worksList').innerHTML = data.map(i => `<div class="item-card"><div class="item-info"><h4>${i.title}</h4><p>${i.work_url}</p></div></div>`).join('');
+                list.innerHTML = data.map(item => `
+                    <div class="item-card">
+                        <div class="item-info"><h4>${item.title}</h4><p>${item.secret_message ? "限定メッセージ設定済み" : "メッセージ未設定"}</p></div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
+                    </div>
+                `).join('');
             }
         }
 
-        // データ保存系
-        async function saveLink() {
-            const title = document.getElementById('linkTitle').value; const url = document.getElementById('linkUrl').value;
-            if(!title || !url) return alert("入力が不足しています。");
-            await supabaseClient.from('creator_links').insert([{ creator_id: currentUser.id, title, url }]);
-            closeModal('linkModal'); document.getElementById('linkTitle').value = ''; document.getElementById('linkUrl').value = '';
-            await loadLinks(); await updateApprovalStatus();
-        }
+        /* グローバル関数の定義（ボタンクリックで確実に動くように明示的に登録） */
+        window.openModal = function(id) {
+            document.getElementById(id).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        };
 
-        async function saveMessage() {
-            const title = document.getElementById('msgTitle').value; const content = document.getElementById('msgContent').value;
-            if(!title || !content) return alert("入力が不足しています。");
-            await supabaseClient.from('creator_messages').insert([{ creator_id: currentUser.id, title, content }]);
-            closeModal('msgModal'); document.getElementById('msgTitle').value = ''; document.getElementById('msgContent').value = '';
-            await loadMessages(); await updateApprovalStatus();
-        }
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.remove('show');
+            document.body.style.overflow = '';
+        };
+        
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        };
 
-        async function saveWork() {
-            const title = document.getElementById('workTitle').value; const url = document.getElementById('workUrl').value; const msg = document.getElementById('workMessage').value;
+        window.toggleSidebar = function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        };
+
+        /* データの保存機能 */
+        window.saveLink = async function() {
+            const title = document.getElementById('linkTitle').value;
+            const url = document.getElementById('linkUrl').value;
+            if(!title || !url) return alert("タイトルとURLを入力してください。");
+
+            const { error } = await supabaseClient.from('creator_links').insert([{ creator_id: currentUserId, title, url }]);
+            if (error) alert("保存エラー: " + error.message);
+            else {
+                window.closeModal('linkModal');
+                document.getElementById('linkTitle').value = ''; document.getElementById('linkUrl').value = '';
+                await loadLinks();
+            }
+        };
+
+        window.saveMessage = async function() {
+            const title = document.getElementById('msgTitle').value;
+            const content = document.getElementById('msgContent').value;
+            if(!title || !content) return alert("タイトルとメッセージを入力してください。");
+
+            const { error } = await supabaseClient.from('creator_messages').insert([{ creator_id: currentUserId, title, content }]);
+            if (error) alert("保存エラー: " + error.message);
+            else {
+                window.closeModal('msgModal');
+                document.getElementById('msgTitle').value = ''; document.getElementById('msgContent').value = '';
+                await loadMessages();
+            }
+        };
+
+        window.saveWork = async function() {
+            const title = document.getElementById('workTitle').value;
+            const url = document.getElementById('workUrl').value;
+            const secret_message = document.getElementById('workMessage').value;
             if(!title || !url) return alert("タイトルとURLは必須です。");
-            await supabaseClient.from('works').insert([{ creator_id: currentUser.id, title, work_url: url, secret_message: msg }]);
-            closeModal('workModal'); document.getElementById('workTitle').value = ''; document.getElementById('workUrl').value = ''; document.getElementById('workMessage').value = '';
-            await loadWorks(); await updateApprovalStatus();
-        }
 
-        // 決済・引き出し系
-        async function startStripeConnect(e) {
-            const btn = e.target; btn.disabled = true; btn.innerText = "接続中...";
-            try {
-                const { data, error } = await supabaseClient.functions.invoke('create-stripe-account', { body: { userId: currentUser.id, email: currentUser.email } });
-                if (error) throw error;
-                window.location.href = data.url;
-            } catch (err) {
-                alert("Stripe接続エラー: " + err.message); btn.disabled = false; btn.innerText = "売上の振込先を登録する";
+            const { error } = await supabaseClient.from('works').insert([{ creator_id: currentUserId, title, url, secret_message }]);
+            if (error) alert("保存エラー: " + error.message);
+            else {
+                window.closeModal('workModal');
+                document.getElementById('workTitle').value = ''; document.getElementById('workUrl').value = ''; document.getElementById('workMessage').value = '';
+                await loadWorks();
             }
-        }
+        };
 
-        async function requestWithdrawal(e) {
+        // 売上引き出し
+        window.requestWithdrawal = async function(event) {
             if (!confirm("現在の残高を引き出します。よろしいですか？")) return;
-            const btn = e.target; btn.disabled = true; btn.innerText = "処理中...";
+
+            const button = event.target;
+            button.innerText = "処理中...";
+            button.disabled = true;
+
             try {
-                const { data, error } = await supabaseClient.functions.invoke('request-withdrawal', { body: { userId: currentUser.id } });
-                if (error) throw new Error(error.message);
-                if (data.error) throw new Error(data.error);
+                // 【注意】ここもご自身のSupabaseプロジェクトIDに書き換える必要があります！
+                const response = await fetch('https://あなたのプロジェクトID.supabase.co/functions/v1/request-withdrawal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: currentUserId })
+                });
+
+                const result = await response.json();
+                if (result.error) throw new Error(result.error);
+
                 alert("振込手続きが完了しました！");
-                window.location.reload();
-            } catch (err) {
-                alert("振込エラー: " + err.message); btn.disabled = false; btn.innerText = "売上を引き出す";
+                window.location.reload(); 
+            } catch (error) {
+                alert("振込エラー: " + error.message);
+                button.innerText = "売上を引き出す";
+                button.disabled = false;
             }
-        }
+        };
+
+        // コピー機能
+        window.copyUrl = function() {
+            navigator.clipboard.writeText(document.getElementById('profileUrlText').innerText).then(() => alert("URLをコピーしました！"));
+        };
+
+        // ログアウト機能
+        window.logout = async function() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        };
+
+        // ポップアップ開閉
+        window.toggleAccountPopup = function(e) {
+            e.stopPropagation();
+            document.getElementById('accountPopup').classList.toggle('show');
+        };
     </script>
 </body>
 </html>
