@@ -111,12 +111,12 @@
         // ==========================================
         // 【重要】ご自身のSupabaseのURLとキーに変更してください
         // ==========================================
-        const SUPABASE_URL = 'あなたのSUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'あなたのSUPABASE_ANON_KEY';
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         // ==========================================
         // 【重要】Stripeの公開可能キー(pk_test_...)に変更してください
         // ==========================================
-        const STRIPE_PUBLIC_KEY = 'あなたのSTRIPE公開キー';
+        const STRIPE_PUBLIC_KEY = 'pk_test_51ThTKj4XyICGMkd9IU5z99hggK13SiHHFZMffu6rMnMTtNiQ6TNzNeBxhqD7ah8wTed7GATw83rNiJgohFUhuwOg00I0j4UOOM';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const stripe = Stripe(STRIPE_PUBLIC_KEY);
