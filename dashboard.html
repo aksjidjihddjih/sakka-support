@@ -136,7 +136,6 @@
 
             <div class="account-wrapper">
                 <div class="account-popup" id="accountPopup">
-                    <!-- ★プロフィール設定をここから削除し、ログアウト等のみにしました -->
                     <button class="popup-item text-danger" onclick="window.logout()">
                         <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト
                     </button>
@@ -154,7 +153,6 @@
         <main class="main-content">
             <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
             
-            <!-- セットアップ・URL表示エリア -->
             <div id="setupContainer"></div>
 
             <div class="card" style="text-align: center; padding: 48px 20px;">
@@ -165,7 +163,6 @@
                 </div>
             </div>
 
-            <!-- ★新設：プロフィール設定カード -->
             <div class="card">
                 <div class="card-header">
                     <div>
@@ -224,7 +221,6 @@
         </main>
     </div>
 
-    <!-- モーダル群 -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -250,7 +246,6 @@
                 <h3 class="modal-title" id="linkModalTitle">活動サイトを追加</h3>
                 <button class="modal-close" onclick="window.closeModal('linkModal')">&times;</button>
             </div>
-            <!-- ★サイト名入力欄を削除。URLのみ入力させます -->
             <div class="form-group">
                 <label>URL</label>
                 <input type="url" id="linkUrl" class="form-control" placeholder="https://...">
@@ -316,7 +311,6 @@
         </div>
     </div>
 
-    <!-- スクリプト -->
     <script>
         (function() {
             const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
@@ -334,19 +328,22 @@
                     if (!session) { window.location.href = 'login.html'; return; }
                     currentUserId = session.user.id;
 
-                    // ★重要修正: FKEYエラーを防ぐため、upsertで確実にcreatorsテーブルの枠を作る
+                    // ★重要修正：SQL設定漏れがあっても画面が止まらないよう、明示的にエラーをキャッチしてアラートを出します
                     const { error: upsertErr } = await supabaseClient.from('creators').upsert(
                         { id: currentUserId }, 
                         { onConflict: 'id', ignoreDuplicates: true }
                     );
-                    if (upsertErr) console.warn("Creator initialization warning:", upsertErr);
+                    
+                    if (upsertErr) {
+                        alert("【データベース権限エラー】\n作者の基本データを作成できませんでした。SupabaseのSQLエディタで権限設定を行ってください。\n\n詳細: " + upsertErr.message);
+                        return; // ここで処理を止めることで、リンク作成時のFKEYエラーを未然に防ぎます
+                    }
 
                     let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', currentUserId).single();
                     if (!creator) creator = { id: currentUserId, pen_name: "" }; 
 
                     const penname = creator.pen_name || creator.penname || "";
                     
-                    // サイドバーとプロフィールカードの表示更新
                     const nameDisplay = document.getElementById('userNameDisplay');
                     const avatarDisplay = document.getElementById('userAvatar');
                     const profileCardDisplay = document.getElementById('profilePennameDisplay');
@@ -487,7 +484,6 @@
             window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
             window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
 
-            // ★修正：リンク編集時はURLのみを渡す
             window.editLink = function(id, url) { editLinkId = id; document.getElementById('linkUrl').value = url; document.getElementById('linkModalTitle').innerText = '活動サイトを編集'; document.getElementById('linkDelBtn').style.display = 'block'; window.openModal('linkModal'); };
             window.editMessage = function(content) { document.getElementById('msgContent').value = content; window.openModal('msgModal'); };
             window.editWork = function(id, title, url, msg) { editWorkId = id; document.getElementById('workTitle').value = title; document.getElementById('workUrl').value = url; document.getElementById('workMessage').value = msg; document.getElementById('workModalTitle').innerText = '作品を編集'; document.getElementById('workDelBtn').style.display = 'block'; window.openModal('workModal'); };
@@ -505,7 +501,6 @@
                 await window.initDashboard(); 
             };
 
-            // ★修正：URLからの自動判別ロジック
             window.saveLink = async function() {
                 const url = document.getElementById('linkUrl').value.trim();
                 if(!url) return alert("URLを入力してください。");
