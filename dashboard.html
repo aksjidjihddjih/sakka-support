@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ダッシュボード - KANKETSU</title>
-    
     <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -84,9 +83,9 @@
 
         .item-list { display: flex; flex-direction: column; gap: 12px; }
         
-        /* ★修正：ホバー時のモーションを削除し、背景色変更のみに */
-        .item-card { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; transition: background-color 0.2s ease; }
-        .item-card:hover { background-color: #f9fafb; cursor: pointer; }
+        /* ★修正：ホバー時のガタつき（transform）を削除し、背景色とボーダーのみ変更 */
+        .item-card { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; transition: all 0.2s ease; cursor: pointer;}
+        .item-card:hover { border-color: var(--border-color); background-color: #f9fafb; }
         
         .item-info h4 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; }
         .item-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
@@ -100,7 +99,6 @@
         .modal-close { background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer; line-height: 1; }
         .modal-close:hover { color: var(--text-main); }
         .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; border-top: 1px solid var(--border-light); padding-top: 24px; }
-        .modal-footer-actions { display: flex; gap: 12px; justify-content: flex-end; flex: 1; }
 
         .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
         .site-footer a { color: var(--text-sub); text-decoration: none; margin: 0 8px; cursor: pointer;}
@@ -109,7 +107,7 @@
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="app-container" id="dashboard-container">
         <header class="mobile-header">
             <a href="dashboard.html" class="brand-logo">KANKETSU</a>
             <button class="hamburger" onclick="window.toggleSidebar()">
@@ -124,26 +122,31 @@
             
             <nav class="sidebar-nav">
                 <a href="dashboard.html" class="nav-item active">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> ホーム
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    ホーム
                 </a>
                 <a href="sales.html" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg> 支援履歴（売上明細）
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg>
+                    支援履歴（売上明細）
                 </a>
                 <a href="stripe.html" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 振込先・口座管理
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                    振込先・口座管理
                 </a>
+                
+                <div class="nav-divider"></div>
+                <a href="#" class="nav-item">使い方ガイド</a>
+                <a href="#" class="nav-item">よくある質問</a>
             </nav>
 
             <div class="account-wrapper">
                 <div class="account-popup" id="accountPopup">
-                    <button class="popup-item text-danger" onclick="window.logout()">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト
-                    </button>
+                    <button class="popup-item text-danger" onclick="window.logout()">ログアウト</button>
                 </div>
                 <button class="account-btn" onclick="window.toggleAccountPopup(event)">
                     <div class="account-info">
                         <div class="avatar" id="userAvatar">？</div>
-                        <span class="account-name" id="userNameDisplay">読み込み中...</span>
+                        <span class="account-name" id="userNameDisplay">読込中...</span>
                     </div>
                     <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
@@ -160,7 +163,7 @@
             </div>
 
             <div class="card" style="text-align: center; padding: 48px 20px;">
-                <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Balance</p>
+                <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">BALANCE</p>
                 <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
                 <div style="max-width: 280px; margin: 0 auto;">
                     <button class="btn btn-primary" onclick="window.requestWithdrawal(event)">売上を引き出す</button>
@@ -173,11 +176,9 @@
                         <h2 class="card-title">活動サイトリンク</h2>
                         <p class="card-desc">読者に表示するあなたのマイページURL</p>
                     </div>
-                    <button class="btn btn-outline btn-sm" onclick="window.openAddModal('linkModal')">+ 追加</button>
+                    <button class="btn btn-outline btn-sm" onclick="window.openModal('linkModal')">+ 追加</button>
                 </div>
-                <div class="item-list" id="linksList">
-                    <p style="font-size: 14px; color: var(--text-sub);">読み込み中...</p>
-                </div>
+                <div class="item-list" id="linksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
             </div>
 
             <div class="card">
@@ -186,11 +187,9 @@
                         <h2 class="card-title">支援へのお礼メッセージ</h2>
                         <p class="card-desc">作品指定がない支援に対する共通メッセージ</p>
                     </div>
-                    <button class="btn btn-outline btn-sm" onclick="window.openAddModal('msgModal')">+ 追加</button>
+                    <button class="btn btn-outline btn-sm" onclick="window.openModal('msgModal')">+ 追加</button>
                 </div>
-                <div class="item-list" id="messagesList">
-                    <p style="font-size: 14px; color: var(--text-sub);">読み込み中...</p>
-                </div>
+                <div class="item-list" id="messagesList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
             </div>
 
             <div class="card">
@@ -199,12 +198,14 @@
                         <h2 class="card-title">作品と専用メッセージ</h2>
                         <p class="card-desc">特定の作品に対する支援と、その限定の裏話など</p>
                     </div>
-                    <button class="btn btn-outline btn-sm" onclick="window.openAddModal('workModal')">+ 追加</button>
+                    <button class="btn btn-outline btn-sm" onclick="window.openModal('workModal')">+ 追加</button>
                 </div>
-                <div class="item-list" id="worksList">
-                    <p style="font-size: 14px; color: var(--text-sub);">読み込み中...</p>
-                </div>
+                <div class="item-list" id="worksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
             </div>
+
+            <footer class="site-footer">
+                <p>&copy; 2026 KANKETSU</p>
+            </footer>
         </main>
     </div>
 
@@ -215,16 +216,16 @@
                 <button class="modal-close" onclick="window.closeModal('linkModal')">&times;</button>
             </div>
             <div class="form-group">
-                <label>サイト名 (例: 小説家になろう)</label>
+                <label>サイト名</label>
                 <input type="text" id="linkTitle" class="form-control" placeholder="サイト名を入力">
             </div>
             <div class="form-group">
-                <label>マイページURL</label>
+                <label>URL</label>
                 <input type="url" id="linkUrl" class="form-control" placeholder="https://...">
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline btn-sm text-danger" id="linkDeleteBtn" style="display:none; color:#dc2626; border-color:#dc2626;" onclick="window.deleteItem('creator_links')">削除</button>
-                <div class="modal-footer-actions">
+                <button class="btn btn-outline btn-sm" id="linkDelBtn" style="display:none; color:#dc2626; border-color:#fca5a5;" onclick="window.deleteLink()">削除</button>
+                <div style="display:flex; gap:12px; margin-left:auto;">
                     <button class="btn btn-outline btn-sm" onclick="window.closeModal('linkModal')">キャンセル</button>
                     <button class="btn btn-primary btn-sm" onclick="window.saveLink()">保存する</button>
                 </div>
@@ -235,11 +236,11 @@
     <div class="modal-overlay" id="msgModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="msgModalTitle">お礼メッセージを追加</h3>
+                <h3 class="modal-title" id="msgModalTitle">メッセージを追加</h3>
                 <button class="modal-close" onclick="window.closeModal('msgModal')">&times;</button>
             </div>
             <div class="form-group">
-                <label>管理用タイトル (読者には見えません)</label>
+                <label>管理用タイトル</label>
                 <input type="text" id="msgTitle" class="form-control" placeholder="例: 標準メッセージ">
             </div>
             <div class="form-group">
@@ -247,8 +248,8 @@
                 <textarea id="msgContent" class="form-control" placeholder="支援へのお礼を書きましょう"></textarea>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline btn-sm text-danger" id="msgDeleteBtn" style="display:none; color:#dc2626; border-color:#dc2626;" onclick="window.deleteItem('creator_messages')">削除</button>
-                <div class="modal-footer-actions">
+                <button class="btn btn-outline btn-sm" id="msgDelBtn" style="display:none; color:#dc2626; border-color:#fca5a5;" onclick="window.deleteMessage()">削除</button>
+                <div style="display:flex; gap:12px; margin-left:auto;">
                     <button class="btn btn-outline btn-sm" onclick="window.closeModal('msgModal')">キャンセル</button>
                     <button class="btn btn-primary btn-sm" onclick="window.saveMessage()">保存する</button>
                 </div>
@@ -271,12 +272,12 @@
                 <input type="url" id="workUrl" class="form-control" placeholder="https://...">
             </div>
             <div class="form-group">
-                <label>この作品専用の限定メッセージ (任意)</label>
+                <label>限定メッセージ</label>
                 <textarea id="workMessage" class="form-control" placeholder="作品の裏話などを書きましょう"></textarea>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline btn-sm text-danger" id="workDeleteBtn" style="display:none; color:#dc2626; border-color:#dc2626;" onclick="window.deleteItem('works')">削除</button>
-                <div class="modal-footer-actions">
+                <button class="btn btn-outline btn-sm" id="workDelBtn" style="display:none; color:#dc2626; border-color:#fca5a5;" onclick="window.deleteWork()">削除</button>
+                <div style="display:flex; gap:12px; margin-left:auto;">
                     <button class="btn btn-outline btn-sm" onclick="window.closeModal('workModal')">キャンセル</button>
                     <button class="btn btn-primary btn-sm" onclick="window.saveWork()">保存する</button>
                 </div>
@@ -290,143 +291,117 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUserId = null;
-        let linksData = [], messagesData = [], worksData = [];
-        let currentEditId = null; // 編集中のアイテムID
+        let editLinkId = null, editMsgId = null, editWorkId = null; // 編集用のID保持
 
-        async function initDashboard() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) return window.location.href = 'login.html';
-            currentUserId = session.user.id;
+        // ★追加：Turboでの画面遷移時に、関係ないページでエラーが起きないための安全装置
+        window.initDashboard = async function() {
+            if (!document.getElementById('dashboard-container')) return; // ダッシュボード画面でない場合は終了
 
-            // サイドバー等の全ページ共通要素の更新
-            const nameEl = document.getElementById('userNameDisplay');
-            if (nameEl) {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
+                currentUserId = session.user.id;
+
                 const { data: creator } = await supabaseClient.from('creators').select('*').eq('id', currentUserId).single();
                 if (creator) {
-                    nameEl.innerText = creator.pen_name || "名無し作者";
-                    document.getElementById('userAvatar').innerText = (creator.pen_name || "名").charAt(0);
+                    const penname = creator.penname || "名無し作者";
+                    document.getElementById('userNameDisplay').innerText = penname;
+                    document.getElementById('userAvatar').innerText = penname.charAt(0);
                 }
-            }
 
-            // ★エラー修正：ダッシュボード特有の要素が存在するか確認（sales.htmlからの誤作動防止）
-            if (!document.getElementById('profileUrlText')) return;
+                document.getElementById('profileUrlText').innerText = `${window.location.origin}/profile.html?id=${currentUserId}`;
 
-            document.getElementById('profileUrlText').innerText = `${window.location.origin}/profile.html?id=${currentUserId}`;
+                const { data: donations } = await supabaseClient.from('donations').select('net_amount').eq('creator_id', currentUserId).eq('status', 'pending');
+                let totalBalance = donations ? donations.reduce((sum, d) => sum + Number(d.net_amount), 0) : 0;
+                document.getElementById('balanceText').innerText = `¥${totalBalance.toLocaleString()}`;
 
-            const { data: donations } = await supabaseClient.from('donations').select('net_amount').eq('creator_id', currentUserId).eq('status', 'pending');
-            const totalBalance = donations ? donations.reduce((sum, d) => sum + Number(d.net_amount), 0) : 0;
-            document.getElementById('balanceText').innerText = `¥${totalBalance.toLocaleString()}`;
+                await loadLinks(); await loadMessages(); await loadWorks();
+            } catch (error) { console.error("Error:", error); }
+        };
 
-            await loadAllData();
+        // Turboイベントと初回ロードイベントの両方で発火させる
+        if (!window.hasRegisteredDashboard) {
+            document.addEventListener('turbo:load', window.initDashboard);
+            window.hasRegisteredDashboard = true;
         }
+        window.initDashboard(); // 初回実行
 
-        document.addEventListener('turbo:load', initDashboard);
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initDashboard); else initDashboard();
-
-        async function loadAllData() {
-            const [linksRes, msgsRes, worksRes] = await Promise.all([
-                supabaseClient.from('creator_links').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false }),
-                supabaseClient.from('creator_messages').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false }),
-                supabaseClient.from('works').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false })
-            ]);
-
-            linksData = linksRes.data || [];
-            messagesData = msgsRes.data || [];
-            worksData = worksRes.data || [];
-
-            renderList('linksList', linksData, 'linkModal', item => `<h4>${item.title}</h4><p>${item.url}</p>`);
-            renderList('messagesList', messagesData, 'msgModal', item => `<h4>${item.title}</h4><p>${item.content.substring(0, 30)}...</p>`);
-            renderList('worksList', worksData, 'workModal', item => `<h4>${item.title}</h4><p>${item.secret_message ? "限定メッセージ設定済み" : "メッセージ未設定"}</p>`);
-        }
-
-        function renderList(elementId, dataArray, modalId, htmlFormatFn) {
-            const listEl = document.getElementById(elementId);
-            if (!dataArray.length) { listEl.innerHTML = '<p style="font-size: 14px; color: var(--text-sub);">まだ登録されていません。</p>'; return; }
-            
-            listEl.innerHTML = dataArray.map(item => `
-                <div class="item-card" onclick="window.openEditModal('${modalId}', ${item.id})">
-                    <div class="item-info">${htmlFormatFn(item)}</div>
+        /* データ読み込み＆リスト生成（編集イベント付き） */
+        async function loadLinks() {
+            const { data } = await supabaseClient.from('creator_links').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
+            document.getElementById('linksList').innerHTML = data && data.length > 0 ? data.map(item => `
+                <div class="item-card" onclick="window.editLink('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.url.replace(/'/g, "\\'")}')">
+                    <div class="item-info"><h4>${item.title}</h4><p>${item.url}</p></div>
                     <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
-                </div>
-            `).join('');
+                </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
         }
 
-        // --- モーダルの開閉と編集ロジック ---
-        window.openAddModal = function(modalId) {
-            currentEditId = null;
-            document.getElementById(modalId).classList.add('show');
-            document.body.style.overflow = 'hidden';
-            
-            if(modalId === 'linkModal') {
-                document.getElementById('linkModalTitle').innerText = '活動サイトを追加';
-                document.getElementById('linkTitle').value = ''; document.getElementById('linkUrl').value = '';
-                document.getElementById('linkDeleteBtn').style.display = 'none';
-            } else if(modalId === 'msgModal') {
-                document.getElementById('msgModalTitle').innerText = 'お礼メッセージを追加';
-                document.getElementById('msgTitle').value = ''; document.getElementById('msgContent').value = '';
-                document.getElementById('msgDeleteBtn').style.display = 'none';
-            } else if(modalId === 'workModal') {
-                document.getElementById('workModalTitle').innerText = '作品を追加';
-                document.getElementById('workTitle').value = ''; document.getElementById('workUrl').value = ''; document.getElementById('workMessage').value = '';
-                document.getElementById('workDeleteBtn').style.display = 'none';
-            }
+        async function loadMessages() {
+            const { data } = await supabaseClient.from('creator_messages').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
+            document.getElementById('messagesList').innerHTML = data && data.length > 0 ? data.map(item => `
+                <div class="item-card" onclick="window.editMessage('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.content.replace(/'/g, "\\'").replace(/\n/g, "\\n")}')">
+                    <div class="item-info"><h4>${item.title}</h4><p>${item.content.substring(0, 30)}...</p></div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
+                </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
+        }
+
+        async function loadWorks() {
+            const { data } = await supabaseClient.from('works').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
+            document.getElementById('worksList').innerHTML = data && data.length > 0 ? data.map(item => `
+                <div class="item-card" onclick="window.editWork('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.work_url.replace(/'/g, "\\'")}', '${item.secret_message ? item.secret_message.replace(/'/g, "\\'").replace(/\n/g, "\\n") : ''}')">
+                    <div class="item-info"><h4>${item.title}</h4><p>${item.secret_message ? "限定メッセージあり" : "メッセージなし"}</p></div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
+                </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
+        }
+
+        /* モーダル開閉・UI操作 */
+        window.openModal = function(id) { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; };
+        window.closeModal = function(id) { 
+            document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; 
+            // 閉じる時にフォームをリセット
+            if(id === 'linkModal') { editLinkId = null; document.getElementById('linkTitle').value = ''; document.getElementById('linkUrl').value = ''; document.getElementById('linkModalTitle').innerText = '活動サイトを追加'; document.getElementById('linkDelBtn').style.display = 'none'; }
+            if(id === 'msgModal') { editMsgId = null; document.getElementById('msgTitle').value = ''; document.getElementById('msgContent').value = ''; document.getElementById('msgModalTitle').innerText = 'メッセージを追加'; document.getElementById('msgDelBtn').style.display = 'none'; }
+            if(id === 'workModal') { editWorkId = null; document.getElementById('workTitle').value = ''; document.getElementById('workUrl').value = ''; document.getElementById('workMessage').value = ''; document.getElementById('workModalTitle').innerText = '作品を追加'; document.getElementById('workDelBtn').style.display = 'none'; }
         };
-
-        window.openEditModal = function(modalId, id) {
-            currentEditId = id;
-            document.getElementById(modalId).classList.add('show');
-            document.body.style.overflow = 'hidden';
-
-            if(modalId === 'linkModal') {
-                const item = linksData.find(d => d.id === id);
-                document.getElementById('linkModalTitle').innerText = '活動サイトを編集';
-                document.getElementById('linkTitle').value = item.title; document.getElementById('linkUrl').value = item.url;
-                document.getElementById('linkDeleteBtn').style.display = 'block';
-            } else if(modalId === 'msgModal') {
-                const item = messagesData.find(d => d.id === id);
-                document.getElementById('msgModalTitle').innerText = 'お礼メッセージを編集';
-                document.getElementById('msgTitle').value = item.title; document.getElementById('msgContent').value = item.content;
-                document.getElementById('msgDeleteBtn').style.display = 'block';
-            } else if(modalId === 'workModal') {
-                const item = worksData.find(d => d.id === id);
-                document.getElementById('workModalTitle').innerText = '作品を編集';
-                document.getElementById('workTitle').value = item.title; document.getElementById('workUrl').value = item.work_url; document.getElementById('workMessage').value = item.secret_message;
-                document.getElementById('workDeleteBtn').style.display = 'block';
-            }
-        };
-
-        window.closeModal = function(id) { document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; };
-        window.onclick = function(e) { if (e.target.classList.contains('modal-overlay')) { e.target.classList.remove('show'); document.body.style.overflow = ''; } };
+        window.onclick = function(e) { if (e.target.classList.contains('modal-overlay')) { window.closeModal(e.target.id); } };
         window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
+        window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
 
-        // --- データの保存・更新・削除 ---
-        async function upsertData(tableName, dataObj, modalId) {
-            let res;
-            if (currentEditId) res = await supabaseClient.from(tableName).update(dataObj).eq('id', currentEditId);
-            else res = await supabaseClient.from(tableName).insert([{ ...dataObj, creator_id: currentUserId }]);
-            
-            if (res.error) alert("保存エラー: " + res.error.message);
-            else { window.closeModal(modalId); await loadAllData(); }
-        }
+        /* 編集モーダルの呼び出し */
+        window.editLink = function(id, title, url) { editLinkId = id; document.getElementById('linkTitle').value = title; document.getElementById('linkUrl').value = url; document.getElementById('linkModalTitle').innerText = '活動サイトを編集'; document.getElementById('linkDelBtn').style.display = 'block'; window.openModal('linkModal'); };
+        window.editMessage = function(id, title, content) { editMsgId = id; document.getElementById('msgTitle').value = title; document.getElementById('msgContent').value = content; document.getElementById('msgModalTitle').innerText = 'メッセージを編集'; document.getElementById('msgDelBtn').style.display = 'block'; window.openModal('msgModal'); };
+        window.editWork = function(id, title, url, msg) { editWorkId = id; document.getElementById('workTitle').value = title; document.getElementById('workUrl').value = url; document.getElementById('workMessage').value = msg; document.getElementById('workModalTitle').innerText = '作品を編集'; document.getElementById('workDelBtn').style.display = 'block'; window.openModal('workModal'); };
 
-        window.saveLink = () => upsertData('creator_links', { title: document.getElementById('linkTitle').value, url: document.getElementById('linkUrl').value }, 'linkModal');
-        window.saveMessage = () => upsertData('creator_messages', { title: document.getElementById('msgTitle').value, content: document.getElementById('msgContent').value }, 'msgModal');
-        window.saveWork = () => upsertData('works', { title: document.getElementById('workTitle').value, work_url: document.getElementById('workUrl').value, secret_message: document.getElementById('workMessage').value }, 'workModal');
-
-        window.deleteItem = async function(tableName) {
-            if(!confirm("本当に削除しますか？")) return;
-            const { error } = await supabaseClient.from(tableName).delete().eq('id', currentEditId);
-            if(error) alert("削除エラー: " + error.message);
-            else {
-                window.closeModal(tableName === 'creator_links' ? 'linkModal' : (tableName === 'works' ? 'workModal' : 'msgModal'));
-                await loadAllData();
-            }
+        /* 保存処理（新規追加・上書き両対応） */
+        window.saveLink = async function() {
+            const title = document.getElementById('linkTitle').value, url = document.getElementById('linkUrl').value;
+            if(!title || !url) return alert("入力してください。");
+            const promise = editLinkId ? supabaseClient.from('creator_links').update({ title, url }).eq('id', editLinkId) : supabaseClient.from('creator_links').insert([{ creator_id: currentUserId, title, url }]);
+            const { error } = await promise;
+            if (error) alert("エラー: " + error.message); else { window.closeModal('linkModal'); await loadLinks(); }
+        };
+        window.saveMessage = async function() {
+            const title = document.getElementById('msgTitle').value, content = document.getElementById('msgContent').value;
+            if(!title || !content) return alert("入力してください。");
+            const promise = editMsgId ? supabaseClient.from('creator_messages').update({ title, content }).eq('id', editMsgId) : supabaseClient.from('creator_messages').insert([{ creator_id: currentUserId, title, content }]);
+            const { error } = await promise;
+            if (error) alert("エラー: " + error.message); else { window.closeModal('msgModal'); await loadMessages(); }
+        };
+        window.saveWork = async function() {
+            const title = document.getElementById('workTitle').value, work_url = document.getElementById('workUrl').value, secret_message = document.getElementById('workMessage').value;
+            if(!title || !work_url) return alert("タイトルとURLは必須です。");
+            const promise = editWorkId ? supabaseClient.from('works').update({ title, work_url, secret_message }).eq('id', editWorkId) : supabaseClient.from('works').insert([{ creator_id: currentUserId, title, work_url, secret_message }]);
+            const { error } = await promise;
+            if (error) alert("エラー: " + error.message); else { window.closeModal('workModal'); await loadWorks(); }
         };
 
-        window.requestWithdrawal = async function(e) { /* 省略（以前のコードと同じ） */ };
-        window.copyUrl = () => navigator.clipboard.writeText(document.getElementById('profileUrlText').innerText).then(() => alert("URLをコピーしました！"));
-        window.logout = async () => { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
-        window.toggleAccountPopup = e => { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
+        /* 削除処理 */
+        window.deleteLink = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('creator_links').delete().eq('id', editLinkId); window.closeModal('linkModal'); loadLinks(); };
+        window.deleteMessage = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('creator_messages').delete().eq('id', editMsgId); window.closeModal('msgModal'); loadMessages(); };
+        window.deleteWork = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('works').delete().eq('id', editWorkId); window.closeModal('workModal'); loadWorks(); };
+
+        window.copyUrl = function() { navigator.clipboard.writeText(document.getElementById('profileUrlText').innerText).then(() => alert("URLをコピーしました！")); };
+        window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
     </script>
 </body>
 </html>
