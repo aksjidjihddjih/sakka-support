@@ -136,11 +136,7 @@
 
             <div class="account-wrapper">
                 <div class="account-popup" id="accountPopup">
-                    <!-- ★プロフィール設定ボタンを追加 -->
-                    <button class="popup-item" onclick="window.openModal('profileModal')">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> プロフィール設定
-                    </button>
-                    <div class="popup-divider"></div>
+                    <!-- ★プロフィール設定をここから削除し、ログアウト等のみにしました -->
                     <button class="popup-item text-danger" onclick="window.logout()">
                         <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト
                     </button>
@@ -166,6 +162,26 @@
                 <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
                 <div style="max-width: 280px; margin: 0 auto;">
                     <button class="btn btn-primary" onclick="window.requestWithdrawal(event)">売上を引き出す</button>
+                </div>
+            </div>
+
+            <!-- ★新設：プロフィール設定カード -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">プロフィール</h2>
+                        <p class="card-desc">読者に公開されるペンネーム</p>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="window.openModal('profileModal')">編集</button>
+                </div>
+                <div class="item-list">
+                    <div class="item-card" onclick="window.openModal('profileModal')">
+                        <div class="item-info">
+                            <h4 id="profilePennameDisplay">未設定</h4>
+                            <p>ペンネーム</p>
+                        </div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
+                    </div>
                 </div>
             </div>
 
@@ -234,13 +250,14 @@
                 <h3 class="modal-title" id="linkModalTitle">活動サイトを追加</h3>
                 <button class="modal-close" onclick="window.closeModal('linkModal')">&times;</button>
             </div>
-            <div class="form-group">
-                <label>サイト名</label>
-                <input type="text" id="linkTitle" class="form-control" placeholder="サイト名を入力">
-            </div>
+            <!-- ★サイト名入力欄を削除。URLのみ入力させます -->
             <div class="form-group">
                 <label>URL</label>
                 <input type="url" id="linkUrl" class="form-control" placeholder="https://...">
+                <p style="font-size: 12px; color: var(--text-sub); margin-top: 8px;">
+                    ※対応サイト：小説家になろう、アルファポリス、ハーメルン、カクヨム<br>
+                    URLを入力するだけで、サイト名は自動で判別されます。
+                </p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline btn-sm" id="linkDelBtn" style="display:none; color:#dc2626; border-color:#fca5a5;" onclick="window.deleteLink()">削除</button>
@@ -258,7 +275,6 @@
                 <h3 class="modal-title" id="msgModalTitle">お礼メッセージを設定</h3>
                 <button class="modal-close" onclick="window.closeModal('msgModal')">&times;</button>
             </div>
-            <!-- ★タイトル入力を削除し、メッセージ内容だけに絞りました -->
             <div class="form-group">
                 <label>メッセージ内容（作品指定のない支援時に表示されます）</label>
                 <textarea id="msgContent" class="form-control" placeholder="支援へのお礼を書きましょう"></textarea>
@@ -300,6 +316,7 @@
         </div>
     </div>
 
+    <!-- スクリプト -->
     <script>
         (function() {
             const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
@@ -317,18 +334,26 @@
                     if (!session) { window.location.href = 'login.html'; return; }
                     currentUserId = session.user.id;
 
-                    // ★重要修正: 新規ユーザーの場合、親データ(creators)が存在しないため自動作成する
+                    // ★重要修正: FKEYエラーを防ぐため、upsertで確実にcreatorsテーブルの枠を作る
+                    const { error: upsertErr } = await supabaseClient.from('creators').upsert(
+                        { id: currentUserId }, 
+                        { onConflict: 'id', ignoreDuplicates: true }
+                    );
+                    if (upsertErr) console.warn("Creator initialization warning:", upsertErr);
+
                     let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', currentUserId).single();
-                    if (!creator) {
-                        await supabaseClient.from('creators').insert([{ id: currentUserId }]);
-                        creator = { id: currentUserId, pen_name: "" }; // ダミーデータを入れて処理を継続
-                    }
+                    if (!creator) creator = { id: currentUserId, pen_name: "" }; 
 
                     const penname = creator.pen_name || creator.penname || "";
+                    
+                    // サイドバーとプロフィールカードの表示更新
                     const nameDisplay = document.getElementById('userNameDisplay');
                     const avatarDisplay = document.getElementById('userAvatar');
+                    const profileCardDisplay = document.getElementById('profilePennameDisplay');
+                    
                     if(nameDisplay) nameDisplay.innerText = penname || "未設定";
                     if(avatarDisplay) avatarDisplay.innerText = penname ? penname.charAt(0) : "？";
+                    if(profileCardDisplay) profileCardDisplay.innerText = penname || "未設定";
                     
                     if(document.getElementById('pennameInput')) {
                         document.getElementById('pennameInput').value = penname;
@@ -419,21 +444,20 @@
                 const list = document.getElementById('linksList');
                 if(!list) return 0;
                 list.innerHTML = data && data.length > 0 ? data.map(item => `
-                    <div class="item-card" onclick="window.editLink('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.url.replace(/'/g, "\\'")}')">
+                    <div class="item-card" onclick="window.editLink('${item.id}', '${item.url.replace(/'/g, "\\'")}')">
                         <div class="item-info"><h4>${item.title}</h4><p>${item.url}</p></div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
                     </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
                 return data ? data.length : 0;
             }
 
-            // ★修正: お礼メッセージはリストに1つだけ表示（タイトルを見せず内容のみ表示）
             async function loadMessages() {
                 const { data } = await supabaseClient.from('creator_messages').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
                 const list = document.getElementById('messagesList');
                 if(!list) return 0;
                 list.innerHTML = data && data.length > 0 ? `
                     <div class="item-card" onclick="window.editMessage('${data[0].content.replace(/'/g, "\\'").replace(/\n/g, "\\n")}')">
-                        <div class="item-info"><p style="color: var(--text-main);">${data[0].content.length > 60 ? data[0].content.substring(0, 60) + '...' : data[0].content}</p></div>
+                        <div class="item-info"><p style="color: var(--text-main); font-weight: 600;">${data[0].content.length > 60 ? data[0].content.substring(0, 60) + '...' : data[0].content}</p></div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
                     </div>` : '<p style="font-size: 14px; color: var(--text-sub);">設定されていません。</p>';
                 return data ? data.length : 0;
@@ -455,7 +479,7 @@
             window.closeModal = function(id) { 
                 document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; 
                 if(id === 'profileModal') { document.getElementById('pennameInput').value = document.getElementById('userNameDisplay').innerText; }
-                if(id === 'linkModal') { editLinkId = null; document.getElementById('linkTitle').value = ''; document.getElementById('linkUrl').value = ''; document.getElementById('linkModalTitle').innerText = '活動サイトを追加'; document.getElementById('linkDelBtn').style.display = 'none'; }
+                if(id === 'linkModal') { editLinkId = null; document.getElementById('linkUrl').value = ''; document.getElementById('linkModalTitle').innerText = '活動サイトを追加'; document.getElementById('linkDelBtn').style.display = 'none'; }
                 if(id === 'msgModal') { document.getElementById('msgContent').value = ''; }
                 if(id === 'workModal') { editWorkId = null; document.getElementById('workTitle').value = ''; document.getElementById('workUrl').value = ''; document.getElementById('workMessage').value = ''; document.getElementById('workModalTitle').innerText = '作品を追加'; document.getElementById('workDelBtn').style.display = 'none'; }
             };
@@ -463,11 +487,9 @@
             window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
             window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
 
-            window.editLink = function(id, title, url) { editLinkId = id; document.getElementById('linkTitle').value = title; document.getElementById('linkUrl').value = url; document.getElementById('linkModalTitle').innerText = '活動サイトを編集'; document.getElementById('linkDelBtn').style.display = 'block'; window.openModal('linkModal'); };
-            
-            // ★修正: メッセージ編集時は内容だけを渡す
+            // ★修正：リンク編集時はURLのみを渡す
+            window.editLink = function(id, url) { editLinkId = id; document.getElementById('linkUrl').value = url; document.getElementById('linkModalTitle').innerText = '活動サイトを編集'; document.getElementById('linkDelBtn').style.display = 'block'; window.openModal('linkModal'); };
             window.editMessage = function(content) { document.getElementById('msgContent').value = content; window.openModal('msgModal'); };
-            
             window.editWork = function(id, title, url, msg) { editWorkId = id; document.getElementById('workTitle').value = title; document.getElementById('workUrl').value = url; document.getElementById('workMessage').value = msg; document.getElementById('workModalTitle').innerText = '作品を編集'; document.getElementById('workDelBtn').style.display = 'block'; window.openModal('workModal'); };
 
             window.saveProfile = async function() {
@@ -483,15 +505,29 @@
                 await window.initDashboard(); 
             };
 
+            // ★修正：URLからの自動判別ロジック
             window.saveLink = async function() {
-                const title = document.getElementById('linkTitle').value, url = document.getElementById('linkUrl').value;
-                if(!title || !url) return alert("入力してください。");
-                const promise = editLinkId ? supabaseClient.from('creator_links').update({ title, url }).eq('id', editLinkId) : supabaseClient.from('creator_links').insert([{ creator_id: currentUserId, title, url }]);
+                const url = document.getElementById('linkUrl').value.trim();
+                if(!url) return alert("URLを入力してください。");
+
+                let autoTitle = "";
+                try {
+                    const u = new URL(url);
+                    if (u.hostname.includes('syosetu.com')) autoTitle = '小説家になろう';
+                    else if (u.hostname.includes('alphapolis.co.jp')) autoTitle = 'アルファポリス';
+                    else if (u.hostname.includes('syosetu.org')) autoTitle = 'ハーメルン';
+                    else if (u.hostname.includes('kakuyomu.jp')) autoTitle = 'カクヨム';
+                } catch(e) {}
+
+                if (!autoTitle) {
+                    return alert("許可されていないサイトのURLです。\n（対応：小説家になろう、アルファポリス、ハーメルン、カクヨム）");
+                }
+
+                const promise = editLinkId ? supabaseClient.from('creator_links').update({ title: autoTitle, url }).eq('id', editLinkId) : supabaseClient.from('creator_links').insert([{ creator_id: currentUserId, title: autoTitle, url }]);
                 const { error } = await promise;
                 if (error) alert("エラー: " + error.message); else { window.closeModal('linkModal'); await window.initDashboard(); }
             };
 
-            // ★修正: お礼メッセージは常に1つ。既存があればUpdate、なければInsert。タイトルは固定
             window.saveMessage = async function() {
                 const content = document.getElementById('msgContent').value.trim();
                 if(!content) return alert("メッセージを入力してください。");
