@@ -144,8 +144,9 @@
                 if (works && works.length > 0) {
                     const worksList = document.getElementById('worksList');
                     works.forEach(work => {
+                        // ★検索対象にするため search-target と data-title を追加
                         worksList.innerHTML += `
-                            <div class="work-option">
+                            <div class="work-option search-target" data-title="${work.title.replace(/"/g, '&quot;')}">
                                 <input type="radio" name="selectedWork" id="work_${work.id}" value="${work.id}">
                                 <label for="work_${work.id}" class="work-label">
                                     <span class="work-label-title">${work.title}</span>
@@ -153,11 +154,24 @@
                                 </label>
                             </div>`;
                     });
+
+                    // ★ 追加: リアルタイム検索機能のロジック
+                    const searchInput = document.getElementById('workSearchInput');
+                    if(searchInput) {
+                        searchInput.addEventListener('input', function(e) {
+                            const searchTerm = e.target.value.toLowerCase();
+                            const targets = document.querySelectorAll('.search-target');
+                            targets.forEach(target => {
+                                const title = target.getAttribute('data-title').toLowerCase();
+                                if (title.includes(searchTerm)) {
+                                    target.style.display = ''; // 一致すれば表示
+                                } else {
+                                    target.style.display = 'none'; // 一致しなければ隠す
+                                }
+                            });
+                        });
+                    }
                 }
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-            } catch (error) { showError(error.message); }
-        });
 
         async function processCheckout() {
             const btn = document.getElementById('checkoutBtn');
