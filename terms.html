@@ -4,36 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>利用規約 - KANKETSU</title>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; }
+        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 24px 40px; background: transparent; }
-        .brand-logo { font-size: 24px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 24px 20px; max-width: 840px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
         
-        .btn { display: inline-flex; justify-content: center; align-items: center; padding: 10px 20px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); text-decoration: none; }
+        .btn { display: inline-flex; justify-content: center; align-items: center; padding: 8px 20px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); text-decoration: none; }
         .btn-outline { background-color: transparent; color: var(--text-main); }
         .btn-outline:hover { background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
 
-        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; flex: 1; width: 100%; box-sizing: border-box; }
+        .container { max-width: 840px; margin: 0 auto; padding: 20px 20px 60px 20px; flex: 1; width: 100%; box-sizing: border-box; }
         
-        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 40px; box-shadow: 4px 4px 0px rgba(0,0,0,1); }
-        .card h1 { font-size: 24px; font-weight: 800; margin: 0 0 32px 0; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; }
+        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); overflow-wrap: break-word; }
+        .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 24px 0; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; }
         .card h2 { font-size: 18px; font-weight: 700; margin: 32px 0 16px 0; }
-        .card p, .card li { font-size: 15px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.8; }
+        .card p, .card li { font-size: 14px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.8; }
         .card ul { padding-left: 24px; margin-bottom: 24px; color: var(--text-sub); }
 
-        .footer { padding: 40px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
-        .footer a { color: var(--text-sub); text-decoration: none; margin: 0 12px; font-weight: 600;}
-        .footer a:hover { color: var(--text-main); }
+        .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
     </style>
 </head>
 <body>
     <div class="header">
         <a href="index.html" class="brand-logo">KANKETSU</a>
-        <a href="login.html" id="headerBtn" class="btn btn-outline">ログイン / 登録</a>
+        <!-- ★判定JSを削除し、ブラウザバックに統一しました -->
+        <a href="javascript:history.back()" class="btn btn-outline">戻る</a>
     </div>
 
     <div class="container">
@@ -67,29 +64,13 @@
         </div>
     </div>
 
-    <div class="footer">
-        <a href="tokushoho.html">特定商取引法に基づく表記</a>
-        <a href="terms.html">利用規約</a>
-        <a href="privacy.html">プライバシーポリシー</a>
-        <p style="margin-top: 24px;">&copy; 2026 KANKETSU</p>
-    </div>
-
-    <script>
-        (async function() {
-            const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
-            // ログイン状態を判定してボタンを切り替える
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            const btn = document.getElementById('headerBtn');
-            if (session) {
-                btn.innerText = 'ダッシュボードへ戻る';
-                btn.href = 'dashboard.html';
-                btn.style.backgroundColor = 'var(--text-main)';
-                btn.style.color = '#fff';
-            }
-        })();
-    </script>
+    <footer class="footer">
+        <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
+            <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
+            <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
+            <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
+        </div>
+        <p style="margin: 0;">&copy; 2026 KANKETSU</p>
+    </footer>
 </body>
 </html>
