@@ -168,64 +168,54 @@
 
     <script>
         (function() {
-            const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            async function init() {
-                if (!document.getElementById('sales-container')) return;
+        async function init() {
+            if (!document.getElementById('sales-container')) return;
 
-                try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (!session) { window.location.href = 'login.html'; return; }
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
 
-                    // ★修正：データが空でもエラーで止まらないように安全に取得
-                    let penname = "未設定";
-                    try {
-                        const { data: creator } = await supabaseClient.from('creators').select('pen_name, penname').eq('id', session.user.id).single();
-                        if (creator) penname = creator.pen_name || creator.penname || "未設定";
-                    } catch (e) { console.warn("Creator info fetch failed:", e); }
+                // ★DASHBOARDと全く同じ取得ロジック
+                let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
+                if (!creator) creator = { id: session.user.id, pen_name: "" }; 
 
-                    const nameDisplay = document.getElementById('userNameDisplay');
-                    const avatarDisplay = document.getElementById('userAvatar');
-                    if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
-                    if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
+                const penname = creator.pen_name || creator.penname || "";
+                const nameDisplay = document.getElementById('userNameDisplay');
+                const avatarDisplay = document.getElementById('userAvatar');
+                
+                if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
+                if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
 
-                    // 売上履歴を取得して反映
-                    const { data: donations } = await supabaseClient.from('donations')
-                        .select('*').eq('creator_id', session.user.id).order('created_at', { ascending: false });
+                // 売上履歴の取得
+                const { data: donations } = await supabaseClient.from('donations').select('*').eq('creator_id', session.user.id).order('created_at', { ascending: false });
+                const tbody = document.getElementById('salesTableBody');
+                if (!tbody) return;
 
-                    const tbody = document.getElementById('salesTableBody');
-                    if (!tbody) return;
+                if (!donations || donations.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">まだ支援履歴はありません。</td></tr>';
+                    return;
+                }
 
-                    if (!donations || donations.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">まだ支援履歴はありません。</td></tr>';
-                        return;
-                    }
+                tbody.innerHTML = donations.map(d => {
+                    const date = new Date(d.created_at).toLocaleString('ja-JP', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+                    const statusHtml = d.status === 'pending' ? '<span class="status-badge status-pending">引出可能</span>' : '<span class="status-badge status-transferred">振込済</span>';
+                    return `<tr><td>${date}</td><td>¥${d.amount.toLocaleString()}</td><td>-¥${d.fee.toLocaleString()}</td><td><strong>¥${d.net_amount.toLocaleString()}</strong></td><td>${statusHtml}</td></tr>`;
+                }).join('');
 
-                    tbody.innerHTML = donations.map(d => {
-                        const date = new Date(d.created_at).toLocaleString('ja-JP', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
-                        const statusHtml = d.status === 'pending' 
-                            ? '<span class="status-badge status-pending">引出可能</span>' 
-                            : '<span class="status-badge status-transferred">振込済</span>';
-                        return `<tr><td>${date}</td><td>¥${d.amount.toLocaleString()}</td><td>-¥${d.fee.toLocaleString()}</td><td><strong>¥${d.net_amount.toLocaleString()}</strong></td><td>${statusHtml}</td></tr>`;
-                    }).join('');
+            } catch (error) { console.error("Error:", error); }
+        }
 
-                } catch (error) { console.error("Error:", error); }
-            }
+        window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
+        window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
+        window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
 
-            // UI関数のグローバル登録
-            window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
-            window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
-            window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
-
-            // ページ読み込み時に実行
-            if (!window.hasRegisteredSales) {
-                document.addEventListener('turbo:load', init);
-                window.hasRegisteredSales = true;
-            }
-            init();
-        })();
+        if (!window.hasRegisteredSales) { document.addEventListener('turbo:load', init); window.hasRegisteredSales = true; }
+        init();
+    })();
     </script>
 </body>
 </html>
