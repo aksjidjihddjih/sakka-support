@@ -107,45 +107,53 @@
         </main>
     </div>
 
-    <script>
-        (function() {
-            const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script>
+    (function() {
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            async function init() {
-                if (!document.getElementById('faq-container')) return;
-                try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (!session) { window.location.href = 'login.html'; return; }
-                    const { data: creator } = await supabaseClient.from('creators').select('pen_name, penname').eq('id', session.user.id).single();
-                    if (creator) {
-                        const penname = creator.pen_name || creator.penname || "未設定";
-                        document.getElementById('userNameDisplay').innerText = penname;
-                        document.getElementById('userAvatar').innerText = penname !== '未設定' ? penname.charAt(0) : "？";
-                    }
-                } catch (error) { console.error(error); }
+        async function init() {
+            if (!document.getElementById('faq-container')) return;
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
+
+                // ★DASHBOARDと全く同じ取得ロジック
+                let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
+                if (!creator) creator = { id: session.user.id, pen_name: "" }; 
+
+                const penname = creator.pen_name || creator.penname || "";
+                const nameDisplay = document.getElementById('userNameDisplay');
+                const avatarDisplay = document.getElementById('userAvatar');
+                
+                if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
+                if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
+
+            } catch (error) { console.error("Error:", error); }
+        }
+
+        window.toggleFaq = function(element) {
+            const answer = element.nextElementSibling;
+            const icon = element.querySelector('svg');
+            if (answer.style.display === 'block') {
+                answer.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                answer.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+                icon.style.transition = 'transform 0.2s';
             }
+        };
 
-            window.toggleFaq = function(element) {
-                const answer = element.nextElementSibling;
-                const icon = element.querySelector('svg');
-                if (answer.style.display === 'block') {
-                    answer.style.display = 'none';
-                    icon.style.transform = 'rotate(0deg)';
-                } else {
-                    answer.style.display = 'block';
-                    icon.style.transform = 'rotate(180deg)';
-                    icon.style.transition = 'transform 0.2s';
-                }
-            };
+        window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
+        window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
+        window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
 
-            window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
-            window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
-            window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
-            if (!window.hasRegisteredFaq) { document.addEventListener('turbo:load', init); window.hasRegisteredFaq = true; }
-            init();
-        })();
-    </script>
+        if (!window.hasRegisteredFaq) { document.addEventListener('turbo:load', init); window.hasRegisteredFaq = true; }
+        init();
+    })();
+</script>
 </body>
 </html>
