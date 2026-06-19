@@ -89,66 +89,75 @@
     </footer>
 
     <script>
-        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        window.addEventListener('DOMContentLoaded', async () => {
-            const sessionId = new URLSearchParams(window.location.search).get('session_id');
-            const loadingState = document.getElementById('loadingState');
-            const resultState = document.getElementById('resultState');
-            const errorState = document.getElementById('errorState');
-            const secretMessage = document.getElementById('secretMessage');
-            const btnHome = document.getElementById('btnHome');
-            const messageCard = document.getElementById('messageCard');
-            const warningBox = document.getElementById('warningBox');
+    const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+        const sessionId = new URLSearchParams(window.location.search).get('session_id');
+        const loadingState = document.getElementById('loadingState');
+        const resultState = document.getElementById('resultState');
+        const errorState = document.getElementById('errorState');
+        const secretMessage = document.getElementById('secretMessage');
+        const btnHome = document.getElementById('btnHome');
+        const messageCard = document.getElementById('messageCard');
+        const warningBox = document.getElementById('warningBox');
 
-            if (!sessionId) {
-                loadingState.style.display = 'none';
-                resultState.style.display = 'block';
-                errorState.style.display = 'block';
-                errorState.innerText = '不正なアクセスです。決済のセッションIDが見つかりません。';
-                messageCard.style.display = 'none';
-                warningBox.style.display = 'none';
-                return;
+        if (!sessionId) {
+            loadingState.style.display = 'none';
+            resultState.style.display = 'block';
+            errorState.style.display = 'block';
+            errorState.innerText = '不正なアクセスです。決済のセッションIDが見つかりません。';
+            messageCard.style.display = 'none';
+            warningBox.style.display = 'none';
+            return;
+        }
+
+        try {
+            // ★変更点：直接 fetch を使って詳細なエラー文を掴み取る
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/verify-payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({ sessionId: sessionId })
+            });
+
+            // レスポンスの文章（JSON）を読み込む
+            const data = await response.json();
+
+            // 通信に失敗していたら、裏側から送られてきたエラーメッセージを投げる
+            if (!response.ok) {
+                throw new Error(data.error || "詳細不明のバックエンドエラーが発生しました。");
             }
 
-            try {
-                // Edge Functionを呼び出して決済の正当性を検証＆メッセージ取得
-                const { data, error } = await supabaseClient.functions.invoke('verify-payment', { 
-                    body: { sessionId: sessionId } 
-                });
-
-                if (error) throw new Error("通信エラーが発生しました: " + error.message);
-                if (data && data.error) throw new Error("決済の確認に失敗しました: " + data.error);
-
-                // 検証成功時
-                loadingState.style.display = 'none';
-                resultState.style.display = 'block';
-                
-                if (data && data.message) {
-                    secretMessage.innerText = data.message;
-                } else {
-                    secretMessage.innerText = "作者からのメッセージはありません。";
-                }
-
-                if (data && data.authorId) {
-                    btnHome.href = `profile.html?id=${data.authorId}`;
-                    btnHome.innerText = 'プロフィール画面へ戻る';
-                }
-
-            } catch (err) {
-                // エラー時（不正なアクセスやタイムアウトなど）
-                loadingState.style.display = 'none';
-                resultState.style.display = 'block';
-                
-                errorState.style.display = 'block';
-                errorState.innerText = err.message;
-                
-                messageCard.style.display = 'none';
-                warningBox.style.display = 'none';
+            // 検証成功時
+            loadingState.style.display = 'none';
+            resultState.style.display = 'block';
+            
+            if (data && data.message) {
+                secretMessage.innerText = data.message;
+            } else {
+                secretMessage.innerText = "作者からのメッセージはありません。";
             }
-        });
-    </script>
+
+            if (data && data.authorId) {
+                btnHome.href = `profile.html?id=${data.authorId}`;
+                btnHome.innerText = 'プロフィール画面へ戻る';
+            }
+
+        } catch (err) {
+            // エラー時（画面に本当の理由を表示する）
+            loadingState.style.display = 'none';
+            resultState.style.display = 'block';
+            
+            errorState.style.display = 'block';
+            errorState.innerText = "【通信エラー】\n" + err.message;
+            
+            messageCard.style.display = 'none';
+            warningBox.style.display = 'none';
+        }
+    });
+</script>
 </body>
 </html>
