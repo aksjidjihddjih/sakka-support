@@ -102,33 +102,43 @@
     </div>
 
     <script>
-        (function() {
-            const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    (function() {
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            async function init() {
-                if (!document.getElementById('settings-container')) return;
-                try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (!session) { window.location.href = 'login.html'; return; }
-                    
+        async function init() {
+            if (!document.getElementById('settings-container')) return;
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
+                
+                if(document.getElementById('userEmail')) {
                     document.getElementById('userEmail').value = session.user.email;
+                }
 
-                    const { data: creator } = await supabaseClient.from('creators').select('pen_name, penname').eq('id', session.user.id).single();
-                    if (creator) {
-                        const penname = creator.pen_name || creator.penname || "未設定";
-                        document.getElementById('userNameDisplay').innerText = penname;
-                        document.getElementById('userAvatar').innerText = penname !== '未設定' ? penname.charAt(0) : "？";
-                    }
-                } catch (error) { console.error(error); }
-            }
-            window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
-            window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
-            window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
-            if (!window.hasRegisteredSettings) { document.addEventListener('turbo:load', init); window.hasRegisteredSettings = true; }
-            init();
-        })();
+                // ★DASHBOARDと全く同じ取得ロジック
+                let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
+                if (!creator) creator = { id: session.user.id, pen_name: "" }; 
+
+                const penname = creator.pen_name || creator.penname || "";
+                const nameDisplay = document.getElementById('userNameDisplay');
+                const avatarDisplay = document.getElementById('userAvatar');
+                
+                if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
+                if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
+
+            } catch (error) { console.error("Error:", error); }
+        }
+
+        window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
+        window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
+        window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
+
+        if (!window.hasRegisteredSettings) { document.addEventListener('turbo:load', init); window.hasRegisteredSettings = true; }
+        init();
+    })();
     </script>
 </body>
 </html>
