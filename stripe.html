@@ -154,63 +154,50 @@
 
     <script>
         (function() {
-            const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            async function init() {
-                if (!document.getElementById('stripe-container')) return;
+        async function init() {
+            if (!document.getElementById('stripe-container')) return;
 
-                try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (!session) { window.location.href = 'login.html'; return; }
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
 
-                    // ★修正：データが空でもエラーで止まらないように安全に取得
-                    let penname = "未設定";
-                    let isStripeConnected = false;
-                    try {
-                        const { data: creator, error: fetchErr } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
+                // ★DASHBOARDと全く同じ取得ロジック
+                let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
+                if (!creator) creator = { id: session.user.id, pen_name: "" }; 
 
-                        const penname = creator ? (creator.pen_name || creator.penname || "") : "";
-                        const nameDisplay = document.getElementById('userNameDisplay');
-                        const avatarDisplay = document.getElementById('userAvatar');
+                const penname = creator.pen_name || creator.penname || "";
+                const nameDisplay = document.getElementById('userNameDisplay');
+                const avatarDisplay = document.getElementById('userAvatar');
+                
+                if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
+                if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
 
-                        if(nameDisplay) nameDisplay.innerText = (penname === '未設定' || !penname ? "未設定" : penname);
-                        if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
-                        if (creator) {
-                            penname = creator.pen_name || creator.penname || "未設定";
-                            isStripeConnected = !!creator.stripe_account_id;
-                        }
-                    } catch (e) { console.warn("Creator info fetch failed:", e); }
-
-                    const nameDisplay = document.getElementById('userNameDisplay');
-                    const avatarDisplay = document.getElementById('userAvatar');
-                    if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
-                    if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
-
-                    // Stripeステータスの表示
-                    const statusDiv = document.getElementById('stripeStatus');
-                    if (statusDiv) {
-                        if (isStripeConnected) {
-                            statusDiv.style.background = '#f0fdf4';
-                            statusDiv.style.borderColor = '#bbf7d0';
-                            statusDiv.innerHTML = `<svg class="icon icon-sm" style="color: #16a34a;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><p style="margin: 0; font-size: 14px; font-weight: 600; color: #166534;">現在、口座は正常に連携されています。</p>`;
-                        } else {
-                            statusDiv.innerHTML = `<p style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-sub);">現在、口座は未連携です。</p>`;
-                        }
+                // Stripeステータスの表示
+                const statusDiv = document.getElementById('stripeStatus');
+                if (statusDiv) {
+                    if (creator.stripe_account_id) {
+                        statusDiv.style.background = '#f0fdf4';
+                        statusDiv.style.borderColor = '#bbf7d0';
+                        statusDiv.innerHTML = `<svg class="icon icon-sm" style="color: #16a34a;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><p style="margin: 0; font-size: 14px; font-weight: 600; color: #166534;">現在、口座は正常に連携されています。</p>`;
+                    } else {
+                        statusDiv.innerHTML = `<p style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-sub);">現在、口座は未連携です。</p>`;
                     }
+                }
 
-                } catch (error) { console.error("Error:", error); }
-            }
+            } catch (error) { console.error("Error:", error); }
+        }
 
-            // UI関数のグローバル登録
-            window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
-            window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
-            window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
+        window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
+        window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
+        window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
 
-            if (!window.hasRegisteredStripe) { document.addEventListener('turbo:load', init); window.hasRegisteredStripe = true; }
-            init();
-        })();
+        if (!window.hasRegisteredStripe) { document.addEventListener('turbo:load', init); window.hasRegisteredStripe = true; }
+        init();
+    })();
     </script>
 </body>
 </html>
