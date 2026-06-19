@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ログイン / 新規登録 - KANKETSU</title>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
     <style>
         :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
@@ -14,13 +13,11 @@
         
         .container { max-width: 440px; margin: 20px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         
-        /* ★ 影 (box-shadow) を削除しました */
         .card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 48px 32px; text-align: center; }
         .auth-icon { width: 56px; height: 56px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; }
         
         .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 32px 0; }
 
-        /* ★ ホバー時のアニメーションや影を削除し、透明度変更のみにしました */
         .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: opacity 0.2s; border: 2px solid var(--border-color); box-sizing: border-box; text-decoration: none; }
         .btn-primary { background-color: var(--text-main); color: #fff; }
         .btn-primary:hover { opacity: 0.85; }
