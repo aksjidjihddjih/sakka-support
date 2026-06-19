@@ -172,6 +172,10 @@
                         });
                     }
                 }
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+            } catch (error) { showError(error.message); }
+        });
 
         async function processCheckout() {
             const btn = document.getElementById('checkoutBtn');
