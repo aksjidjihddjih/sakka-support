@@ -9,84 +9,62 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        :root {
-            --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563;
-            --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px;
-            --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151;
-            --sidebar-bg: #000000; --sidebar-text: #d1d5db;
-        }
-
+        /* ★全ファイルで完全に統一されたCSS */
+        :root { --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; --sidebar-bg: #000000; --sidebar-text: #d1d5db; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; display: inline-block; vertical-align: middle; }
         .icon-sm { width: 16px; height: 16px; }
-
         .app-container { display: flex; min-height: 100vh; flex-direction: column; }
         .mobile-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--sidebar-bg); color: #fff; position: sticky; top: 0; z-index: 20; }
         .mobile-header .brand-logo { margin: 0; padding: 0; }
         .hamburger { background: transparent; border: none; color: #fff; cursor: pointer; padding: 4px; }
-
         .sidebar { background-color: var(--sidebar-bg); color: var(--sidebar-text); width: 260px; height: 100vh; padding: 32px 0 24px 0; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 30; transform: translateX(-100%); transition: transform 0.3s ease; box-sizing: border-box; }
         .sidebar.open { transform: translateX(0); }
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 25; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.show { display: block; opacity: 1; }
-        
         .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: #fff; text-decoration: none; padding: 0 24px; margin-bottom: 40px; display: block;}
-
-        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; transition: opacity 0.3s ease; }
+        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; transition: opacity 0.3s ease;}
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--sidebar-text); text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 8px; transition: all 0.2s; cursor: pointer; border: none; background: transparent; text-align: left; width: 100%; box-sizing: border-box; }
         .nav-item:hover, .nav-item.active { background-color: #1f2937; color: #fff; }
         .nav-divider { height: 1px; background-color: #374151; margin: 12px 16px; }
-
-        @media (min-width: 768px) {
-            .app-container { flex-direction: row; }
-            .mobile-header { display: none; }
-            .sidebar { position: sticky; transform: translateX(0); }
-        }
-
+        @media (min-width: 768px) { .app-container { flex-direction: row; } .mobile-header { display: none; } .sidebar { position: sticky; transform: translateX(0); } }
         .account-wrapper { position: relative; padding: 0 12px; margin-top: auto; }
         .account-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; color: var(--sidebar-text); cursor: pointer; transition: all 0.2s; }
         .account-btn:hover { background-color: #1f2937; color: #fff; }
         .account-info { display: flex; align-items: center; gap: 12px; }
         .avatar { width: 32px; height: 32px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 14px; }
         .account-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; text-align: left;}
-
         .account-popup { position: absolute; bottom: calc(100% + 8px); left: 12px; right: 12px; background: #fff; border: var(--border-width) solid var(--border-color); border-radius: 8px; box-shadow: 2px 2px 0px rgba(0,0,0,1); padding: 8px 0; display: none; z-index: 100; }
         .account-popup.show { display: block; }
         .popup-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 16px; background: transparent; border: none; text-align: left; font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: background 0.2s; box-sizing: border-box; text-decoration: none;}
         .popup-item:hover { background-color: var(--bg-color); }
         .popup-item.text-danger { color: #dc2626; }
-
+        .popup-divider { height: 1px; background-color: var(--border-light); margin: 4px 0; }
         .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; position: relative;}
         @media (min-width: 768px) { .main-content { padding: 48px; } }
-
         .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
         @media (min-width: 768px) { .card { padding: 32px; } }
         .card-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
         .card-title { font-size: 18px; font-weight: 700; margin: 0; }
         .card-desc { font-size: 13px; color: var(--text-sub); margin: 4px 0 0 0; }
-        
         .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 12px 24px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; text-decoration: none;}
         .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
         .btn-primary:hover { background-color: var(--btn-hover); border-color: var(--btn-hover); }
         .btn-outline { background-color: transparent; color: var(--text-main); }
         .btn-outline:hover { background-color: var(--bg-color); }
         .btn-sm { padding: 8px 16px; font-size: 13px; width: auto; }
-
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
         .form-control { width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; color: var(--text-main); box-sizing: border-box; transition: all 0.2s; }
         .form-control:focus { outline: none; border-color: var(--border-color); box-shadow: 0 0 0 1px var(--border-color); }
         textarea.form-control { resize: vertical; min-height: 120px; }
-
         .share-box { display: flex; align-items: center; border: 1px solid var(--border-light); border-radius: 8px; padding: 4px; background: #f9fafb;}
         .share-url { flex: 1; padding: 8px 12px; font-size: 14px; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: all;}
-
         .item-list { display: flex; flex-direction: column; gap: 12px; }
         .item-card { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; transition: background-color 0.2s ease, border-color 0.2s ease; cursor: pointer;}
         .item-card:hover { border-color: var(--border-color); background-color: #f9fafb; }
         .item-info h4 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; }
         .item-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
-
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.2s ease; }
         .modal-overlay.show { display: flex; opacity: 1; }
         .modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 12px; padding: 32px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; box-sizing: border-box; margin: 20px;}
@@ -96,10 +74,14 @@
         .modal-close { background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer; line-height: 1; }
         .modal-close:hover { color: var(--text-main); }
         .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; border-top: 1px solid var(--border-light); padding-top: 24px; }
-
         .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
-        
-        /* 切り替え用のアニメーション */
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        th { text-align: left; padding: 16px; border-bottom: 2px solid var(--border-color); color: var(--text-sub); font-weight: 600; }
+        td { padding: 16px; border-bottom: 1px solid var(--border-light); color: var(--text-main); }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-transferred { background-color: #d1fae5; color: #065f46; }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -121,40 +103,35 @@
             
             <nav class="sidebar-nav" id="sidebarNavMenu">
                 <a href="dashboard.html" class="nav-item active">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    ホーム
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> ホーム
                 </a>
-                <a href="#" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                    お知らせ
+                <a href="notice.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> お知らせ
                 </a>
                 <a href="sales.html" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg>
-                    支援履歴（売上明細）
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg> 支援履歴（売上明細）
                 </a>
                 <a href="stripe.html" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                    振込先・口座管理
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 振込先・口座管理
                 </a>
-                
                 <div class="nav-divider"></div>
-                
-                <a href="#" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                    使い方ガイド
+                <a href="guide.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 使い方ガイド
                 </a>
-                <a href="#" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    よくある質問 (FAQ)
+                <a href="faq.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> よくある質問 (FAQ)
                 </a>
-                <a href="#" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    お問い合わせ
+                <a href="contact.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> お問い合わせ
                 </a>
             </nav>
 
             <div class="account-wrapper">
                 <div class="account-popup" id="accountPopup">
+                    <a href="settings.html" class="popup-item">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> アカウント設定
+                    </a>
+                    <div class="popup-divider"></div>
                     <button class="popup-item text-danger" onclick="window.logout()">
                         <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト
                     </button>
@@ -171,33 +148,8 @@
 
         <main class="main-content">
             
-            <!-- ========================================== -->
-            <!-- 1. 必須設定画面（未完了時のみ表示されるエリア） -->
-            <!-- ========================================== -->
-            <div id="onboardingView" style="display: none; max-width: 600px; margin: 40px auto; width: 100%;">
-                <div style="text-align: center; margin-bottom: 32px;">
-                    <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 8px;">あと少しで準備完了です。</h1>
-                    <p style="color: var(--text-sub);">支援受付を開始するために、以下の必須項目を設定してください。</p>
-                </div>
-                
-                <div class="card" style="padding: 32px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
-                        <span style="font-size: 14px; font-weight: 700; color: var(--text-sub);">進捗状況 (<span id="onboardingCount">0</span>/4)</span>
-                        <span style="font-size: 16px; font-weight: 800;" id="onboardingPercent">0%</span>
-                    </div>
-                    <div style="height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 32px; border: 1px solid var(--border-light);">
-                        <div id="onboardingProgressBar" style="height: 100%; background: #000; width: 0%; transition: width 0.5s ease;"></div>
-                    </div>
-                    
-                    <div class="task-list" id="onboardingTaskList">
-                        <!-- ここにタスクリストが動的に入ります -->
-                    </div>
-                </div>
-            </div>
+            <div id="setupContainer"></div>
 
-            <!-- ========================================== -->
-            <!-- 2. 本来のダッシュボード（完了時のみ表示されるエリア） -->
-            <!-- ========================================== -->
             <div id="mainDashboardView" style="display: none;" class="fade-in">
                 <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
                 
@@ -276,7 +228,6 @@
         </main>
     </div>
 
-    <!-- モーダル群 -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content">
             <div class="modal-header">
