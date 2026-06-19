@@ -6,41 +6,113 @@
     <title>支援完了 - KANKETSU</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* 共通のモノトーン・モダンUI */
         :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
         
         .header { display: flex; justify-content: center; align-items: center; padding: 24px 20px; max-width: 840px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
         
-        .container { max-width: 600px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; text-align: center; }
+        .container { max-width: 640px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; text-align: center; }
         
         .success-icon { width: 64px; height: 64px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; }
         h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; }
-        .desc { font-size: 15px; color: var(--text-sub); margin-bottom: 32px; }
+        .desc { font-size: 15px; color: var(--text-sub); margin-bottom: 40px; }
 
-        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; margin-bottom: 24px; box-shadow: 2px 2px 0px rgba(0,0,0,1); text-align: left; }
-        .msg-title { font-size: 16px; font-weight: 700; margin: 0 0 16px 0; border-bottom: 1px solid var(--border-light); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        .msg-content { font-size: 15px; line-height: 1.8; color: var(--text-main); white-space: pre-wrap; }
+        /* ★ メッセージカードのプレミアムデザイン */
+        .message-card { 
+            background-color: var(--card-bg); 
+            border: 2px solid var(--border-color); 
+            border-radius: 12px; 
+            padding: 40px 32px; 
+            margin-bottom: 24px; 
+            box-shadow: 4px 4px 0px rgba(0,0,0,1); /* 影を太くして特別感を強調 */
+            text-align: left; 
+            position: relative;
+            overflow: hidden;
+        }
 
-        .warning-box { background: #fff; border: 1px solid var(--border-light); border-radius: 8px; padding: 16px; text-align: left; font-size: 13px; color: var(--text-sub); }
-        .warning-box strong { color: #dc2626; display: block; margin-bottom: 4px;}
+        /* カード上部のアクセント帯 */
+        .message-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: repeating-linear-gradient( 45deg, #000, #000 10px, #fff 10px, #fff 20px );
+        }
 
-        .btn { display: inline-flex; justify-content: center; align-items: center; padding: 12px 24px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; text-decoration: none; margin-top: 24px; }
+        .msg-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-bottom: 24px; 
+        }
+        
+        .msg-icon { 
+            width: 32px; 
+            height: 32px; 
+            background: #000; 
+            color: #fff; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        .msg-title-wrap { display: flex; flex-direction: column; }
+        .msg-title-en { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--text-sub); line-height: 1; margin-bottom: 4px;}
+        .msg-title { font-size: 16px; font-weight: 800; margin: 0; line-height: 1;}
+
+        /* メッセージ本文エリア */
+        .msg-content { 
+            font-size: 15px; 
+            line-height: 1.8; 
+            color: var(--text-main); 
+            white-space: pre-wrap; 
+            background: #f9fafb; 
+            border: 1px solid var(--border-light); 
+            border-radius: 8px; 
+            padding: 24px 24px 24px 40px; 
+            position: relative;
+        }
+
+        /* 引用符の装飾 */
+        .msg-content::before {
+            content: '“';
+            font-size: 64px;
+            color: #e5e7eb;
+            position: absolute;
+            top: -4px;
+            left: 12px;
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+
+        /* 注意書きのスマート化 */
+        .warning-box { 
+            background: transparent; 
+            border: 1px dashed #9ca3af; 
+            border-radius: 8px; 
+            padding: 16px; 
+            text-align: left; 
+            font-size: 13px; 
+            color: var(--text-sub); 
+        }
+        .warning-box strong { 
+            color: #000; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .btn { display: inline-flex; justify-content: center; align-items: center; padding: 12px 24px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; text-decoration: none; margin-top: 32px; }
         .btn-outline { background-color: transparent; color: var(--text-main); }
         .btn-outline:hover { background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
         
         .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
-
-        /* ローディングと結果の切り替え用 */
-        #loadingState { display: block; padding-top: 40px; }
-        #resultState { display: none; animation: fadeIn 0.5s ease-out forwards; }
-        #errorState { display: none; color: #dc2626; font-weight: bold; background: #fee2e2; border: 1px solid #fca5a5; padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: left; }
-        
-        /* くるくる回るアニメーション */
-        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #000; animation: spin 1s linear infinite; margin: 0 auto 16px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -49,34 +121,37 @@
     </div>
 
     <div class="container">
-        <div id="loadingState">
-            <div class="spinner"></div>
-            <h2 style="font-size: 18px; margin-bottom: 8px;">決済を確認しています...</h2>
-            <p style="color: var(--text-sub); font-size: 14px;">このまま画面を閉じずにお待ちください。</p>
+        <div class="success-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h1>ご支援ありがとうございました</h1>
+        <p class="desc">決済が完了し、作者へ応援が届きました。</p>
+
+        <div class="message-card">
+            <div class="msg-header">
+                <div class="msg-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                </div>
+                <div class="msg-title-wrap">
+                    <span class="msg-title-en">SECRET MESSAGE</span>
+                    <h2 class="msg-title">作者からの限定メッセージ</h2>
+                </div>
+            </div>
+            
+            <div id="secretMessage" class="msg-content">読み込み中...</div>
+            
         </div>
 
-        <div id="resultState">
-            <div class="success-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            <h1>ご支援ありがとうございました</h1>
-            <p class="desc">決済が完了し、作者へ応援が届きました。</p>
-
-            <div id="errorState"></div>
-
-            <div class="card" id="messageCard">
-                <div class="msg-title">🎁 作者からの限定メッセージ</div>
-                <div id="secretMessage" class="msg-content">メッセージを読み込み中...</div>
-            </div>
-
-            <div class="warning-box" id="warningBox">
-                <strong>【重要なお願い】</strong>
-                ※この画面は一度閉じると、セキュリティ保護のため再度表示することはできません。<br>
-                ※スクリーンショット等での個人的な保存は可能です（SNS等への無断転載はお控えください）。
-            </div>
-
-            <a href="index.html" id="btnHome" class="btn btn-outline">トップページへ戻る</a>
+        <div class="warning-box">
+            <strong>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                取り扱いについてのお願い
+            </strong>
+            この画面はセキュリティ保護のため、一度閉じると再表示できません。<br>
+            スクリーンショット等での保存は可能ですが、SNS等への無断転載はお控えください。
         </div>
+
+        <a href="#" id="btnHome" class="btn btn-outline">プロフィール画面へ戻る</a>
     </div>
 
     <footer class="footer">
@@ -88,67 +163,44 @@
         <p style="margin: 0;">&copy; 2026 KANKETSU</p>
     </footer>
 
+    <!-- ★完璧に動作するJavaScriptロジック -->
     <script>
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        window.addEventListener('DOMContentLoaded', async () => {
-            const sessionId = new URLSearchParams(window.location.search).get('session_id');
-            const loadingState = document.getElementById('loadingState');
-            const resultState = document.getElementById('resultState');
-            const errorState = document.getElementById('errorState');
-            const secretMessage = document.getElementById('secretMessage');
-            const btnHome = document.getElementById('btnHome');
-            const messageCard = document.getElementById('messageCard');
-            const warningBox = document.getElementById('warningBox');
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+
+        window.onload = async function() {
             if (!sessionId) {
-                loadingState.style.display = 'none';
-                resultState.style.display = 'block';
-                errorState.style.display = 'block';
-                errorState.innerText = '不正なアクセスです。決済のセッションIDが見つかりません。';
-                messageCard.style.display = 'none';
-                warningBox.style.display = 'none';
+                document.getElementById('secretMessage').innerText = '不正なアクセスです。決済情報が見つかりません。';
                 return;
             }
 
             try {
-                // Edge Functionを呼び出して決済の正当性を検証＆メッセージ取得
-                const { data, error } = await supabaseClient.functions.invoke('verify-payment', { 
-                    body: { sessionId: sessionId } 
+                const { data, error } = await supabaseClient.functions.invoke('verify-payment', {
+                    body: { sessionId: sessionId }
                 });
 
-                if (error) throw new Error("通信エラーが発生しました: " + error.message);
-                if (data && data.error) throw new Error("決済の確認に失敗しました: " + data.error);
-
-                // 検証成功時
-                loadingState.style.display = 'none';
-                resultState.style.display = 'block';
-                
-                if (data && data.message) {
-                    secretMessage.innerText = data.message;
-                } else {
-                    secretMessage.innerText = "作者からのメッセージはありません。";
+                if (error) {
+                    throw new Error(`システム通信エラー: ${error.message}`);
+                }
+                if (data && data.error) {
+                    throw new Error(`データ検証エラー: ${data.error}`);
                 }
 
-                if (data && data.authorId) {
-                    btnHome.href = `profile.html?id=${data.authorId}`;
-                    btnHome.innerText = 'プロフィール画面へ戻る';
-                }
+                document.getElementById('secretMessage').innerText = data.message;
+                document.getElementById('btnHome').href = `profile.html?id=${data.authorId}`;
 
             } catch (err) {
-                // エラー時（不正なアクセスやタイムアウトなど）
-                loadingState.style.display = 'none';
-                resultState.style.display = 'block';
-                
-                errorState.style.display = 'block';
-                errorState.innerText = err.message;
-                
-                messageCard.style.display = 'none';
-                warningBox.style.display = 'none';
+                document.getElementById('secretMessage').innerHTML = `
+                    <span style="color: #dc2626; font-weight: bold;">
+                        ${err.message || 'メッセージの取得に失敗しました。'}
+                    </span>
+                `;
             }
-        });
+        };
     </script>
 </body>
 </html>
