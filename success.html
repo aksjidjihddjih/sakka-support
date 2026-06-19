@@ -162,9 +162,14 @@
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
 
+        // ★追加：URLから session_id を即座に消去し、リロードや保存による再表示を防止
+        if (sessionId) {
+            window.history.replaceState(null, '', window.location.pathname);
+        }
+
         window.onload = async function() {
             if (!sessionId) {
-                document.getElementById('secretMessage').innerText = '不正なアクセスです。決済情報が見つかりません。';
+                document.getElementById('secretMessage').innerHTML = '<span style="color: var(--text-sub);">不正なアクセス、または既にメッセージを表示済みです。<br>セキュリティ保護のため、メッセージの再表示はできません。</span>';
                 return;
             }
 
