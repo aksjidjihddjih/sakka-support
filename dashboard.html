@@ -565,14 +565,30 @@
                 if (error) alert("エラー: " + error.message); else { window.closeModal('msgModal'); await window.initDashboard(); }
             };
 
+            // ▼ 変更後（こちらで丸ごと上書きしてください）
             window.saveWork = async function() {
-                const title = document.getElementById('workTitle').value, work_url = document.getElementById('workUrl').value, secret_message = document.getElementById('workMessage').value;
-                if(!title || !work_url) return alert("タイトルとURLは必須です。");
-                const promise = editWorkId ? supabaseClient.from('works').update({ title, work_url, secret_message }).eq('id', editWorkId) : supabaseClient.from('works').insert([{ creator_id: currentUserId, title, work_url, secret_message }]);
+                // .trim() を追加して、スペースだけの無効な入力も防ぎます
+                const title = document.getElementById('workTitle').value.trim();
+                const work_url = document.getElementById('workUrl').value.trim();
+                const secret_message = document.getElementById('workMessage').value.trim();
+                
+                // タイトル、URL、メッセージの「すべて」が入力されていないと弾くように変更
+                if(!title || !work_url || !secret_message) {
+                    return alert("タイトル、URL、限定メッセージの全てを入力してください。");
+                }
+                
+                const promise = editWorkId 
+                    ? supabaseClient.from('works').update({ title, work_url, secret_message }).eq('id', editWorkId) 
+                    : supabaseClient.from('works').insert([{ creator_id: currentUserId, title, work_url, secret_message }]);
+                
                 const { error } = await promise;
-                if (error) alert("エラー: " + error.message); else { window.closeModal('workModal'); await window.initDashboard(); }
+                if (error) {
+                    alert("エラー: " + error.message);
+                } else { 
+                    window.closeModal('workModal'); 
+                    await window.initDashboard(); 
+                }
             };
-
             window.deleteLink = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('creator_links').delete().eq('id', editLinkId); window.closeModal('linkModal'); await window.initDashboard(); };
             window.deleteWork = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('works').delete().eq('id', editWorkId); window.closeModal('workModal'); await window.initDashboard(); };
 
