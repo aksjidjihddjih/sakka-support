@@ -15,18 +15,20 @@
         
         .container { max-width: 640px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; text-align: center; }
         
-        .success-icon { width: 64px; height: 64px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; }
+        /* ★ チェックマークの背景色を緑色に変更 */
+        .success-icon { width: 64px; height: 64px; background: #16a34a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; }
+        
         h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; }
         .desc { font-size: 15px; color: var(--text-sub); margin-bottom: 40px; }
 
-        /* ★ メッセージカードのプレミアムデザイン */
+        /* メッセージカードのプレミアムデザイン */
         .message-card { 
             background-color: var(--card-bg); 
             border: 2px solid var(--border-color); 
             border-radius: 12px; 
             padding: 40px 32px; 
             margin-bottom: 24px; 
-            box-shadow: 4px 4px 0px rgba(0,0,0,1); /* 影を太くして特別感を強調 */
+            box-shadow: 4px 4px 0px rgba(0,0,0,1); 
             text-align: left; 
             position: relative;
             overflow: hidden;
@@ -54,7 +56,7 @@
         .msg-title-en { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--text-sub); line-height: 1; margin-bottom: 4px;}
         .msg-title { font-size: 16px; font-weight: 800; margin: 0; line-height: 1;}
 
-        /* メッセージ本文エリア */
+        /* メッセージ本文エリア（★引用符の装飾を削除し、余白を調整） */
         .msg-content { 
             font-size: 15px; 
             line-height: 1.8; 
@@ -63,20 +65,8 @@
             background: #f9fafb; 
             border: 1px solid var(--border-light); 
             border-radius: 8px; 
-            padding: 24px 24px 24px 40px; 
+            padding: 24px; 
             position: relative;
-        }
-
-        /* 引用符の装飾 */
-        .msg-content::before {
-            content: '“';
-            font-size: 64px;
-            color: #e5e7eb;
-            position: absolute;
-            top: -4px;
-            left: 12px;
-            font-family: Georgia, serif;
-            line-height: 1;
         }
 
         /* 注意書きのスマート化 */
@@ -140,7 +130,7 @@
             この画面はセキュリティ保護のため、一度閉じると再表示できません。<br>
             スクリーンショット等での保存は可能ですが、SNS等への無断転載はお控えください。
         </div>
-        
+
         <a href="#" id="btnHome" class="btn btn-outline">プロフィール画面へ戻る</a>
     </div>
 
@@ -153,7 +143,6 @@
         <p style="margin: 0;">&copy; 2026 KANKETSU</p>
     </footer>
 
-    <!-- ★完璧に動作するJavaScriptロジック -->
     <script>
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
@@ -162,7 +151,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
 
-        // ★追加：URLから session_id を即座に消去し、リロードや保存による再表示を防止
+        // URLから session_id を即座に消去し、リロードや保存による再表示を防止
         if (sessionId) {
             window.history.replaceState(null, '', window.location.pathname);
         }
