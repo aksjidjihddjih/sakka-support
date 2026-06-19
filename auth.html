@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン / 新規登録 - KANKETSU</title>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
+    <style>
+        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
+        
+        .header { display: flex; justify-content: center; align-items: center; padding: 32px 20px; width: 100%; box-sizing: border-box; }
+        .brand-logo { font-size: 24px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
+        
+        .container { max-width: 440px; margin: 20px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
+        
+        .card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 48px 32px; box-shadow: 4px 4px 0px rgba(0,0,0,1); text-align: center; }
+        .auth-icon { width: 56px; height: 56px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; }
+        .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 8px 0; }
+        .card p.desc { font-size: 14px; color: var(--text-sub); margin-bottom: 40px; }
+
+        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 2px solid var(--border-color); box-sizing: border-box; text-decoration: none; }
+        .btn-primary { background-color: var(--text-main); color: #fff; }
+        .btn-primary:hover { background-color: #fff; color: var(--text-main); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .btn-outline { background-color: transparent; color: var(--text-main); }
+        .btn-outline:hover { background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+
+        .terms-text { margin-top: 32px; font-size: 12px; color: var(--text-sub); line-height: 1.6; }
+        .terms-text a { color: var(--text-main); text-decoration: underline; font-weight: 600; }
+        .terms-text a:hover { color: var(--text-sub); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html" class="brand-logo">KANKETSU</a>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="auth-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            
+            <h1>KANKETSU をはじめる</h1>
+            <p class="desc">クリエイターとして活動を開始するか、<br>お気に入りの作者を支援しましょう。</p>
+            
+            <a href="signup.html" class="btn btn-primary" style="margin-bottom: 16px;">新規登録（無料）</a>
+            <a href="login.html" class="btn btn-outline">ログインする</a>
+
+            <p class="terms-text">
+                続行することで、<a href="terms.html">利用規約</a> および <a href="privacy.html">プライバシーポリシー</a> に同意したものとみなされます。
+            </p>
+        </div>
+    </div>
+</body>
+</html>
