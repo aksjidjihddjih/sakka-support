@@ -7,6 +7,7 @@
     <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* ★全ファイルで完全に統一されたCSS */
         :root { --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; --sidebar-bg: #000000; --sidebar-text: #d1d5db; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; display: inline-block; vertical-align: middle; }
@@ -20,7 +21,7 @@
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 25; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.show { display: block; opacity: 1; }
         .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: #fff; text-decoration: none; padding: 0 24px; margin-bottom: 40px; display: block;}
-        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
+        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; transition: opacity 0.3s ease;}
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--sidebar-text); text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 8px; transition: all 0.2s; cursor: pointer; border: none; background: transparent; text-align: left; width: 100%; box-sizing: border-box; }
         .nav-item:hover, .nav-item.active { background-color: #1f2937; color: #fff; }
         .nav-divider { height: 1px; background-color: #374151; margin: 12px 16px; }
@@ -36,20 +37,48 @@
         .popup-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 16px; background: transparent; border: none; text-align: left; font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: background 0.2s; box-sizing: border-box; text-decoration: none;}
         .popup-item:hover { background-color: var(--bg-color); }
         .popup-item.text-danger { color: #dc2626; }
-        .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column;}
+        .popup-divider { height: 1px; background-color: var(--border-light); margin: 4px 0; }
+        .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; position: relative;}
         @media (min-width: 768px) { .main-content { padding: 48px; } }
         .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
         @media (min-width: 768px) { .card { padding: 32px; } }
-        .card-title { font-size: 18px; font-weight: 700; margin: 0 0 8px 0; }
-        .card-desc { font-size: 13px; color: var(--text-sub); margin: 0 0 24px 0; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+        .card-title { font-size: 18px; font-weight: 700; margin: 0; }
+        .card-desc { font-size: 13px; color: var(--text-sub); margin: 4px 0 0 0; }
         .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 12px 24px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; text-decoration: none;}
+        .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
+        .btn-primary:hover { background-color: var(--btn-hover); border-color: var(--btn-hover); }
         .btn-outline { background-color: transparent; color: var(--text-main); }
         .btn-outline:hover { background-color: var(--bg-color); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; width: auto; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
+        .form-control { width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; color: var(--text-main); box-sizing: border-box; transition: all 0.2s; }
+        .form-control:focus { outline: none; border-color: var(--border-color); box-shadow: 0 0 0 1px var(--border-color); }
+        textarea.form-control { resize: vertical; min-height: 120px; }
+        .share-box { display: flex; align-items: center; border: 1px solid var(--border-light); border-radius: 8px; padding: 4px; background: #f9fafb;}
+        .share-url { flex: 1; padding: 8px 12px; font-size: 14px; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: all;}
+        .item-list { display: flex; flex-direction: column; gap: 12px; }
+        .item-card { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; transition: background-color 0.2s ease, border-color 0.2s ease; cursor: pointer;}
+        .item-card:hover { border-color: var(--border-color); background-color: #f9fafb; }
+        .item-info h4 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; }
+        .item-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.2s ease; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 12px; padding: 32px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; box-sizing: border-box; margin: 20px;}
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-title { font-size: 18px; font-weight: 600; margin: 0; }
+        .modal-close { background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer; line-height: 1; }
+        .modal-close:hover { color: var(--text-main); }
+        .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; border-top: 1px solid var(--border-light); padding-top: 24px; }
         .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
     </style>
 </head>
 <body>
+
     <div class="app-container" id="stripe-container">
+        
         <header class="mobile-header">
             <a href="dashboard.html" class="brand-logo">KANKETSU</a>
             <button class="hamburger" onclick="window.toggleSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
@@ -58,24 +87,47 @@
 
         <aside class="sidebar" id="sidebar">
             <a href="dashboard.html" class="brand-logo" style="display: none;">KANKETSU</a>
-            <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item"><svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> ホーム</a>
-                <a href="notice.html" class="nav-item"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> お知らせ</a>
-                <a href="sales.html" class="nav-item"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg> 支援履歴（売上明細）</a>
-                <a href="stripe.html" class="nav-item active"><svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 振込先・口座管理</a>
+            
+            <nav class="sidebar-nav" id="sidebarNavMenu">
+                <a href="dashboard.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> ホーム
+                </a>
+                <a href="notice.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> お知らせ
+                </a>
+                <a href="sales.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg> 支援履歴（売上明細）
+                </a>
+                <a href="stripe.html" class="nav-item active">
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 振込先・口座管理
+                </a>
                 <div class="nav-divider"></div>
-                <a href="guide.html" class="nav-item"><svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 使い方ガイド</a>
-                <a href="faq.html" class="nav-item"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> よくある質問 (FAQ)</a>
-                <a href="contact.html" class="nav-item"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> お問い合わせ</a>
+                <a href="guide.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 使い方ガイド
+                </a>
+                <a href="faq.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> よくある質問 (FAQ)
+                </a>
+                <a href="contact.html" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> お問い合わせ
+                </a>
             </nav>
+
             <div class="account-wrapper">
                 <div class="account-popup" id="accountPopup">
-                    <a href="settings.html" class="popup-item"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> アカウント設定</a>
+                    <a href="settings.html" class="popup-item">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> アカウント設定
+                    </a>
                     <div class="popup-divider"></div>
-                    <button class="popup-item text-danger" onclick="window.logout()"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト</button>
+                    <button class="popup-item text-danger" onclick="window.logout()">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト
+                    </button>
                 </div>
                 <button class="account-btn" onclick="window.toggleAccountPopup(event)">
-                    <div class="account-info"><div class="avatar" id="userAvatar">？</div><span class="account-name" id="userNameDisplay">読込中...</span></div>
+                    <div class="account-info">
+                        <div class="avatar" id="userAvatar">？</div>
+                        <span class="account-name" id="userNameDisplay">読込中...</span>
+                    </div>
                     <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
             </div>
@@ -84,8 +136,8 @@
         <main class="main-content">
             <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">振込先・口座管理</h1>
             <div class="card">
-                <h2 class="card-title">Stripe連携設定</h2>
-                <p class="card-desc">売上を銀行口座へ引き出すための設定・情報更新を行います。</p>
+                <h2 class="card-title" style="margin-bottom: 8px;">Stripe連携設定</h2>
+                <p class="card-desc" style="margin-bottom: 24px;">売上を銀行口座へ引き出すための設定・情報更新を行います。</p>
                 
                 <div id="stripeStatus" style="background: #f9fafb; border: 1px solid var(--border-light); padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 14px; font-weight: 600; color: var(--text-sub);">連携状態を読み込み中...</span>
@@ -93,7 +145,10 @@
 
                 <button class="btn btn-outline" onclick="alert('現在はテスト環境です。')">振込先情報の確認・変更（Stripeを開く）</button>
             </div>
-            <footer class="site-footer"><p>&copy; 2026 KANKETSU</p></footer>
+
+            <footer class="site-footer">
+                <p>&copy; 2026 KANKETSU</p>
+            </footer>
         </main>
     </div>
 
@@ -105,17 +160,31 @@
 
             async function init() {
                 if (!document.getElementById('stripe-container')) return;
+
                 try {
                     const { data: { session } } = await supabaseClient.auth.getSession();
                     if (!session) { window.location.href = 'login.html'; return; }
-                    const { data: creator } = await supabaseClient.from('creators').select('pen_name, penname, stripe_account_id').eq('id', session.user.id).single();
-                    if (creator) {
-                        const penname = creator.pen_name || creator.penname || "未設定";
-                        document.getElementById('userNameDisplay').innerText = penname;
-                        document.getElementById('userAvatar').innerText = penname !== '未設定' ? penname.charAt(0) : "？";
-                        
-                        const statusDiv = document.getElementById('stripeStatus');
-                        if (creator.stripe_account_id) {
+
+                    // ★修正：データが空でもエラーで止まらないように安全に取得
+                    let penname = "未設定";
+                    let isStripeConnected = false;
+                    try {
+                        const { data: creator } = await supabaseClient.from('creators').select('pen_name, penname, stripe_account_id').eq('id', session.user.id).single();
+                        if (creator) {
+                            penname = creator.pen_name || creator.penname || "未設定";
+                            isStripeConnected = !!creator.stripe_account_id;
+                        }
+                    } catch (e) { console.warn("Creator info fetch failed:", e); }
+
+                    const nameDisplay = document.getElementById('userNameDisplay');
+                    const avatarDisplay = document.getElementById('userAvatar');
+                    if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
+                    if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
+
+                    // Stripeステータスの表示
+                    const statusDiv = document.getElementById('stripeStatus');
+                    if (statusDiv) {
+                        if (isStripeConnected) {
                             statusDiv.style.background = '#f0fdf4';
                             statusDiv.style.borderColor = '#bbf7d0';
                             statusDiv.innerHTML = `<svg class="icon icon-sm" style="color: #16a34a;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><p style="margin: 0; font-size: 14px; font-weight: 600; color: #166534;">現在、口座は正常に連携されています。</p>`;
@@ -123,11 +192,15 @@
                             statusDiv.innerHTML = `<p style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-sub);">現在、口座は未連携です。</p>`;
                         }
                     }
-                } catch (error) { console.error(error); }
+
+                } catch (error) { console.error("Error:", error); }
             }
+
+            // UI関数のグローバル登録
             window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
             window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
             window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
+
             if (!window.hasRegisteredStripe) { document.addEventListener('turbo:load', init); window.hasRegisteredStripe = true; }
             init();
         })();
