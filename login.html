@@ -54,18 +54,18 @@
 
             <div id="errorMsg"></div>
 
-            <form id="loginForm">
+            <div>
                 <div class="form-group">
                     <label>メールアドレス</label>
-                    <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
+                    <input type="email" id="email" class="form-control" placeholder="you@example.com" onkeypress="handleEnter(event)">
                 </div>
                 <div class="form-group">
                     <label>パスワード</label>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" onkeypress="handleEnter(event)">
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="submitBtn">ログイン</button>
-            </form>
+                <button type="button" class="btn btn-primary" id="submitBtn" onclick="processLogin()">ログイン</button>
+            </div>
 
             <a href="signup.html" class="link-text">アカウントをお持ちでない場合はこちら</a>
         </div>
@@ -76,13 +76,24 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        document.getElementById('loginForm').onsubmit = async (e) => {
-            e.preventDefault(); // 画面の再読み込みを防止
-            
-            const email = document.getElementById('email').value;
+        // エンターキーが押されたらログインを実行する関数
+        function handleEnter(e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                processLogin();
+            }
+        }
+
+        async function processLogin() {
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = document.getElementById('submitBtn');
             const errorMsg = document.getElementById('errorMsg');
+
+            if (!email || !password) {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = 'メールアドレスとパスワードを入力してください。';
+                return;
+            }
 
             btn.disabled = true;
             btn.innerText = 'ログイン中...';
@@ -91,9 +102,7 @@
             try {
                 const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
                 
                 // 成功したらダッシュボードへ確実に遷移
                 window.location.href = 'dashboard.html';
@@ -104,7 +113,7 @@
                 btn.disabled = false;
                 btn.innerText = 'ログイン';
             }
-        };
+        }
     </script>
 </body>
 </html>
