@@ -18,19 +18,21 @@
         .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 700; margin-bottom: 24px; transition: color 0.2s; }
         .back-link:hover { color: var(--text-main); }
 
-        .card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 40px 32px; box-shadow: 4px 4px 0px rgba(0,0,0,1); }
+        /* ★ 影を削除しました */
+        .card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 40px 32px; }
         .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 8px 0; }
         .card p.desc { font-size: 14px; color: var(--text-sub); margin-bottom: 32px; }
 
         .form-group { margin-bottom: 24px; }
         .form-group label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
         .form-control { width: 100%; padding: 14px 16px; font-size: 15px; font-weight: 600; border: 2px solid var(--border-light); border-radius: 8px; background-color: #f9fafb; color: var(--text-main); box-sizing: border-box; transition: all 0.2s; outline: none; }
-        .form-control:focus { border-color: var(--border-color); background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .form-control:focus { border-color: var(--border-color); background-color: #fff; }
         .form-control::placeholder { color: #9ca3af; font-weight: 500; }
 
-        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 2px solid var(--border-color); box-sizing: border-box; text-decoration: none; }
+        /* ★ ボタンのホバー時の影や移動を削除 */
+        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: opacity 0.2s; border: 2px solid var(--border-color); box-sizing: border-box; text-decoration: none; }
         .btn-primary { background-color: var(--text-main); color: #fff; }
-        .btn-primary:hover { background-color: #fff; color: var(--text-main); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .btn-primary:hover { opacity: 0.85; }
 
         .link-text { display: block; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-sub); margin-top: 24px; text-decoration: underline; cursor: pointer; }
         .link-text:hover { color: var(--text-main); }
@@ -55,7 +57,7 @@
 
             <div id="errorMsg"></div>
 
-            <form id="signupForm">
+            <div>
                 <div class="form-group">
                     <label>メールアドレス</label>
                     <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
@@ -65,8 +67,8 @@
                     <input type="password" id="password" class="form-control" placeholder="••••••••" required minlength="6">
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="submitBtn">登録してはじめる</button>
-            </form>
+                <button type="button" class="btn btn-primary" id="submitBtn" onclick="processSignup()">登録してはじめる</button>
+            </div>
 
             <a href="login.html" class="link-text">すでにアカウントをお持ちの方はこちら</a>
         </div>
@@ -77,36 +79,46 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        function initSignup() {
-            const signupForm = document.getElementById('signupForm');
-            if(!signupForm) return;
+        // エンターキーでも登録できるようにする
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                processSignup();
+            }
+        });
 
-            signupForm.onsubmit = async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const btn = document.getElementById('submitBtn');
-                const errorMsg = document.getElementById('errorMsg');
+        async function processSignup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
 
-                btn.disabled = true;
-                btn.innerText = '登録処理中...';
-                errorMsg.style.display = 'none';
+            if (!email || !password || password.length < 6) {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = 'メールアドレスと6文字以上のパスワードを入力してください。';
+                return;
+            }
 
+            btn.disabled = true;
+            btn.innerText = '登録処理中...';
+            errorMsg.style.display = 'none';
+
+            try {
                 const { data, error } = await supabase.auth.signUp({ email, password });
 
                 if (error) {
-                    errorMsg.style.display = 'block';
-                    errorMsg.innerText = 'エラーが発生しました。すでに登録されているか、パスワードが短すぎます。';
-                    btn.disabled = false;
-                    btn.innerText = '登録してはじめる';
-                } else {
-                    window.location.href = 'dashboard.html';
+                    throw error;
                 }
-            };
-        }
+                
+                // 成功したらダッシュボードへ確実に遷移
+                window.location.href = 'dashboard.html';
 
-        initSignup();
-        document.addEventListener('turbo:load', initSignup);
+            } catch (error) {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = 'エラーが発生しました。すでに登録されているか、パスワードが短すぎます。';
+                btn.disabled = false;
+                btn.innerText = '登録してはじめる';
+            }
+        }
     </script>
 </body>
 </html>
