@@ -99,4 +99,91 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://cfeejhwsh
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const STRIPE_PUBLIC_KEY = 'pk_test_51ThTKj4XyICGMkd9IU5z99hggK13SiHHFZMffu6rMnMTtNiQ6TNzNeBxhqD7ah8wTed7GATw83rNiJgohFUhuwOg00I0j4UOOM';
+
+        let supabaseClient, authorId = null;
+
+        function showError(msg) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').innerHTML = msg;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                authorId = new URLSearchParams(window.location.search).get('id');
+                if (!authorId) throw new Error("URLが正しくありません。");
+
+                const { data: creator } = await supabaseClient.from('creators').select('*').eq('id', authorId).single();
+                if (!creator) throw new Error("指定されたクリエイターが見つかりません。");
+
+                const penname = creator.pen_name || "名無し作者";
+                document.getElementById('authorName').innerText = penname;
+                document.getElementById('authorAvatar').innerText = penname.charAt(0);
+
+                const { data: links } = await supabaseClient.from('creator_links').select('*').eq('creator_id', authorId).order('created_at');
+                if (links && links.length > 0) {
+                    const linksList = document.getElementById('linksList');
+                    links.forEach(link => {
+                        linksList.innerHTML += `<a href="${link.url}" target="_blank" class="link-item">${link.title} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></a>`;
+                    });
+                    document.getElementById('linksCard').style.display = 'block';
+                }
+
+                const { data: works } = await supabaseClient.from('works').select('*').eq('creator_id', authorId).order('created_at');
+                if (works && works.length > 0) {
+                    const worksList = document.getElementById('worksList');
+                    works.forEach(work => {
+                        worksList.innerHTML += `
+                            <div class="work-option">
+                                <input type="radio" name="selectedWork" id="work_${work.id}" value="${work.id}">
+                                <label for="work_${work.id}" class="work-label">
+                                    <span class="work-label-title">${work.title}</span>
+                                    <span class="work-label-desc">この作品を指定して応援します。</span>
+                                </label>
+                            </div>`;
+                    });
+                }
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+            } catch (error) { showError(error.message); }
+        });
+
+        async function processCheckout() {
+            const btn = document.getElementById('checkoutBtn');
+            const amount = parseInt(document.getElementById('amountInput').value, 10);
+            const selectedWork = document.querySelector('input[name="selectedWork"]:checked').value;
+
+            // ★ 修正：金額が空（NaN）、100未満、または10000を超えている場合にアラートを出す
+            if (isNaN(amount) || amount < 100 || amount > 10000) {
+                return alert('100円〜10,000円の範囲で金額を入力してください。');
+            }
+
+            try {
+                const stripe = Stripe(STRIPE_PUBLIC_KEY);
+                btn.disabled = true; btn.innerText = '決済画面へ移動中...';
+
+                const { data: sessionData, error: functionError } = await supabaseClient.functions.invoke('create-checkout', {
+                    body: { amount: amount, authorId: authorId, workId: selectedWork }
+                });
+
+                if (functionError) throw new Error("通信エラー: " + functionError.message);
+                if (sessionData && sessionData.error) throw new Error("決済エラー: " + sessionData.error);
+
+                const checkoutSessionId = sessionData.id || sessionData.sessionId;
+                if (!checkoutSessionId) throw new Error("セッションIDが取得できませんでした。");
+
+                const { error } = await stripe.redirectToCheckout({ sessionId: checkoutSessionId });
+                if (error) throw error;
+            } catch (error) {
+                alert("エラーが発生しました:\n" + error.message);
+                btn.disabled = false; btn.innerText = 'クレジットカードで支援する';
+            }
+        }
+    </script>
+</body>
+</html>
