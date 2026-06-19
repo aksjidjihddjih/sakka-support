@@ -35,9 +35,6 @@
         .link-text:hover { color: var(--text-main); }
 
         #errorMsg { display: none; background: #fee2e2; color: #dc2626; padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 24px; border: 1px solid #fca5a5; }
-        
-        /* 成功時のメッセージデザイン */
-        #successMsg { display: none; background: #dcfce7; color: #166534; padding: 16px; border-radius: 8px; font-size: 14px; font-weight: 700; margin-bottom: 24px; border: 1px solid #86efac; text-align: center; }
     </style>
 </head>
 <body>
@@ -56,9 +53,8 @@
             <p class="desc">新しくKANKETSUのアカウントを作成します。</p>
 
             <div id="errorMsg"></div>
-            <div id="successMsg">登録に成功しました！<br>ダッシュボードへ移動します...</div>
 
-            <div id="formArea">
+            <div>
                 <div class="form-group">
                     <label>メールアドレス</label>
                     <input type="email" id="email" class="form-control" placeholder="you@example.com" onkeypress="handleEnter(event)">
@@ -78,7 +74,8 @@
     <script>
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ★ バグの原因だった変数名を「supabaseClient」に変更し、衝突を回避しました
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         function handleEnter(e) {
             if (e.key === 'Enter' || e.keyCode === 13) {
@@ -91,8 +88,6 @@
             const password = document.getElementById('password').value;
             const btn = document.getElementById('submitBtn');
             const errorMsg = document.getElementById('errorMsg');
-            const successMsg = document.getElementById('successMsg');
-            const formArea = document.getElementById('formArea');
 
             if (!email || !password || password.length < 6) {
                 errorMsg.style.display = 'block';
@@ -105,21 +100,15 @@
             errorMsg.style.display = 'none';
 
             try {
-                // 1. Supabaseで新規登録を実行
-                const { data, error } = await supabase.auth.signUp({ email, password });
+                // ★ 修正した変数名を使用
+                const { data, error } = await supabaseClient.auth.signUp({ email, password });
 
                 if (error) {
                     throw error;
                 }
                 
-                // 2. 成功したらフォームを隠して緑色の成功メッセージを出す
-                formArea.style.display = 'none';
-                successMsg.style.display = 'block';
-
-                // 3. 情報が確実に保存されるまで1秒待ってから、ダッシュボードへ飛ばす
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
+                // 成功したらダッシュボードへ一瞬で遷移
+                window.location.href = 'dashboard.html';
 
             } catch (error) {
                 errorMsg.style.display = 'block';
