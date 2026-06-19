@@ -54,18 +54,18 @@
 
             <div id="errorMsg"></div>
 
-            <form id="signupForm">
+            <div>
                 <div class="form-group">
                     <label>メールアドレス</label>
-                    <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
+                    <input type="email" id="email" class="form-control" placeholder="you@example.com" onkeypress="handleEnter(event)">
                 </div>
                 <div class="form-group">
                     <label>パスワード <span style="color: var(--text-sub); font-weight: 500; font-size: 12px;">(6文字以上)</span></label>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••" required minlength="6">
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" onkeypress="handleEnter(event)">
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="submitBtn">登録してはじめる</button>
-            </form>
+                <button type="button" class="btn btn-primary" id="submitBtn" onclick="processSignup()">登録してはじめる</button>
+            </div>
 
             <a href="login.html" class="link-text">すでにアカウントをお持ちの方はこちら</a>
         </div>
@@ -76,13 +76,24 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        document.getElementById('signupForm').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
+        // エンターキーが押されたら登録を実行する関数
+        function handleEnter(e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                processSignup();
+            }
+        }
+
+        async function processSignup() {
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = document.getElementById('submitBtn');
             const errorMsg = document.getElementById('errorMsg');
+
+            if (!email || !password || password.length < 6) {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = 'メールアドレスと6文字以上のパスワードを入力してください。';
+                return;
+            }
 
             btn.disabled = true;
             btn.innerText = '登録処理中...';
@@ -91,9 +102,7 @@
             try {
                 const { data, error } = await supabase.auth.signUp({ email, password });
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
                 
                 // 成功したらダッシュボードへ確実に遷移
                 window.location.href = 'dashboard.html';
@@ -104,7 +113,7 @@
                 btn.disabled = false;
                 btn.innerText = '登録してはじめる';
             }
-        };
+        }
     </script>
 </body>
 </html>
