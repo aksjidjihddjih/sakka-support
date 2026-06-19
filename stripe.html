@@ -169,7 +169,14 @@
                     let penname = "未設定";
                     let isStripeConnected = false;
                     try {
-                        const { data: creator } = await supabaseClient.from('creators').select('pen_name, penname, stripe_account_id').eq('id', session.user.id).single();
+                        const { data: creator, error: fetchErr } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
+
+                        const penname = creator ? (creator.pen_name || creator.penname || "") : "";
+                        const nameDisplay = document.getElementById('userNameDisplay');
+                        const avatarDisplay = document.getElementById('userAvatar');
+
+                        if(nameDisplay) nameDisplay.innerText = (penname === '未設定' || !penname ? "未設定" : penname);
+                        if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
                         if (creator) {
                             penname = creator.pen_name || creator.penname || "未設定";
                             isStripeConnected = !!creator.stripe_account_id;
