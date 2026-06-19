@@ -14,13 +14,13 @@
         
         .container { max-width: 440px; margin: 20px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         
-        .card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 48px 32px; box-shadow: 4px 4px 0px rgba(0,0,0,1); text-align: center; }
+        /* ★ 影 (box-shadow) を削除しました */
+        .card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 48px 32px; text-align: center; }
         .auth-icon { width: 56px; height: 56px; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; }
         
-        /* 説明文を消した分、見出しの下の余白を少し広げて調整しました */
         .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 32px 0; }
 
-        /* 動く要素と白反転を削除し、シンプルな透明度変化のみにしています */
+        /* ★ ホバー時のアニメーションや影を削除し、透明度変更のみにしました */
         .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: opacity 0.2s; border: 2px solid var(--border-color); box-sizing: border-box; text-decoration: none; }
         .btn-primary { background-color: var(--text-main); color: #fff; }
         .btn-primary:hover { opacity: 0.85; }
