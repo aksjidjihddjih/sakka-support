@@ -33,11 +33,11 @@
         .work-label-desc { font-size: 13px; color: var(--text-sub); display: block; }
         .work-option input[type="radio"]:checked + .work-label { border: 2px solid var(--border-color); background-color: #f9fafb; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
 
-        .amount-input-wrapper { display: flex; align-items: center; border: 2px solid var(--border-color); border-radius: 8px; padding: 12px 16px; font-size: 24px; font-weight: 700; background: #fff; }
-        .amount-input-wrapper span { margin-right: 8px; color: var(--text-sub); }
-        .amount-input { border: none; outline: none; font-size: 24px; font-weight: 700; width: 100%; color: var(--text-main); }
+        /* 金額入力欄のCSSを調整 */
+        .amount-input { border: none; outline: none; font-size: 24px; font-weight: 700; width: 100%; color: var(--text-main); background: transparent; }
+        .amount-input::placeholder { color: #9ca3af; font-weight: 600; }
 
-        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; margin-top: 24px; }
+        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; margin-top: 8px; }
         .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
         .btn-primary:hover { background-color: var(--btn-hover); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
@@ -77,109 +77,26 @@
                     </div>
                 </div>
 
-                <h2 class="section-title" style="margin-top: 32px;">2. 支援金額を入力する</h2>
-                <div class="amount-input-wrapper">
-                    <span>¥</span>
-                    <input type="number" id="amountInput" class="amount-input" value="500" min="100" max="10000" step="100">
+                <h2 class="section-title" style="margin-top: 32px; border-bottom: none; margin-bottom: 8px;">2. 支援金額を入力する</h2>
+                <div style="position: relative; margin-bottom: 8px;">
+                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 20px; font-weight: 700; color: var(--text-main);">¥</span>
+                    <input type="number" id="amountInput" class="amount-input" style="padding: 16px 16px 16px 44px; border: 2px solid var(--border-color); border-radius: 8px; width: 100%; box-sizing: border-box; background: #fff;" placeholder="金額を入力" min="100" max="10000" step="100">
                 </div>
+                <p style="font-size: 13px; color: var(--text-sub); margin: 0 0 24px 0; text-align: right; font-weight: 600;">※ 100円 〜 10,000円 の範囲で入力</p>
 
                 <button class="btn btn-primary" id="checkoutBtn" onclick="processCheckout()">クレジットカードで支援する</button>
             </div>
         </div>
     </div>
+    
     <div style="text-align: center; padding: 40px 20px; border-top: 1px solid var(--border-light); margin-top: 40px;">
-    <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
-        <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
-        <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
-        <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
+        <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
+            <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
+            <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
+            <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
+        </div>
+        <p style="margin: 0; color: var(--text-sub); font-size: 13px;">&copy; 2026 KANKETSU</p>
     </div>
-    <p style="margin: 0; color: var(--text-sub); font-size: 13px;">&copy; 2026 KANKETSU</p>
-</div>
 
     <script>
-        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-        const STRIPE_PUBLIC_KEY = 'pk_test_51ThTKj4XyICGMkd9IU5z99hggK13SiHHFZMffu6rMnMTtNiQ6TNzNeBxhqD7ah8wTed7GATw83rNiJgohFUhuwOg00I0j4UOOM';
-
-        let supabaseClient, authorId = null;
-
-        function showError(msg) {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
-            document.getElementById('errorMessage').innerHTML = msg;
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                authorId = new URLSearchParams(window.location.search).get('id');
-                if (!authorId) throw new Error("URLが正しくありません。");
-
-                const { data: creator } = await supabaseClient.from('creators').select('*').eq('id', authorId).single();
-                if (!creator) throw new Error("指定されたクリエイターが見つかりません。");
-
-                const penname = creator.pen_name || "名無し作者";
-                document.getElementById('authorName').innerText = penname;
-                document.getElementById('authorAvatar').innerText = penname.charAt(0);
-
-                const { data: links } = await supabaseClient.from('creator_links').select('*').eq('creator_id', authorId).order('created_at');
-                if (links && links.length > 0) {
-                    const linksList = document.getElementById('linksList');
-                    links.forEach(link => {
-                        linksList.innerHTML += `<a href="${link.url}" target="_blank" class="link-item">${link.title} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></a>`;
-                    });
-                    document.getElementById('linksCard').style.display = 'block';
-                }
-
-                const { data: works } = await supabaseClient.from('works').select('*').eq('creator_id', authorId).order('created_at');
-                if (works && works.length > 0) {
-                    const worksList = document.getElementById('worksList');
-                    works.forEach(work => {
-                        worksList.innerHTML += `
-                            <div class="work-option">
-                                <input type="radio" name="selectedWork" id="work_${work.id}" value="${work.id}">
-                                <label for="work_${work.id}" class="work-label">
-                                    <span class="work-label-title">${work.title}</span>
-                                    <span class="work-label-desc">この作品を指定して応援します。</span>
-                                </label>
-                            </div>`;
-                    });
-                }
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-            } catch (error) { showError(error.message); }
-        });
-
-        async function processCheckout() {
-            const btn = document.getElementById('checkoutBtn');
-            const amount = parseInt(document.getElementById('amountInput').value, 10);
-            const selectedWork = document.querySelector('input[name="selectedWork"]:checked').value;
-
-            if (isNaN(amount) || amount < 100) return alert('支援金額は100円以上で入力してください。');
-
-            try {
-                const stripe = Stripe(STRIPE_PUBLIC_KEY);
-                btn.disabled = true; btn.innerText = '決済画面へ移動中...';
-
-                // ★修正箇所：response.json()のバグを修正し、Edge Functionから直接データを受け取る
-                const { data: sessionData, error: functionError } = await supabaseClient.functions.invoke('create-checkout', {
-                    body: { amount: amount, authorId: authorId, workId: selectedWork }
-                });
-
-                if (functionError) throw new Error("通信エラー: " + functionError.message);
-                if (sessionData && sessionData.error) throw new Error("決済エラー: " + sessionData.error);
-
-                const checkoutSessionId = sessionData.id || sessionData.sessionId;
-                if (!checkoutSessionId) throw new Error("セッションIDが取得できませんでした。");
-
-                const { error } = await stripe.redirectToCheckout({ sessionId: checkoutSessionId });
-                if (error) throw error;
-            } catch (error) {
-                alert("エラーが発生しました:\n" + error.message);
-                btn.disabled = false; btn.innerText = 'クレジットカードで支援する';
-            }
-        }
-    </script>
-</body>
-</html>
+        const SUPABASE_URL = 'https://cfeejhwsh
