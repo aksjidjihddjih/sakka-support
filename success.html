@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>支援完了 - KANKETSU</title>
+    <!-- Stripeからのリダイレクト専用ページのため、安全第一でTurboは外しています -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
@@ -29,17 +30,6 @@
             text-align: left; 
             position: relative;
             overflow: hidden;
-        }
-
-        /* カード上部のアクセント帯 */
-        .message-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: repeating-linear-gradient( 45deg, #000, #000 10px, #fff 10px, #fff 20px );
         }
 
         .msg-header { 
