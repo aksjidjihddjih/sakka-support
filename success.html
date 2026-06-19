@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>支援完了 - KANKETSU</title>
-    <!-- Stripeからのリダイレクト専用ページのため、安全第一でTurboは外しています -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
@@ -15,13 +14,12 @@
         
         .container { max-width: 640px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; text-align: center; }
         
-        /* ★ チェックマークの背景色を緑色に変更 */
+        /* ★ チェックマークの背景を緑色に変更 */
         .success-icon { width: 64px; height: 64px; background: #16a34a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; }
         
         h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; }
         .desc { font-size: 15px; color: var(--text-sub); margin-bottom: 40px; }
 
-        /* メッセージカードのプレミアムデザイン */
         .message-card { 
             background-color: var(--card-bg); 
             border: 2px solid var(--border-color); 
@@ -56,7 +54,7 @@
         .msg-title-en { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--text-sub); line-height: 1; margin-bottom: 4px;}
         .msg-title { font-size: 16px; font-weight: 800; margin: 0; line-height: 1;}
 
-        /* メッセージ本文エリア（★引用符の装飾を削除し、余白を調整） */
+        /* ★ 余白を均等にし、引用符の装飾（::before）を削除 */
         .msg-content { 
             font-size: 15px; 
             line-height: 1.8; 
@@ -69,7 +67,6 @@
             position: relative;
         }
 
-        /* 注意書きのスマート化 */
         .warning-box { 
             background: transparent; 
             border: 1px dashed #9ca3af; 
@@ -151,7 +148,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
 
-        // URLから session_id を即座に消去し、リロードや保存による再表示を防止
         if (sessionId) {
             window.history.replaceState(null, '', window.location.pathname);
         }
