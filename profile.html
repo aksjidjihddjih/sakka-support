@@ -28,11 +28,12 @@
         .work-options { display: flex; flex-direction: column; gap: 12px; }
         .work-option { position: relative; }
         .work-option input[type="radio"] { position: absolute; opacity: 0; }
-        .work-label { display: block; padding: 16px; border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        /* ★ 通常時の枠線を2pxにし、box-sizingを追加してズレを完全に防止 */
+        .work-label { display: block; padding: 16px; border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; box-sizing: border-box; }
         .work-label-title { font-size: 15px; font-weight: 600; display: block; margin-bottom: 4px; }
         .work-label-desc { font-size: 13px; color: var(--text-sub); display: block; }
-        .work-option input[type="radio"]:checked + .work-label { border: 2px solid var(--border-color); background-color: #f9fafb; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
-
+        /* ★ 影と太さの変更をなくし、色だけを濃くする */
+        .work-option input[type="radio"]:checked + .work-label { border-color: var(--border-color); background-color: #f9fafb; }
         /* 金額入力欄のCSSを調整 */
         .amount-input { border: none; outline: none; font-size: 24px; font-weight: 700; width: 100%; color: var(--text-main); background: transparent; }
         .amount-input::placeholder { color: #9ca3af; font-weight: 600; }
