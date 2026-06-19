@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* ★全ファイルで完全に統一されたCSS */
+        /* 全ファイル共通のCSS */
         :root { --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; --sidebar-bg: #000000; --sidebar-text: #d1d5db; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; display: inline-block; vertical-align: middle; }
@@ -75,13 +75,6 @@
         .modal-close:hover { color: var(--text-main); }
         .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; border-top: 1px solid var(--border-light); padding-top: 24px; }
         .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
-        .table-container { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
-        th { text-align: left; padding: 16px; border-bottom: 2px solid var(--border-color); color: var(--text-sub); font-weight: 600; }
-        td { padding: 16px; border-bottom: 1px solid var(--border-light); color: var(--text-main); }
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-        .status-pending { background-color: #fef3c7; color: #92400e; }
-        .status-transferred { background-color: #d1fae5; color: #065f46; }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -89,11 +82,10 @@
 <body>
 
     <div class="app-container" id="dashboard-container">
+        
         <header class="mobile-header">
             <a href="dashboard.html" class="brand-logo">KANKETSU</a>
-            <button class="hamburger" onclick="window.toggleSidebar()">
-                <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </button>
+            <button class="hamburger" onclick="window.toggleSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
         </header>
 
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
@@ -148,7 +140,25 @@
 
         <main class="main-content">
             
-            <div id="setupContainer"></div>
+            <div id="onboardingView" style="display: none; max-width: 600px; margin: 40px auto; width: 100%;">
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 8px;">あと少しで準備完了です。</h1>
+                    <p style="color: var(--text-sub);">支援受付を開始するために、以下の必須項目を設定してください。</p>
+                </div>
+                
+                <div class="card" style="padding: 32px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
+                        <span style="font-size: 14px; font-weight: 700; color: var(--text-sub);">進捗状況 (<span id="onboardingCount">0</span>/4)</span>
+                        <span style="font-size: 16px; font-weight: 800;" id="onboardingPercent">0%</span>
+                    </div>
+                    <div style="height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 32px; border: 1px solid var(--border-light);">
+                        <div id="onboardingProgressBar" style="height: 100%; background: #000; width: 0%; transition: width 0.5s ease;"></div>
+                    </div>
+                    
+                    <div class="task-list" id="onboardingTaskList">
+                        </div>
+                </div>
+            </div>
 
             <div id="mainDashboardView" style="display: none;" class="fade-in">
                 <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
@@ -344,22 +354,6 @@
                         }, 
                         { onConflict: 'id', ignoreDuplicates: true }
                     );
-                    
-                    if (upsertErr) {
-                        const { error: upsertErr2 } = await supabaseClient.from('creators').upsert(
-                            { 
-                                id: currentUserId, 
-                                penname: '未設定',
-                                profile_url: 'https://kanketsu.site/setup',
-                                general_secret_message: '未設定'
-                            },
-                            { onConflict: 'id', ignoreDuplicates: true }
-                        );
-                        if (upsertErr2) {
-                            alert("【データベース権限エラー】\n作者の基本データを作成できませんでした。\n詳細: " + upsertErr2.message);
-                            return; 
-                        }
-                    }
 
                     let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', currentUserId).single();
                     if (!creator) creator = { id: currentUserId, pen_name: "" }; 
@@ -411,6 +405,8 @@
                 const onboardingView = document.getElementById('onboardingView');
                 const mainDashboardView = document.getElementById('mainDashboardView');
                 const sidebarNav = document.getElementById('sidebarNavMenu');
+
+                if (!onboardingView || !mainDashboardView) return; // ★エラー防止の安全装置
 
                 if (isCompleted) {
                     onboardingView.style.display = 'none';
