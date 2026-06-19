@@ -66,9 +66,15 @@
             </div>
 
             <div class="card">
-                <h2 class="section-title">1. 支援する作品を選ぶ</h2>
-                <div class="work-options" id="worksList">
-                    <div class="work-option">
+                <h2 class="section-title" style="border-bottom: none; padding-bottom: 0; margin-bottom: 12px;">1. 支援する作品を選ぶ</h2>
+                
+                <div style="position: relative; margin-bottom: 16px;">
+                    <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-sub);" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="workSearchInput" style="width: 100%; padding: 12px 16px 12px 36px; border: 1px solid var(--border-light); border-radius: 8px; box-sizing: border-box; font-size: 14px; background-color: #f9fafb; transition: all 0.2s; outline: none;" placeholder="作品名で検索..." onfocus="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='#fff';" onblur="this.style.borderColor='var(--border-light)'; this.style.backgroundColor='#f9fafb';">
+                </div>
+
+                <div class="work-options" id="worksList" style="max-height: 300px; overflow-y: auto; padding-right: 4px;">
+                    <div class="work-option search-target" data-title="全体への支援（作品指定なし）">
                         <input type="radio" name="selectedWork" id="work_general" value="general" checked>
                         <label for="work_general" class="work-label">
                             <span class="work-label-title">全体への支援（作品指定なし）</span>
