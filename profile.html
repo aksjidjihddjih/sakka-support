@@ -129,8 +129,7 @@
 
                 const penname = creator.pen_name || "名無し作者";
                 document.getElementById('authorName').innerText = penname;
-                document.getElementById('authorAvatar').innerText = penname.charAt(0);
-
+               
                 const { data: links } = await supabaseClient.from('creator_links').select('*').eq('creator_id', authorId).order('created_at');
                 if (links && links.length > 0) {
                     const linksList = document.getElementById('linksList');
