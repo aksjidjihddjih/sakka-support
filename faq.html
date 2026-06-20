@@ -43,6 +43,11 @@
         .faq-question { font-size: 15px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .faq-answer { font-size: 14px; color: var(--text-sub); margin-top: 12px; display: none; line-height: 1.6; }
         .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
+        /* スマホ向けフッター1列化（文字サイズを最小にして横に並べる） */
+        @media (max-width: 768px) {
+            .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
+            .site-footer a { font-size: 10px !important; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
