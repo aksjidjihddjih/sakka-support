@@ -84,6 +84,11 @@
         .status-pending { background-color: #fef3c7; color: #92400e; }
         .status-transferred { background-color: #d1fae5; color: #065f46; }
         html { overflow-y: scroll; }
+        /* スマホ向けフッター1列化（文字サイズを最小にして横に並べる） */
+        @media (max-width: 768px) {
+            .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
+            .site-footer a { font-size: 10px !important; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
