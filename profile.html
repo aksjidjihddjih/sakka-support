@@ -47,6 +47,11 @@
         #errorState { display: none; background: #fee2e2; border: 2px solid #ef4444; border-radius: 8px; padding: 24px; margin: 40px 0; text-align: center; }
         #errorState h2 { color: #b91c1c; margin-top: 0; font-size: 18px; }
         #mainContent { display: none; }
+        /* スマホ向けフッター1列化（文字サイズを最小にして横に並べる） */
+        @media (max-width: 768px) {
+            .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
+            .site-footer a { font-size: 10px !important; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
