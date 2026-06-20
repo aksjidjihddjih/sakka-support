@@ -109,6 +109,19 @@
             .nav-item { padding: 8px 24px; }
             .account-btn { padding: 12px 24px; }
         }
+        /* スマホ向けのテーブル最適化（横スクロール禁止・自動折り返し） */
+@media (max-width: 768px) {
+    .table-wrap { overflow-x: hidden !important; }
+    table { table-layout: fixed; width: 100%; }
+    
+    /* スマホ画面に合わせて余白と文字サイズを縮小し、強制的に折り返す */
+    th, td { 
+        white-space: normal !important; 
+        word-break: break-word; 
+        padding: 12px 6px !important; 
+        font-size: 12px !important; 
+    }
+}
     </style>
 </head>
 <body>
