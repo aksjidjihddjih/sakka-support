@@ -122,6 +122,23 @@
         font-size: 12px !important; 
     }
 }
+                /* ★ テーブルを囲む枠の「影（浮き上がり）」と「太い黒線」を無効化し、シンプルな薄い線にする */
+        .card { 
+            border: 1px solid #d1d5db !important; 
+            box-shadow: none !important; 
+            border-radius: 8px !important;
+        }
+        
+        .table-wrap {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* 表の中の線（ヘッダー下の太い線など）もすべて薄いグレーに統一してスッキリさせる */
+        table, th, td {
+            border: 1px solid var(--border-light) !important;
+        }
+
     </style>
 </head>
 <body>
