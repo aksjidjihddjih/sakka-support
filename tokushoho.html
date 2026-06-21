@@ -8,106 +8,99 @@
         :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 24px 20px; max-width: 840px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
+        .header { padding: 24px 20px 0 20px; max-width: 840px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         
-        .btn { display: inline-flex; justify-content: center; align-items: center; padding: 8px 20px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); text-decoration: none; }
-        .btn-outline { background-color: transparent; color: var(--text-main); }
-        .btn-outline:hover { background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
-
         .container { max-width: 840px; margin: 0 auto; padding: 20px 20px 60px 20px; flex: 1; width: 100%; box-sizing: border-box; }
         
-        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); overflow-wrap: break-word; }
+        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
         .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 24px 0; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; }
         
-        /* ★はみ出し防止用のコンテナを追加 */
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th, td { padding: 14px 16px; border: 1px solid var(--border-light); font-size: 14px; }
-        th { background-color: #f9fafb; font-weight: 700; width: 25%; text-align: left; }
-        td { color: var(--text-sub); }
+        /* ★ 横スクロールを完全に防止するテーブル設定 */
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { padding: 14px 16px; border: 1px solid var(--border-light); font-size: 14px; word-wrap: break-word; overflow-wrap: break-word; }
+        th { background-color: #f9fafb; font-weight: 700; width: 30%; text-align: left; vertical-align: top; }
+        td { color: var(--text-sub); width: 70%; }
 
+        /* フッター設定 */
         .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
-                /* スマホ向けフッター強制1列化 */
+        .footer-links { margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; }
+        .footer-links a { color: var(--text-sub); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--text-main); }
+
+        /* ★ スマホ向けの設定（フッター1列化＆テーブル最適化） */
         @media (max-width: 768px) {
-            .footer, .site-footer, .footer-links { 
-                display: flex !important; 
-                flex-direction: row !important; 
-                flex-wrap: nowrap !important; 
-                justify-content: center !important; 
-                gap: 8px !important; 
-                padding-left: 5px !important; 
-                padding-right: 5px !important; 
-            }
-            .footer a, .site-footer a, .footer-links a { 
-                font-size: 10px !important; 
-                white-space: nowrap !important; 
-            }
+            .card { padding: 20px; }
+            /* スマホで横スクロールしないよう、文字サイズと余白を詰める */
+            th, td { padding: 10px 8px; font-size: 12px; }
+            th { width: 35%; }
+            td { width: 65%; }
+
+            /* スマホでフッターリンクを強制的に横1列にする */
+            .footer-links { flex-wrap: nowrap !important; gap: 8px !important; }
+            .footer-links a { font-size: 10px !important; white-space: nowrap !important; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 700; margin-bottom: 24px; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-sub)'">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-    戻る
-</a>
+        <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 700; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-sub)'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            戻る
+        </a>
     </div>
 
     <div class="container">
         <div class="card">
             <h1>特定商取引法に基づく表記</h1>
             
-            <div class="table-responsive">
-                <table>
-                    <tbody>
-                        <tr>
-                            <th>サービス名</th>
-                            <td>KANKETSU</td>
-                        </tr>
-                        <tr>
-                            <th>事業者名</th>
-                            <td>（あなたの氏名または法人名をご記入ください）</td>
-                        </tr>
-                        <tr>
-                            <th>所在地</th>
-                            <td>（ご住所をご記入ください。※バーチャルオフィスの利用も可）</td>
-                        </tr>
-                        <tr>
-                            <th>お問い合わせ</th>
-                            <td>support@example.com（メールアドレスをご記入ください）</td>
-                        </tr>
-                        <tr>
-                            <th>利用料金</th>
-                            <td>クリエイター登録・利用は無料。支援金から決済・システム手数料として10%を差し引きます。</td>
-                        </tr>
-                        <tr>
-                            <th>支払い方法</th>
-                            <td>クレジットカード決済（Stripeを利用）</td>
-                        </tr>
-                        <tr>
-                            <th>代金の支払い時期</th>
-                            <td>支援時に即時決済されます。</td>
-                        </tr>
-                        <tr>
-                            <th>サービスの提供時期</th>
-                            <td>決済完了後、即時にデジタルコンテンツ（限定メッセージ等）が提供されます。</td>
-                        </tr>
-                        <tr>
-                            <th>キャンセル・返金</th>
-                            <td>デジタルコンテンツの性質上、決済完了後のキャンセル・返金はお受けできません。</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table>
+                <tbody>
+                    <tr>
+                        <th>サービス名</th>
+                        <td>KANKETSU</td>
+                    </tr>
+                    <tr>
+                        <th>事業者名</th>
+                        <td>（あなたの氏名または法人名をご記入ください）</td>
+                    </tr>
+                    <tr>
+                        <th>所在地</th>
+                        <td>（ご住所をご記入ください。※バーチャルオフィスの利用も可）</td>
+                    </tr>
+                    <tr>
+                        <th>お問い合わせ</th>
+                        <td>support@example.com（メールアドレスをご記入ください）</td>
+                    </tr>
+                    <tr>
+                        <th>利用料金</th>
+                        <td>クリエイター登録・利用は無料。支援金から決済・システム手数料として10%を差し引きます。</td>
+                    </tr>
+                    <tr>
+                        <th>支払い方法</th>
+                        <td>クレジットカード決済（Stripeを利用）</td>
+                    </tr>
+                    <tr>
+                        <th>代金の支払い時期</th>
+                        <td>支援時に即時決済されます。</td>
+                    </tr>
+                    <tr>
+                        <th>サービスの提供時期</th>
+                        <td>決済完了後、即時にデジタルコンテンツ（限定メッセージ等）が提供されます。</td>
+                    </tr>
+                    <tr>
+                        <th>キャンセル・返金</th>
+                        <td>デジタルコンテンツの性質上、決済完了後のキャンセル・返金はお受けできません。</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <footer class="footer">
-        <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
-            <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
-            <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
-            <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
+        <div class="footer-links">
+            <a href="tokushoho.html">特定商取引法に基づく表記</a>
+            <a href="terms.html">利用規約</a>
+            <a href="privacy.html">プライバシーポリシー</a>
         </div>
         <p style="margin: 0;">&copy; 2026 KANKETSU</p>
     </footer>
