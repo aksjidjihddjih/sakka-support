@@ -145,10 +145,12 @@
                 
                 currentUserId = session.user.id;
                 
+                // ★ 返信用メールアドレスを自動入力
                 if (document.getElementById('contactEmail') && session.user.email) {
                     document.getElementById('contactEmail').value = session.user.email;
                 }
 
+                // DASHBOARD共通の取得ロジック
                 let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
                 if (!creator) creator = { id: session.user.id, pen_name: "" }; 
 
@@ -162,18 +164,12 @@
             } catch (error) { console.error("Error:", error); }
         }
 
+        // お問い合わせ送信ロジック
         window.submitInquiry = async function() {
-            // 要素の取得漏れを防ぐための安全な取得方法に変更
-            const emailInput = document.getElementById('contactEmail');
-            const typeSelect = document.getElementById('contactType') || document.querySelector('select');
-            const messageInput = document.getElementById('contactMessage');
+            const email = document.getElementById('contactEmail').value.trim();
+            const type = document.getElementById('contactType').value;
+            const message = document.getElementById('contactMessage').value.trim();
             const btn = document.getElementById('submitBtn');
-
-            if (!emailInput || !messageInput) return; // 要素がない場合は何もしない
-
-            const email = emailInput.value.trim();
-            const type = typeSelect ? typeSelect.value : '未選択';
-            const message = messageInput.value.trim();
 
             if (!email || !message) {
                 return alert('返信用メールアドレスと内容を入力してください。');
@@ -183,17 +179,20 @@
             btn.innerText = '送信中...';
 
             try {
+                // Supabaseのお問い合わせ専用テーブルにデータを送信
                 const { error } = await supabaseClient.from('inquiries').insert([{
                     user_id: currentUserId,
                     email: email,
-                    inquiry_type: type || '未選択', // 強制的にnullを回避
+                    inquiry_type: type,
                     message: message
                 }]);
 
                 if (error) throw error;
 
                 alert('お問い合わせを受け付けました。\n内容を確認次第、入力いただいたメールアドレスへご返信いたします。');
-                messageInput.value = '';
+                
+                // メッセージ欄だけを空にする（メアド等は残す）
+                document.getElementById('contactMessage').value = '';
 
             } catch (error) {
                 alert('送信に失敗しました。時間をおいて再度お試しください。\n' + error.message);
