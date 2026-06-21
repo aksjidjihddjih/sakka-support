@@ -138,7 +138,21 @@
         table, th, td {
             border: 1px solid var(--border-light) !important;
         }
-
+                @media (max-width: 768px) {
+            /* ★ 1列目（日時）が数字の途中で変に改行されないようにする */
+            th:nth-child(1), td:nth-child(1) {
+                word-break: keep-all !important; 
+                overflow-wrap: normal !important;
+                width: 28%; /* 日時が綺麗に収まるよう、少しだけ幅を広げる */
+            }
+            /* 他の列は均等に割り振る */
+            th:nth-child(2), td:nth-child(2),
+            th:nth-child(3), td:nth-child(3),
+            th:nth-child(4), td:nth-child(4),
+            th:nth-child(5), td:nth-child(5) {
+                width: 18%;
+            }
+        }
     </style>
 </head>
 <body>
