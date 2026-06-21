@@ -28,16 +28,26 @@
         td { color: var(--text-sub); }
 
         .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
-        /* スマホ向けフッター1列化（文字サイズを最小にして横に並べる） */
+                /* スマホ向けフッター強制1列化 */
         @media (max-width: 768px) {
-            .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
-            .site-footer a { font-size: 10px !important; white-space: nowrap; }
+            .footer, .site-footer, .footer-links { 
+                display: flex !important; 
+                flex-direction: row !important; 
+                flex-wrap: nowrap !important; 
+                justify-content: center !important; 
+                gap: 8px !important; 
+                padding-left: 5px !important; 
+                padding-right: 5px !important; 
+            }
+            .footer a, .site-footer a, .footer-links a { 
+                font-size: 10px !important; 
+                white-space: nowrap !important; 
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <a href="index.html" class="brand-logo">KANKETSU</a>
         <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 700; margin-bottom: 24px; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-sub)'">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
     戻る
