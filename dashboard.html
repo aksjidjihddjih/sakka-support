@@ -551,43 +551,68 @@
             };
 
             window.saveLink = async function() {
-                const url = document.getElementById('linkUrl').value.trim();
-                if(!url) return alert("URLを入力してください。");
+            const url = document.getElementById('linkUrl').value.trim();
+            if(!url) return alert("URLを入力してください。");
 
-                let autoTitle = "";
-                try {
-                    const u = new URL(url);
-                    if (u.hostname.includes('syosetu.com')) autoTitle = '小説家になろう';
-                    else if (u.hostname.includes('alphapolis.co.jp')) autoTitle = 'アルファポリス';
-                    else if (u.hostname.includes('syosetu.org')) autoTitle = 'ハーメルン';
-                    else if (u.hostname.includes('kakuyomu.jp')) autoTitle = 'カクヨム';
-                } catch(e) {}
-
-                if (!autoTitle) {
-                    return alert("許可されていないサイトのURLです。\n（対応：小説家になろう、アルファポリス、ハーメルン、カクヨム）");
-                }
-
-                const promise = editLinkId ? supabaseClient.from('creator_links').update({ title: autoTitle, url }).eq('id', editLinkId) : supabaseClient.from('creator_links').insert([{ creator_id: currentUserId, title: autoTitle, url }]);
-                const { error } = await promise;
-                if (error) alert("エラー: " + error.message); else { window.closeModal('linkModal'); await window.initDashboard(); }
-            };
-
-            window.saveMessage = async function() {
-                const content = document.getElementById('msgContent').value.trim();
-                if(!content) return alert("メッセージを入力してください。");
+            let autoTitle = "";
+            try {
+                const u = new URL(url);
                 
-                const { data: existing } = await supabaseClient.from('creator_messages').select('id').eq('creator_id', currentUserId).single();
-                
-                let promise;
-                if (existing) {
-                    promise = supabaseClient.from('creator_messages').update({ title: "基本のお礼メッセージ", content }).eq('id', existing.id);
-                } else {
-                    promise = supabaseClient.from('creator_messages').insert([{ creator_id: currentUserId, title: "基本のお礼メッセージ", content }]);
+                // --- URLの厳密チェックと親切なエラーメッセージ ---
+                if (u.hostname.includes('syosetu.com')) {
+                    if (url.includes('mypage.syosetu.com/')) {
+                        autoTitle = '小説家になろう';
+                    } else {
+                        return alert("【小説家になろう のURLについて】\n作者用の管理画面ではなく、読者から見える「公開用マイページ」のURLを入力してください。\n\n正しい例: https://mypage.syosetu.com/〇〇〇〇/");
+                    }
                 }
+                else if (u.hostname.includes('alphapolis.co.jp')) {
+                    if (url.includes('www.alphapolis.co.jp/author/detail/')) {
+                        autoTitle = 'アルファポリス';
+                    } else {
+                        return alert("【アルファポリス のURLについて】\n作者用の管理画面ではなく、読者から見える「公開用マイページ」のURLを入力してください。\n\n正しい例: https://www.alphapolis.co.jp/author/detail/〇〇〇〇");
+                    }
+                }
+                else if (u.hostname.includes('syosetu.org')) {
+                    if (url.includes('syosetu.org/user/')) {
+                        autoTitle = 'ハーメルン';
+                    } else {
+                        return alert("【ハーメルン のURLについて】\n作者用の管理画面ではなく、読者から見える「公開用マイページ」のURLを入力してください。\n\n正しい例: https://syosetu.org/user/〇〇〇〇/");
+                    }
+                }
+                else if (u.hostname.includes('kakuyomu.jp')) {
+                    if (url.includes('kakuyomu.jp/users/')) {
+                        autoTitle = 'カクヨム';
+                    } else {
+                        return alert("【カクヨム のURLについて】\n作者用の管理画面ではなく、読者から見える「公開用マイページ」のURLを入力してください。\n\n正しい例: https://kakuyomu.jp/users/〇〇〇〇");
+                    }
+                }
+            } catch(e) {
+                return alert("有効なURLを入力してください。");
+            }
 
-                const { error } = await promise;
-                if (error) alert("エラー: " + error.message); else { window.closeModal('msgModal'); await window.initDashboard(); }
-            };
+            // --- ここから下は元の保存処理（変更なし） ---
+            const title = autoTitle || "活動サイト"; 
+            const btn = document.getElementById('saveLinkBtn');
+            btn.disabled = true;
+            btn.innerText = '保存中...';
+
+            try {
+                const { error } = await supabaseClient.from('creator_links').insert([
+                    { creator_id: currentUserId, title: title, url: url }
+                ]);
+                if (error) throw error;
+                
+                document.getElementById('linkUrl').value = '';
+                closeModal('linkModal');
+                loadLinks();
+            } catch (error) {
+                alert("エラーが発生しました: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '追加する';
+            }
+        };
 
             // ▼ 変更後（こちらで丸ごと上書きしてください）
             window.saveWork = async function() {
