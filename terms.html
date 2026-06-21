@@ -4,44 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>利用規約 - KANKETSU</title>
-    <style>
+        <style>
         :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 24px 20px; max-width: 840px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
+        .header { padding: 24px 20px 0 20px; max-width: 840px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         
-        .btn { display: inline-flex; justify-content: center; align-items: center; padding: 8px 20px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); text-decoration: none; }
-        .btn-outline { background-color: transparent; color: var(--text-main); }
-        .btn-outline:hover { background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
-
         .container { max-width: 840px; margin: 0 auto; padding: 20px 20px 60px 20px; flex: 1; width: 100%; box-sizing: border-box; }
         
-        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); overflow-wrap: break-word; }
+        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        
+        /* タイトル周り */
         .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 24px 0; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; }
-        .card h2 { font-size: 18px; font-weight: 700; margin: 32px 0 16px 0; }
-        .card p, .card li { font-size: 14px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.8; }
-        .card ul { padding-left: 24px; margin-bottom: 24px; color: var(--text-sub); }
+        .card h2 { font-size: 18px; font-weight: 700; margin: 32px 0 16px 0; color: var(--text-main); }
+        
+        /* ★ 文章・リストをスマートなサイズと色に調整 */
+        .card p { font-size: 14px; color: var(--text-sub); margin: 0 0 16px 0; line-height: 1.8; }
+        .card ul, .card ol { font-size: 14px; color: var(--text-sub); margin: 0 0 16px 0; padding-left: 24px; line-height: 1.8; }
+        .card li { margin-bottom: 8px; }
+        
+        /* 特商法のテーブル設定 */
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { padding: 14px 16px; border: 1px solid var(--border-light); font-size: 14px; word-wrap: break-word; overflow-wrap: break-word; }
+        th { background-color: #f9fafb; font-weight: 700; width: 30%; text-align: left; vertical-align: top; }
+        td { color: var(--text-sub); width: 70%; }
 
+        /* フッター設定 */
         .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
-                /* スマホ向けフッター強制1列化 */
-        @media (max-width: 768px) {
-            .footer, .site-footer, .footer-links { 
-                display: flex !important; 
-                flex-direction: row !important; 
-                flex-wrap: nowrap !important; 
-                justify-content: center !important; 
-                gap: 8px !important; 
-                padding-left: 5px !important; 
-                padding-right: 5px !important; 
-            }
-            .footer a, .site-footer a, .footer-links a { 
-                font-size: 10px !important; 
-                white-space: nowrap !important; 
-            }
-        }
+        .footer-links { margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; }
+        .footer-links a { color: var(--text-sub); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--text-main); }
 
+        /* ★ スマホ向けの設定（文字をさらに小さく最適化） */
+        @media (max-width: 768px) {
+            .card { padding: 20px; }
+            .card h1 { font-size: 18px; margin-bottom: 16px; padding-bottom: 12px; }
+            .card h2 { font-size: 16px; margin: 24px 0 12px 0; }
+            
+            /* スマホでの文章サイズを縮小し、色合いをキープ */
+            .card p, .card ul, .card ol { font-size: 13px; margin-bottom: 12px; }
+
+            th, td { padding: 10px 8px; font-size: 12px; }
+            th { width: 35%; }
+            td { width: 65%; }
+
+            /* スマホでフッターリンクを強制的に横1列にする */
+            .footer-links { flex-wrap: nowrap !important; gap: 8px !important; }
+            .footer-links a { font-size: 10px !important; white-space: nowrap !important; }
+        }
     </style>
+
 </head>
 <body>
     <div class="header">
