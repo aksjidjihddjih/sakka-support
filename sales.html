@@ -138,19 +138,25 @@
         table, th, td {
             border: 1px solid var(--border-light) !important;
         }
-                @media (max-width: 768px) {
-            /* ★ 1列目（日時）が数字の途中で変に改行されないようにする */
+        @media (max-width: 768px) {
+            /* 1列目（日時）：無駄な余白を削って丁度いい幅にする */
             th:nth-child(1), td:nth-child(1) {
                 word-break: keep-all !important; 
                 overflow-wrap: normal !important;
-                width: 28%; /* 日時が綺麗に収まるよう、少しだけ幅を広げる */
+                width: 23% !important; 
             }
-            /* 他の列は均等に割り振る */
+            /* 2〜4列目（金額系）：均等に少しずつ幅を持たせる */
             th:nth-child(2), td:nth-child(2),
-            th:nth-child(3), td:nth-child(3),
-            th:nth-child(4), td:nth-child(4),
+            th:nth-child(3), td:nth-child(3) {
+                width: 16% !important;
+            }
+            th:nth-child(4), td:nth-child(4) {
+                width: 19% !important;
+            }
+            /* 5列目（状態）：幅を広げつつ、絶対に改行させない */
             th:nth-child(5), td:nth-child(5) {
-                width: 18%;
+                width: 26% !important;
+                white-space: nowrap !important;
             }
         }
     </style>
