@@ -13,7 +13,10 @@
             --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
-        .container { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        
+        /* ★ コンテナの上部余白を 40px から 80px に増やして全体を下に下げました */
+        .container { max-width: 600px; margin: 80px auto 40px auto; padding: 0 20px; }
+        
         .header { text-align: center; margin-bottom: 40px; }
         .avatar { width: 80px; height: 80px; background-color: var(--text-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 32px; margin: 0 auto 16px auto; }
         .creator-name { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; }
@@ -28,17 +31,15 @@
         .work-options { display: flex; flex-direction: column; gap: 12px; }
         .work-option { position: relative; }
         .work-option input[type="radio"] { position: absolute; opacity: 0; }
-        /* ★ 通常時の枠線を2pxにし、box-sizingを追加してズレを完全に防止 */
         .work-label { display: block; padding: 16px; border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; box-sizing: border-box; }
         .work-label-title { font-size: 15px; font-weight: 600; display: block; margin-bottom: 4px; }
         .work-label-desc { font-size: 13px; color: var(--text-sub); display: block; }
-        /* ★ 影と太さの変更をなくし、色だけを濃くする */
         .work-option input[type="radio"]:checked + .work-label { border-color: var(--border-color); background-color: #f9fafb; }
-        /* 金額入力欄のCSSを調整 */
+        
         .amount-input { border: none; outline: none; font-size: 24px; font-weight: 700; width: 100%; color: var(--text-main); background: transparent; }
         .amount-input::placeholder { color: #9ca3af; font-weight: 600; }
 
-        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; margin-top: 8px; }
+        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; margin-top: 8px; text-decoration: none;}
         .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
         .btn-primary:hover { background-color: var(--btn-hover); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
@@ -47,14 +48,20 @@
         #errorState { display: none; background: #fee2e2; border: 2px solid #ef4444; border-radius: 8px; padding: 24px; margin: 40px 0; text-align: center; }
         #errorState h2 { color: #b91c1c; margin-top: 0; font-size: 18px; }
         #mainContent { display: none; }
-        /* スマホ向けフッター1列化（文字サイズを最小にして横に並べる） */
+        
         @media (max-width: 768px) {
             .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
             .site-footer a { font-size: 10px !important; white-space: nowrap; }
+            /* スマホの時は上の余白を少し縮める */
+            .container { margin-top: 60px; }
         }
     </style>
 </head>
 <body>
+    <div style="position: absolute; top: 0; left: 0; right: 0; padding: 16px 20px; display: flex; justify-content: flex-end; box-sizing: border-box;">
+        <a href="signup.html" class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 12px; font-weight: 700; border-radius: 20px; margin-top: 0;">クリエイター登録 (無料)</a>
+    </div>
+
     <div class="container">
         <div id="loadingState">クリエイター情報を読み込み中...</div>
         <div id="errorState"><h2>読み込みエラー</h2><p id="errorMessage"></p></div>
@@ -101,10 +108,11 @@
     </div>
     
     <div style="text-align: center; padding: 40px 20px; border-top: 1px solid var(--border-light); margin-top: 40px;">
-        <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
+        <div class="site-footer" style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
             <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
             <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
             <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
+            <a href="contact.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">お問い合わせ</a>
         </div>
         <p style="margin: 0; color: var(--text-sub); font-size: 13px;">&copy; 2026 KANKETSU</p>
     </div>
@@ -148,7 +156,6 @@
                 if (works && works.length > 0) {
                     const worksList = document.getElementById('worksList');
                     works.forEach(work => {
-                        // ★検索対象にするため search-target と data-title を追加
                         worksList.innerHTML += `
                             <div class="work-option search-target" data-title="${work.title.replace(/"/g, '&quot;')}">
                                 <input type="radio" name="selectedWork" id="work_${work.id}" value="${work.id}">
@@ -159,7 +166,6 @@
                             </div>`;
                     });
 
-                    // ★ 追加: リアルタイム検索機能のロジック
                     const searchInput = document.getElementById('workSearchInput');
                     if(searchInput) {
                         searchInput.addEventListener('input', function(e) {
@@ -168,9 +174,9 @@
                             targets.forEach(target => {
                                 const title = target.getAttribute('data-title').toLowerCase();
                                 if (title.includes(searchTerm)) {
-                                    target.style.display = ''; // 一致すれば表示
+                                    target.style.display = '';
                                 } else {
-                                    target.style.display = 'none'; // 一致しなければ隠す
+                                    target.style.display = 'none';
                                 }
                             });
                         });
@@ -186,7 +192,6 @@
             const amount = parseInt(document.getElementById('amountInput').value, 10);
             const selectedWork = document.querySelector('input[name="selectedWork"]:checked').value;
 
-            // ★ 修正：金額が空（NaN）、100未満、または10000を超えている場合にアラートを出す
             if (isNaN(amount) || amount < 100 || amount > 10000) {
                 return alert('100円〜10,000円の範囲で金額を入力してください。');
             }
