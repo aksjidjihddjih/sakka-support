@@ -337,7 +337,7 @@
             </div>
             <div class="form-group">
                 <label>作品タイトル</label>
-                <input type="text" id="workTitle" class="form-control" placeholder="作品名を入力（200文字以内）" maxlength="200">
+                <input type="text" id="workTitle" class="form-control" placeholder="作品名を入力（100文字以内）" maxlength="100">
             </div>
             <div class="form-group">
                 <label>作品のURL</label>
@@ -633,7 +633,7 @@
                     return alert("タイトル、URL、限定メッセージの全てを入力してください。");
                 }
                 
-                if(title.length > 200) return alert("作品名は200文字以内で入力してください。");
+                if(title.length > 100) return alert("作品名は100文字以内で入力してください。");
                 if(secret_message.length < 10) return alert("限定メッセージは10文字以上で入力してください。");
                 if(secret_message.length > 10000) return alert("限定メッセージは10,000文字以内で入力してください。");
                 
