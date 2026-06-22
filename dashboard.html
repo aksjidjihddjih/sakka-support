@@ -77,26 +77,15 @@
         .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* スマホ向けフッター1列化（文字サイズを最小にして横に並べる） */
         @media (max-width: 768px) {
             .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
             .site-footer a { font-size: 10px !important; white-space: nowrap; }
-        }
-                /* ★ スマホ向け：サイドバーを1画面に収め、スライド（スクロール）を禁止する調整 */
-        @media (max-width: 768px) {
-            /* スマホのアドレスバー等の高さを除いた「正確な画面の高さ」を取得して合わせる */
             .sidebar { height: 100dvh; }
-            
-            /* 上下にスライドできないようにスクロールをロック */
             .sidebar-nav { overflow-y: hidden; }
-            
-            /* メニュー全体の無駄なスペース（上下の余白）を少しずつ削って圧縮 */
             .sidebar-header { padding: 20px 24px 12px; }
             .nav-item { padding: 10px 24px; }
             .account-btn { padding: 16px 24px; }
         }
-        
-        /* （※念のため）画面の縦幅が極端に小さいスマホでも確実に入るようにする安全装置 */
         @media (max-width: 768px) and (max-height: 700px) {
             .sidebar-header { padding: 16px 24px 8px; }
             .nav-item { padding: 8px 24px; }
@@ -187,46 +176,43 @@
 
             <div id="mainDashboardView" style="display: none;" class="fade-in">
                 <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
-
-                <div id="unlinked-header" style="display: none; background-color: #fef08a; color: #854d0e; padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 24px; align-items: center; gap: 8px;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-    現在、支援の受け取りが「オフ」になっています。口座連携を完了すると支援受付ページが公開されます。
-</div>
-                <div id="linked-header" style="display: none;">
-                <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                    <span style="display:inline-block; width:8px; height:8px; background:#16a34a; border-radius:50%;"></span> 公開中 (支援受付ページURL)
-                </p>
-                <div class="share-box" style="margin-bottom: 32px;">
-                    <div class="share-url" id="profileUrlText">取得中...</div>
-                    <button class="btn btn-primary btn-sm" onclick="window.copyUrl()">コピー</button>
-                </div>
-                </div>
-
-                <!-- ★ 残高・アクションエリア -->
-<!-- 未連携用（巨大ボタン） -->
-<div id="unlinked-card" class="card" style="display: none; border: 2px dashed var(--border-color); background-color: #f9fafb; text-align: center; padding: 32px 20px;">
-    <h3 style="margin-top: 0; font-size: 18px;">💰 支援を受け取れるようにしましょう</h3>
-    <p style="font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px;">
-        「まだ支援されるかわからないから…」という方もご安心ください。<br>
-        未連携の状態でも、読者から<strong>「支援機能をオンにしてほしい！」というリクエスト通知（メール）</strong>を受け取ることができます。<br>
-        リクエストが届いてから連携を行う形でも全く問題ありません！
-    </p>
-    <!-- Stripe連携画面（stripe.html）へ飛ぶボタン -->
-    <button onclick="window.location.href='stripe.html'" class="btn btn-primary" style="font-size: 16px; padding: 12px 32px;">
-        今すぐStripe口座を連携する
-    </button>
-</div
                 
-                <!-- 連携済み用（元の残高表示と引き出しボタンをこのdivで囲んでください） -->
-<div id="linked-card" style="display: none;">
-                <div class="card" style="text-align: center; padding: 48px 20px;">
-                    <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">BALANCE</p>
-                    <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
-                    <div style="max-width: 280px; margin: 0 auto;">
-                        <button class="btn btn-primary" onclick="window.requestWithdrawal(event)">売上を引き出す</button>
+                <div id="unlinked-header" style="display: none; background-color: #fef08a; color: #854d0e; padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 24px; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    現在、支援の受け取りが「オフ」になっています。口座連携を完了すると支援受付ページが公開されます。
+                </div>
+
+                <div id="linked-header" style="display: none;">
+                    <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <span style="display:inline-block; width:8px; height:8px; background:#16a34a; border-radius:50%;"></span> 公開中 (支援受付ページURL)
+                    </p>
+                    <div class="share-box" style="margin-bottom: 32px;">
+                        <div class="share-url" id="profileUrlText">取得中...</div>
+                        <button class="btn btn-primary btn-sm" onclick="window.copyUrl()">コピー</button>
                     </div>
                 </div>
-    </div>
+
+                <div id="unlinked-card" class="card" style="display: none; border: 2px dashed var(--border-color); background-color: #f9fafb; text-align: center; padding: 32px 20px;">
+                    <h3 style="margin-top: 0; font-size: 18px;">💰 支援を受け取れるようにしましょう</h3>
+                    <p style="font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px;">
+                        「まだ支援されるかわからないから…」という方もご安心ください。<br>
+                        未連携の状態でも、読者から<strong>「支援機能をオンにしてほしい！」というリクエスト通知（メール）</strong>を受け取ることができます。<br>
+                        リクエストが届いてから連携を行う形でも全く問題ありません！
+                    </p>
+                    <button onclick="window.location.href='stripe.html'" class="btn btn-primary" style="font-size: 16px; padding: 12px 32px;">
+                        今すぐStripe口座を連携する
+                    </button>
+                </div>
+
+                <div id="linked-card" style="display: none;">
+                    <div class="card" style="text-align: center; padding: 48px 20px;">
+                        <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">BALANCE</p>
+                        <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
+                        <div style="max-width: 280px; margin: 0 auto;">
+                            <button class="btn btn-primary" onclick="window.requestWithdrawal(event)">売上を引き出す</button>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card">
                     <div class="card-header">
@@ -280,13 +266,13 @@
                 </div>
 
                 <footer class="site-footer">
-    <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
-        <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
-        <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
-        <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
-    </div>
-    <p style="margin: 0;">&copy; 2026 KANKETSU</p>
-</footer>
+                    <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
+                        <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
+                        <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
+                        <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
+                    </div>
+                    <p style="margin: 0;">&copy; 2026 KANKETSU</p>
+                </footer>
             </div>
         </main>
     </div>
@@ -390,23 +376,21 @@
             let currentUserId = null;
             let editLinkId = null, editWorkId = null;
 
-            // ★ ここから追加：Stripeの連携状態をチェックする関数
+            // ★ Stripeの連携状態をチェックする関数
             async function checkStripeStatus(userId) {
                 try {
-                    // ※dashboard.htmlに合わせて、creatorsテーブルを参照するように修正しています
                     const { data, error } = await supabaseClient
                         .from('creators')
                         .select('stripe_account_id')
                         .eq('id', userId)
                         .single();
 
-                    if (error && error.code !== 'PGRST116') throw error; // データがない場合のエラーは無視
+                    if (error && error.code !== 'PGRST116') throw error;
 
-                    // stripe_account_id が存在すれば「連携済み」、なければ「未連携」
                     const isStripeLinked = data && data.stripe_account_id;
 
                     if (isStripeLinked) {
-                        document.getElementById('linked-header').style.display = 'flex';
+                        document.getElementById('linked-header').style.display = 'block';
                         document.getElementById('linked-card').style.display = 'block';
                         document.getElementById('unlinked-header').style.display = 'none';
                         document.getElementById('unlinked-card').style.display = 'none';
@@ -429,6 +413,7 @@
                     if (!session) { window.location.href = 'login.html'; return; }
                     currentUserId = session.user.id;
 
+                    // ★ ユーザーIDが取得できたらStripe状態をチェック！
                     await checkStripeStatus(currentUserId);
 
                     const { error: upsertErr } = await supabaseClient.from('creators').upsert(
@@ -594,7 +579,6 @@
             window.editMessage = function(content) { document.getElementById('msgContent').value = content; window.openModal('msgModal'); };
             window.editWork = function(id, title, url, msg) { editWorkId = id; document.getElementById('workTitle').value = title; document.getElementById('workUrl').value = url; document.getElementById('workMessage').value = msg; document.getElementById('workModalTitle').innerText = '作品を編集'; document.getElementById('workDelBtn').style.display = 'block'; window.openModal('workModal'); };
 
-            // ★ プロフィール（ペンネーム）保存時の文字数制限
             window.saveProfile = async function() {
                 const penname = document.getElementById('pennameInput').value.trim();
                 
@@ -652,7 +636,6 @@
                 }
             };
 
-            // ★ 抜け落ちていた共通メッセージの保存機能を完全復活・制限追加
             window.saveMessage = async function() {
                 const message = document.getElementById('msgContent').value.trim();
                 
@@ -665,7 +648,6 @@
                 btn.innerText = '保存中...';
 
                 try {
-                    // 古いメッセージを削除して、新しいメッセージを入れる（一番確実な方法です）
                     await supabaseClient.from('creator_messages').delete().eq('creator_id', currentUserId);
                     const { error } = await supabaseClient.from('creator_messages').insert([{ creator_id: currentUserId, content: message }]);
                     
@@ -680,7 +662,6 @@
                 }
             };
 
-            // ★ 作品登録時の文字数制限
             window.saveWork = async function() {
                 const title = document.getElementById('workTitle').value.trim();
                 const work_url = document.getElementById('workUrl').value.trim();
