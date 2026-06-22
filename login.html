@@ -6,35 +6,41 @@
     <title>ログイン - KANKETSU</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
+        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
-        
-        .header { display: flex; justify-content: center; align-items: center; padding: 32px 20px; width: 100%; box-sizing: border-box; }
-        .brand-logo { font-size: 24px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
-        
+        .header { padding: 32px 20px; text-align: center; }
+        .brand-logo { font-size: 28px; font-weight: 900; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
         .container { max-width: 440px; margin: 0 auto 40px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         
-        .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 700; margin-bottom: 24px; transition: color 0.2s; }
-        .back-link:hover { color: var(--text-main); }
-
-        .card { background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 40px 32px; }
+        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 40px 32px; box-shadow: 4px 4px 0px rgba(0,0,0,1); text-align: center;}
         .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 8px 0; }
-        .card p.desc { font-size: 14px; color: var(--text-sub); margin-bottom: 32px; }
+        .card p.desc { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; }
 
-        .form-group { margin-bottom: 24px; }
-        .form-group label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
-        .form-control { width: 100%; padding: 14px 16px; font-size: 15px; font-weight: 600; border: 2px solid var(--border-light); border-radius: 8px; background-color: #f9fafb; color: var(--text-main); box-sizing: border-box; transition: all 0.2s; outline: none; }
+        .social-btn { display: flex; justify-content: center; align-items: center; gap: 12px; width: 100%; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; background: #fff; color: var(--text-main); margin-bottom: 12px; text-decoration: none; }
+        .social-btn:hover { background-color: #f3f4f6; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
+        
+        .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-light); }
+        .divider span { padding: 0 16px; color: var(--text-sub); font-size: 12px; font-weight: 600; }
+
+        .form-group { margin-bottom: 20px; text-align: left; position: relative;}
+        .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+        .form-control { width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #f9fafb; color: var(--text-main); box-sizing: border-box; transition: all 0.2s; outline: none; }
         .form-control:focus { border-color: var(--border-color); background-color: #fff; }
-        .form-control::placeholder { color: #9ca3af; font-weight: 500; }
 
-        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: opacity 0.2s; border: 2px solid var(--border-color); box-sizing: border-box; text-decoration: none; }
-        .btn-primary { background-color: var(--text-main); color: #fff; }
-        .btn-primary:hover { opacity: 0.85; }
+        .forgot-password { position: absolute; top: 0; right: 0; font-size: 12px; color: var(--text-sub); text-decoration: none; font-weight: 600;}
+        .forgot-password:hover { color: var(--text-main); text-decoration: underline; }
 
-        .link-text { display: block; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-sub); margin-top: 24px; text-decoration: underline; cursor: pointer; }
-        .link-text:hover { color: var(--text-main); }
+        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; margin-top: 12px;}
+        .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
+        .btn-primary:hover { background-color: var(--btn-hover); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-        #errorMsg { display: none; background: #fee2e2; color: #dc2626; padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 24px; border: 1px solid #fca5a5; }
+        .signup-link { margin-top: 24px; font-size: 14px; color: var(--text-sub); }
+        .signup-link a { color: var(--text-main); font-weight: 700; text-decoration: none; }
+        .signup-link a:hover { text-decoration: underline; }
+
+        .error-message { color: #dc2626; font-size: 13px; font-weight: 600; margin-top: 8px; display: none; text-align: left; background: #fee2e2; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5;}
     </style>
 </head>
 <body>
@@ -43,76 +49,106 @@
     </div>
 
     <div class="container">
-        <a href="javascript:history.back()" class="back-link" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 700; margin-bottom: 16px; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-sub)'">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-    戻る
-</a>
-
         <div class="card">
             <h1>おかえりなさい</h1>
-            <p class="desc">登録したメールアドレスとパスワードを入力してください。</p>
+            <p class="desc">アカウントにログインしてダッシュボードを開きます。</p>
+            
+            <button class="social-btn" onclick="signInWithProvider('google')">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Googleでログイン
+            </button>
+            <button class="social-btn" onclick="signInWithProvider('twitter')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                X (Twitter)でログイン
+            </button>
 
-            <div id="errorMsg"></div>
+            <div class="divider"><span>またはメールアドレスでログイン</span></div>
 
-            <div>
-                <div class="form-group">
-                    <label>メールアドレス</label>
-                    <input type="email" id="email" class="form-control" placeholder="you@example.com" onkeypress="handleEnter(event)">
-                </div>
-                <div class="form-group">
-                    <label>パスワード</label>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••" onkeypress="handleEnter(event)">
-                </div>
-                
-                <button type="button" class="btn btn-primary" id="submitBtn" onclick="processLogin()">ログイン</button>
+            <div class="form-group">
+                <label>メールアドレス</label>
+                <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>パスワード</label>
+                <a href="#" class="forgot-password" onclick="alert('パスワードリセット機能は準備中です。\nお困りの場合はお問い合わせください。')">パスワードを忘れた場合</a>
+                <input type="password" id="password" class="form-control" placeholder="••••••••" required onkeypress="if(event.key === 'Enter') handleLogin()">
             </div>
 
-            <a href="signup.html" class="link-text">アカウントをお持ちでない場合はこちら</a>
+            <div id="errorMsg" class="error-message"></div>
+
+            <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">ログイン</button>
+            
+            <div class="signup-link">
+                アカウントをお持ちでない方は <a href="signup.html">無料で登録</a>
+            </div>
         </div>
     </div>
 
     <script>
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-        // ★ バグの原因だった変数名を「supabaseClient」に変更し、衝突を回避しました
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        function handleEnter(e) {
-            if (e.key === 'Enter' || e.keyCode === 13) {
-                processLogin();
+        // セッションチェック（既にログイン済みの場合はダッシュボードへ）
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        // ソーシャルログイン処理
+        async function signInWithProvider(provider) {
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: provider,
+                    options: { redirectTo: window.location.origin + '/dashboard.html' }
+                });
+                if (error) throw error;
+            } catch (error) {
+                alert('エラーが発生しました: ' + error.message);
             }
         }
 
-        async function processLogin() {
+        // メールアドレスログイン処理
+        async function handleLogin() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const btn = document.getElementById('submitBtn');
+            const btn = document.getElementById('loginBtn');
             const errorMsg = document.getElementById('errorMsg');
 
+            errorMsg.style.display = 'none';
+
             if (!email || !password) {
-                errorMsg.style.display = 'block';
                 errorMsg.innerText = 'メールアドレスとパスワードを入力してください。';
+                errorMsg.style.display = 'block';
                 return;
             }
 
             btn.disabled = true;
             btn.innerText = 'ログイン中...';
-            errorMsg.style.display = 'none';
 
             try {
-                // ★ 修正した変数名を使用
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
 
                 if (error) {
+                    // Supabaseの「Email not confirmed」エラーを日本語で親切に表示
+                    if (error.message.includes('Email not confirmed')) {
+                        throw new Error('メールアドレスの認証が完了していません。\n登録時に送信されたメール内のリンクをクリックしてください。');
+                    } else if (error.message.includes('Invalid login credentials')) {
+                        throw new Error('メールアドレスまたはパスワードが間違っています。');
+                    }
                     throw error;
                 }
-                
-                // 成功したらダッシュボードへ一瞬で遷移
+
+                // ログイン成功
                 window.location.href = 'dashboard.html';
 
             } catch (error) {
+                errorMsg.innerText = error.message;
                 errorMsg.style.display = 'block';
-                errorMsg.innerText = 'メールアドレスまたはパスワードが間違っています。';
                 btn.disabled = false;
                 btn.innerText = 'ログイン';
             }
