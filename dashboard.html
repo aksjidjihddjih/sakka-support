@@ -649,7 +649,13 @@
 
                 try {
                     await supabaseClient.from('creator_messages').delete().eq('creator_id', currentUserId);
-                    const { error } = await supabaseClient.from('creator_messages').insert([{ creator_id: currentUserId, content: message }]);
+                    
+                    // ★ 修正箇所：title に '共通お礼メッセージ' を自動で入れるようにしました
+                    const { error } = await supabaseClient.from('creator_messages').insert([{ 
+                        creator_id: currentUserId, 
+                        title: '共通お礼メッセージ', 
+                        content: message 
+                    }]);
                     
                     if (error) throw error;
                     window.closeModal('msgModal');
