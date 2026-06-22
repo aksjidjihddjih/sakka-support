@@ -202,6 +202,23 @@
                 </div>
                 </div>
 
+                <!-- ★ 残高・アクションエリア -->
+<!-- 未連携用（巨大ボタン） -->
+<div id="unlinked-card" class="card" style="display: none; border: 2px dashed var(--border-color); background-color: #f9fafb; text-align: center; padding: 32px 20px;">
+    <h3 style="margin-top: 0; font-size: 18px;">💰 支援を受け取れるようにしましょう</h3>
+    <p style="font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px;">
+        「まだ支援されるかわからないから…」という方もご安心ください。<br>
+        未連携の状態でも、読者から<strong>「支援機能をオンにしてほしい！」というリクエスト通知（メール）</strong>を受け取ることができます。<br>
+        リクエストが届いてから連携を行う形でも全く問題ありません！
+    </p>
+    <!-- Stripe連携画面（stripe.html）へ飛ぶボタン -->
+    <button onclick="window.location.href='stripe.html'" class="btn btn-primary" style="font-size: 16px; padding: 12px 32px;">
+        今すぐStripe口座を連携する
+    </button>
+</div
+                
+                <!-- 連携済み用（元の残高表示と引き出しボタンをこのdivで囲んでください） -->
+<div id="linked-card" style="display: none;">
                 <div class="card" style="text-align: center; padding: 48px 20px;">
                     <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">BALANCE</p>
                     <h2 style="font-size: 48px; font-weight: 800; margin: 0 0 32px 0; letter-spacing: -1px;" id="balanceText">¥0</h2>
@@ -209,6 +226,7 @@
                         <button class="btn btn-primary" onclick="window.requestWithdrawal(event)">売上を引き出す</button>
                     </div>
                 </div>
+    </div>
 
                 <div class="card">
                     <div class="card-header">
