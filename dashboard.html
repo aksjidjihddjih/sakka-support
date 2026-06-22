@@ -429,6 +429,8 @@
                     if (!session) { window.location.href = 'login.html'; return; }
                     currentUserId = session.user.id;
 
+                    await checkStripeStatus(currentUserId);
+
                     const { error: upsertErr } = await supabaseClient.from('creators').upsert(
                         { 
                             id: currentUserId, 
