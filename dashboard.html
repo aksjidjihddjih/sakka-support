@@ -177,11 +177,13 @@
             <div id="mainDashboardView" style="display: none;" class="fade-in">
                 <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
                 
+                <!-- ★ 未連携用ヘッダー -->
                 <div id="unlinked-header" style="display: none; background-color: #fef08a; color: #854d0e; padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 24px; align-items: center; gap: 8px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     現在、支援の受け取りが「オフ」になっています。口座連携を完了すると支援受付ページが公開されます。
                 </div>
 
+                <!-- ★ 連携済み用ヘッダー -->
                 <div id="linked-header" style="display: none;">
                     <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                         <span style="display:inline-block; width:8px; height:8px; background:#16a34a; border-radius:50%;"></span> 公開中 (支援受付ページURL)
@@ -192,18 +194,19 @@
                     </div>
                 </div>
 
-                <div id="unlinked-card" class="card" style="display: none; border: 2px dashed var(--border-color); background-color: #f9fafb; text-align: center; padding: 32px 20px;">
-                    <h3 style="margin-top: 0; font-size: 18px;">💰 支援を受け取れるようにしましょう</h3>
+                <!-- ★ 未連携用カード（ボタン化） 右下の影を消し、文言をシンプルに -->
+                <div id="unlinked-card" class="card" style="display: none; border: 2px dashed var(--border-color); background-color: #f9fafb; text-align: center; padding: 32px 20px; box-shadow: none;">
+                    <h3 style="margin-top: 0; font-size: 18px;">💰 支援受付ページを公開しましょう</h3>
                     <p style="font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px;">
-                        「まだ支援されるかわからないから…」という方もご安心ください。<br>
-                        未連携の状態でも、読者から<strong>「支援機能をオンにしてほしい！」というリクエスト通知（メール）</strong>を受け取ることができます。<br>
-                        リクエストが届いてから連携を行う形でも全く問題ありません！
+                        支援を受け取るための専用ページ（URL）を発行するには、Stripeの口座連携が必要です。<br>
+                        安全な取引のため、連携（本人確認）を完了させて読者にURLを公開しましょう！
                     </p>
                     <button onclick="window.location.href='stripe.html'" class="btn btn-primary" style="font-size: 16px; padding: 12px 32px;">
                         今すぐStripe口座を連携する
                     </button>
                 </div>
 
+                <!-- ★ 連携済み用カード -->
                 <div id="linked-card" style="display: none;">
                     <div class="card" style="text-align: center; padding: 48px 20px;">
                         <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">BALANCE</p>
@@ -219,7 +222,7 @@
                         <div>
                             <h2 class="card-title">プロフィール</h2>
                             <p class="card-desc">読者に公開されるペンネーム</p>
-                        </div>
+                            </div>
                         </div>
                     <div class="item-list">
                         <div class="item-card" onclick="window.openModal('profileModal')">
@@ -319,7 +322,7 @@
             </div>
         </div>
     </div>
-
+    
     <div class="modal-overlay" id="msgModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -413,7 +416,7 @@
                     if (!session) { window.location.href = 'login.html'; return; }
                     currentUserId = session.user.id;
 
-                    // ★ ユーザーIDが取得できたらStripe状態をチェック！
+                    // ★ ユーザーIDが取得できたらStripe状態をチェック
                     await checkStripeStatus(currentUserId);
 
                     const { error: upsertErr } = await supabaseClient.from('creators').upsert(
@@ -507,7 +510,6 @@
                     `;
                 }
             }
-
             function getTaskHtml(isDone, title, modalId) {
                 if (isDone) {
                     return `
@@ -636,6 +638,7 @@
                 }
             };
 
+            // ★ メッセージ保存処理（タイトル自動挿入の修正版）
             window.saveMessage = async function() {
                 const message = document.getElementById('msgContent').value.trim();
                 
@@ -650,7 +653,6 @@
                 try {
                     await supabaseClient.from('creator_messages').delete().eq('creator_id', currentUserId);
                     
-                    // ★ 修正箇所：title に '共通お礼メッセージ' を自動で入れるようにしました
                     const { error } = await supabaseClient.from('creator_messages').insert([{ 
                         creator_id: currentUserId, 
                         title: '共通お礼メッセージ', 
@@ -693,8 +695,8 @@
                     await window.initDashboard(); 
                 }
             };
-            
-            window.deleteLink = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('creator_links').delete().eq('id', editLinkId); window.closeModal('linkModal'); await window.initDashboard(); };
+
+         window.deleteLink = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('creator_links').delete().eq('id', editLinkId); window.closeModal('linkModal'); await window.initDashboard(); };
             window.deleteWork = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('works').delete().eq('id', editWorkId); window.closeModal('workModal'); await window.initDashboard(); };
 
             window.copyUrl = function() { navigator.clipboard.writeText(document.getElementById('profileUrlText').innerText).then(() => alert("URLをコピーしました！")); };
