@@ -84,6 +84,21 @@
                 <div class="link-list" id="linksList"></div>
             </div>
 
+            <!-- ★ 支援アクションエリア -->
+<!-- 未連携用（リクエスト送信パーツ） -->
+<div id="unlinked-support" style="display: none; background-color: #f9fafb; border: 1px solid var(--border-light); border-radius: 8px; padding: 24px; text-align: center;">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" style="margin-bottom: 12px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    <h3 style="font-size: 16px; margin: 0 0 8px 0;">このクリエイターは支援の受け取り準備中です</h3>
+    <p style="font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px;">
+        口座連携が完了するまで支援（決済）を行うことはできませんが、<br><strong>「支援機能をオンにしてほしい！」という応援リクエスト</strong>を作者に直接届けることができます。
+    </p>
+    <button onclick="sendSupportRequest()" class="btn" style="background-color: #ffffff; color: var(--text-main); border: 2px solid var(--border-color); font-weight: bold; width: 100%;">
+        ✉️ 支援リクエストを送信する
+    </button>
+</div>
+            
+<!-- 連携済み用（元の支援するボタンをこのdivで囲んでください） -->
+<div id="linked-support" style="display: none;">
             <div class="card">
                 <h2 class="section-title" style="border-bottom: none; padding-bottom: 0; margin-bottom: 12px;">1. 支援する作品を選ぶ</h2>
                 
@@ -108,6 +123,8 @@
                         </label>
                     </div>
                 </div>
+                </div>
+    </div>
 
                 <h2 class="section-title" style="margin-top: 32px; border-bottom: none; margin-bottom: 8px;">2. 支援金額を入力する</h2>
                 <div style="position: relative; margin-bottom: 8px;">
