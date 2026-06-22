@@ -3,265 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>クリエイターを支援する - KANKETSU</title>
+    <title>クリエイタープロフィール - KANKETSU</title>
+    
+    <!-- Supabaseの読み込み -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://js.stripe.com/v3/"></script>
+
     <style>
-        :root {
-            --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563;
-            --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px;
-            --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151;
-        }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+        /* KANKETSU 共通デザインシステム */
+        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; min-height: 100vh;}
         
-        .container { max-width: 600px; margin: 80px auto 40px auto; padding: 0 20px; }
-        
-        .header { text-align: center; margin-bottom: 24px; }
-        .avatar { width: 80px; height: 80px; background-color: var(--text-main); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 32px; margin: 0 auto 16px auto; }
-        .creator-name { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; }
-        
-        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; margin-bottom: 24px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
-        .section-title { font-size: 16px; font-weight: 700; margin: 0 0 16px 0; border-bottom: 1px solid var(--border-light); padding-bottom: 8px; }
+        /* ヘッダー */
+        .header { background: #fff; padding: 16px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;}
+        .brand-logo { font-size: 20px; font-weight: 900; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
+        .header-links a { color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 600; margin-left: 16px; }
 
-        .link-list { display: flex; flex-direction: column; gap: 12px; }
-        .link-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: 8px; text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 14px; transition: all 0.2s; }
-        .link-item:hover { border-color: var(--border-color); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
-
-        .work-options { display: flex; flex-direction: column; gap: 12px; }
-        .work-option { position: relative; }
-        .work-option input[type="radio"] { position: absolute; opacity: 0; }
-        .work-label { display: block; padding: 16px; border: 2px solid var(--border-light); border-radius: 8px; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; box-sizing: border-box; }
-        .work-label-title { font-size: 15px; font-weight: 600; display: block; margin-bottom: 4px; }
-        .work-label-desc { font-size: 13px; color: var(--text-sub); display: block; }
-        .work-option input[type="radio"]:checked + .work-label { border-color: var(--border-color); background-color: #f9fafb; }
+        /* メインコンテンツ */
+        .container { max-width: 680px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         
-        .amount-input { border: none; outline: none; font-size: 24px; font-weight: 700; width: 100%; color: var(--text-main); background: transparent; }
-        .amount-input::placeholder { color: #9ca3af; font-weight: 600; }
+        /* プロフィール上部 */
+        .profile-header { text-align: center; margin-bottom: 40px; }
+        .avatar { width: 80px; height: 80px; background-color: #e5e7eb; border: 2px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-main); font-weight: bold; font-size: 32px; margin: 0 auto 16px auto; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        .pen-name { font-size: 24px; font-weight: 800; margin: 0 0 16px 0; }
+        .links-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .link-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; border: 1px solid var(--border-light); border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--text-sub); text-decoration: none; transition: all 0.2s; }
+        .link-badge:hover { border-color: var(--border-color); color: var(--text-main); background: #f9fafb; }
 
-        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; margin-top: 8px; text-decoration: none;}
+        /* カード共通 */
+        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; margin-bottom: 32px; box-shadow: 4px 4px 0px rgba(0,0,0,1); }
+        .card-title { font-size: 18px; font-weight: 800; margin: 0 0 24px 0; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--bg-color); padding-bottom: 12px;}
+
+        /* ボタン */
+        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; }
         .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
         .btn-primary:hover { background-color: var(--btn-hover); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .btn-outline { background-color: #ffffff; color: var(--text-main); }
+        .btn-outline:hover { background-color: var(--bg-color); }
 
-        #loadingState { text-align: center; padding: 40px; color: var(--text-sub); font-weight: 600; }
-        #errorState { display: none; background: #fee2e2; border: 2px solid #ef4444; border-radius: 8px; padding: 24px; margin: 40px 0; text-align: center; }
-        #errorState h2 { color: #b91c1c; margin-top: 0; font-size: 18px; }
-        #mainContent { display: none; }
-        
-        .concept-box { background-color: #f3f4f6; border-radius: 8px; padding: 16px; margin-bottom: 32px; text-align: center; border: 1px solid var(--border-light); }
-        .concept-box p { margin: 0; font-size: 13px; color: var(--text-sub); line-height: 1.6; }
-        
-        @media (max-width: 768px) {
-            .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
-            .site-footer a { font-size: 10px !important; white-space: nowrap; }
-            .container { margin-top: 60px; }
-        }
+        /* 作品リスト */
+        .work-item { border: 1px solid var(--border-light); border-radius: 8px; padding: 20px; margin-bottom: 16px; background: #fff; transition: all 0.2s; }
+        .work-item:hover { border-color: var(--border-color); }
+        .work-title { font-size: 16px; font-weight: 700; margin: 0 0 8px 0; }
+        .work-url { display: inline-block; font-size: 13px; color: #2563eb; text-decoration: none; margin-bottom: 12px; font-weight: 600;}
+        .work-url:hover { text-decoration: underline; }
+        .secret-badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+
+        /* フッター */
+        .site-footer { margin-top: auto; padding: 32px 20px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; background: #fff;}
     </style>
 </head>
 <body>
-    <div style="position: absolute; top: 0; left: 0; right: 0; padding: 16px 20px; display: flex; justify-content: flex-end; box-sizing: border-box;">
-        <a href="auth.html" class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 12px; font-weight: 700; border-radius: 20px; margin-top: 0;">作家登録</a>
-    </div>
 
-    <div class="container">
-        <div id="loadingState">クリエイター情報を読み込み中...</div>
-        <div id="errorState"><h2>読み込みエラー</h2><p id="errorMessage"></p></div>
+    <header class="header">
+        <a href="index.html" class="brand-logo">KANKETSU</a>
+        <div class="header-links">
+            <a href="login.html">ログイン</a>
+            <a href="signup.html">クリエイター登録</a>
+        </div>
+    </header>
 
-        <div id="mainContent">
-            <div class="header">
-                <h1 class="creator-name" id="authorName" style="font-size: 28px;">読み込み中...</h1>
-                <p style="color: var(--text-sub); margin: 0; font-size: 14px;">このクリエイターの創作活動を支援します</p>
+    <div class="container" id="profileContainer">
+        <!-- 読み込み中表示 -->
+        <div id="loadingState" style="text-align: center; padding: 60px 0;">
+            <p style="color: var(--text-sub); font-weight: 600;">クリエイター情報を読み込んでいます...</p>
+        </div>
+
+        <!-- メインコンテンツ（JSで表示切り替え） -->
+        <div id="contentState" style="display: none;">
+            
+            <div class="profile-header">
+                <div class="avatar" id="creatorAvatar">？</div>
+                <h1 class="pen-name" id="creatorName">未設定</h1>
+                <div class="links-container" id="creatorLinks">
+                    <!-- リンクがここにJSで挿入されます -->
+                </div>
             </div>
 
-            <div class="concept-box">
-                <p>
-                    <strong style="color: var(--text-main);">KANKETSU</strong> は、作者の創作モチベーションを高め、作品の「完結」を応援するための支援プラットフォームです。あなたの支援がクリエイターの力になります。
-                </p>
-            </div>
-
-            <div class="card" id="linksCard" style="display: none;">
-                <h2 class="section-title">活動サイト</h2>
-                <div class="link-list" id="linksList"></div>
-            </div>
-
+            <!-- ★ 支援（サポート）エリア -->
             <div class="card">
-                <div id="unlinked-support" style="display: none; background-color: #f9fafb; border: 1px solid var(--border-light); border-radius: 8px; padding: 24px; text-align: center;">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" style="margin-bottom: 12px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    <h3 style="font-size: 16px; margin: 0 0 8px 0;">このクリエイターは支援の受け取り準備中です</h3>
-                    <p style="font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px;">
-                        口座連携が完了するまで支援（決済）を行うことはできませんが、<br><strong>「支援機能をオンにしてほしい！」という応援リクエスト</strong>を作者に直接届けることができます。
+                <h2 class="card-title">🤝 このクリエイターを支援する</h2>
+
+                <!-- ① Stripe未連携の場合：リクエスト送信UI -->
+                <div id="unlinked-support" style="display: none; background-color: #f9fafb; border: 1px solid var(--border-light); border-radius: 8px; padding: 32px 24px; text-align: center;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="1.5" style="margin-bottom: 16px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <h3 style="font-size: 18px; font-weight: 800; margin: 0 0 12px 0;">支援の受け取り準備中です</h3>
+                    <p style="font-size: 14px; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px;">
+                        口座連携が完了するまで支援（決済）を行うことはできませんが、<br>
+                        <strong>「支援機能をオンにしてほしい！」という応援リクエスト</strong>を<br>作者に直接届けることができます。
                     </p>
-                    <button onclick="sendSupportRequest()" class="btn" style="background-color: #ffffff; color: var(--text-main); border: 2px solid var(--border-color); font-weight: bold; width: 100%;">
+                    <button onclick="sendSupportRequest()" class="btn btn-outline" style="border-width: 2px;">
                         ✉️ 支援リクエストを送信する
                     </button>
                 </div>
 
+                <!-- ② Stripe連携済みの場合：通常の支援UI -->
                 <div id="linked-support" style="display: none;">
-                    <h2 class="section-title" style="border-bottom: none; padding-bottom: 0; margin-bottom: 12px;">1. 支援する作品を選ぶ</h2>
-                    
-                    <div style="display: flex; gap: 8px; align-items: flex-start; margin-bottom: 20px; color: var(--text-sub);">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        <p style="margin: 0; font-size: 14px; line-height: 1.6;">
-                            支援完了後、選んだ作品に対する作者からの【限定お礼メッセージ】や【裏話】などを読むことができます。
-                        </p>
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">支援金額 (円)</label>
+                        <select id="supportAmount" style="width: 100%; padding: 12px 16px; font-size: 16px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #f9fafb;">
+                            <option value="100">100円</option>
+                            <option value="300">300円</option>
+                            <option value="500">500円</option>
+                            <option value="1000">1,000円</option>
+                            <option value="5000">5,000円</option>
+                        </select>
                     </div>
-
-                    <div style="position: relative; margin-bottom: 16px;">
-                        <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-sub);" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="workSearchInput" style="width: 100%; padding: 12px 16px 12px 36px; border: 1px solid var(--border-light); border-radius: 8px; box-sizing: border-box; font-size: 14px; background-color: #f9fafb; transition: all 0.2s; outline: none;" placeholder="作品名で検索..." onfocus="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='#fff';" onblur="this.style.borderColor='var(--border-light)'; this.style.backgroundColor='#f9fafb';">
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">応援メッセージ（任意）</label>
+                        <textarea id="supportMessage" placeholder="クリエイターへの応援の言葉を入力..." style="width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #f9fafb; min-height: 100px; resize: vertical; box-sizing: border-box;"></textarea>
                     </div>
-
-                    <div class="work-options" id="worksList" style="max-height: 300px; overflow-y: auto; padding-right: 4px;">
-                        <div class="work-option search-target" data-title="全体への支援（作品指定なし）">
-                            <input type="radio" name="selectedWork" id="work_general" value="general" checked>
-                            <label for="work_general" class="work-label">
-                                <span class="work-label-title">全体への支援（作品指定なし）</span>
-                                <span class="work-label-desc">活動全般に対する応援として支援します。</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <h2 class="section-title" style="margin-top: 32px; border-bottom: none; margin-bottom: 8px;">2. 支援金額を入力する</h2>
-                    <div style="position: relative; margin-bottom: 8px;">
-                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 20px; font-weight: 700; color: var(--text-main);">¥</span>
-                        <input type="number" id="amountInput" class="amount-input" style="padding: 16px 16px 16px 44px; border: 2px solid var(--border-color); border-radius: 8px; width: 100%; box-sizing: border-box; background: #fff;" placeholder="" min="100" max="10000" step="100">
-                    </div>
-                    <p style="font-size: 13px; color: var(--text-sub); margin: 0 0 24px 0; text-align: right; font-weight: 600;">※ 100円 〜 10,000円 の範囲で入力</p>
-
-                    <div style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 12px; background: #f9fafb; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-light);">
-                        <input type="checkbox" id="agreeTerms" style="margin-top: 3px; cursor: pointer; width: 16px; height: 16px; accent-color: var(--text-main);">
-                        <label for="agreeTerms" style="font-size: 12px; color: var(--text-sub); line-height: 1.5; cursor: pointer; user-select: none;">
-                            <a href="terms.html" target="_blank" style="color: var(--text-main); font-weight: 700;">利用規約</a> および <a href="tokushoho.html" target="_blank" style="color: var(--text-main); font-weight: 700;">特定商取引法に基づく表記</a> に同意します。<br>
-                            ※デジタルコンテンツの性質上、決済後の返金はできません。
-                        </label>
-                    </div>
-
-                    <button class="btn btn-primary" id="checkoutBtn" onclick="processCheckout()" disabled>支援する</button>
+                    <button class="btn btn-primary" onclick="proceedToCheckout()">
+                        クレジットカードで支援する
+                    </button>
+                    <p style="font-size: 12px; color: var(--text-sub); margin-top: 12px; text-align: center;">
+                        ※お支払いはStripeの安全な決済システムを利用します。
+                    </p>
                 </div>
             </div>
-    
-    <div style="text-align: center; padding: 40px 20px; border-top: 1px solid var(--border-light); margin-top: 40px;">
-        <div class="site-footer" style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
-            <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
-            <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
-            <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
-            <a href="inquiry.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">お問い合わせ</a>
+
+            <!-- ★ 作品一覧エリア -->
+            <div class="card" id="worksSection" style="display: none;">
+                <h2 class="card-title">📖 公開中の作品</h2>
+                <div id="worksList">
+                    <!-- 作品リストがJSで挿入されます -->
+                </div>
+            </div>
+
         </div>
-        <p style="margin: 0; color: var(--text-sub); font-size: 13px;">&copy; 2026 KANKETSU</p>
+
+        <!-- エラー時表示 -->
+        <div id="errorState" style="display: none; text-align: center; padding: 60px 0;">
+            <h2 style="font-size: 20px; color: #dc2626; margin-bottom: 8px;">エラーが発生しました</h2>
+            <p style="color: var(--text-sub);" id="errorMessage">クリエイターが見つかりません。</p>
+            <button onclick="window.location.href='index.html'" class="btn btn-outline" style="max-width: 200px; margin-top: 24px;">トップページへ戻る</button>
+        </div>
     </div>
 
+    <footer class="site-footer">
+        <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
+            <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;">特定商取引法に基づく表記</a>
+            <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;">利用規約</a>
+            <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;">プライバシーポリシー</a>
+        </div>
+        <p style="margin: 0;">&copy; 2026 KANKETSU</p>
+    </footer>
+
     <script>
+        // Supabaseの初期化設定
         const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-        const STRIPE_PUBLIC_KEY = 'pk_test_51ThTKj4XyICGMkd9IU5z99hggK13SiHHFZMffu6rMnMTtNiQ6TNzNeBxhqD7ah8wTed7GATw83rNiJgohFUhuwOg00I0j4UOOM';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let supabaseClient, authorId = null;
+        // URLからクリエイターIDを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetCreatorId = urlParams.get('id');
+
+        async function initProfile() {
+            if (!targetCreatorId) {
+                showError('クリエイターIDが指定されていません。正しいURLからアクセスしてください。');
+                return;
+            }
+
+            try {
+                // 1. クリエイターの基本情報とStripe連携状態を取得
+                const { data: creator, error: creatorErr } = await supabaseClient
+                    .from('creators')
+                    .select('*')
+                    .eq('id', targetCreatorId)
+                    .single();
+
+                if (creatorErr || !creator) throw new Error('クリエイターが見つかりませんでした。');
+
+                // 画面にペンネームとアバターを反映
+                const penname = creator.pen_name || creator.penname || "名無しクリエイター";
+                document.getElementById('creatorName').innerText = penname;
+                document.getElementById('creatorAvatar').innerText = penname.charAt(0);
+
+                // ★ Stripe連携状態の判定とUI切り替え
+                const isStripeLinked = creator.stripe_account_id ? true : false;
+                if (isStripeLinked) {
+                    document.getElementById('linked-support').style.display = 'block';
+                } else {
+                    document.getElementById('unlinked-support').style.display = 'block';
+                }
+
+                // 2. 活動サイトリンクを取得
+                const { data: links } = await supabaseClient
+                    .from('creator_links')
+                    .select('*')
+                    .eq('creator_id', targetCreatorId);
+                
+                if (links && links.length > 0) {
+                    const linksHtml = links.map(link => `
+                        <a href="${link.url}" target="_blank" class="link-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                            ${link.title}
+                        </a>
+                    `).join('');
+                    document.getElementById('creatorLinks').innerHTML = linksHtml;
+                }
+
+                // 3. 作品リストを取得
+                const { data: works } = await supabaseClient
+                    .from('works')
+                    .select('*')
+                    .eq('creator_id', targetCreatorId);
+                
+                if (works && works.length > 0) {
+                    document.getElementById('worksSection').style.display = 'block';
+                    const worksHtml = works.map(work => `
+                        <div class="work-item">
+                            <h3 class="work-title">${work.title}</h3>
+                            <a href="${work.work_url}" target="_blank" class="work-url">🔗 作品を読む (外部サイト)</a>
+                            ${work.secret_message ? `<br><span class="secret-badge">🔒 支援者限定メッセージあり</span>` : ''}
+                        </div>
+                    `).join('');
+                    document.getElementById('worksList').innerHTML = worksHtml;
+                }
+
+                // ローディングを隠してコンテンツを表示
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('contentState').style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                showError(err.message);
+            }
+        }
 
         function showError(msg) {
             document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('contentState').style.display = 'none';
             document.getElementById('errorState').style.display = 'block';
-            document.getElementById('errorMessage').innerHTML = msg;
+            document.getElementById('errorMessage').innerText = msg;
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const agreeCheckbox = document.getElementById('agreeTerms');
-            const checkoutBtn = document.getElementById('checkoutBtn');
-            if (agreeCheckbox && checkoutBtn) {
-                agreeCheckbox.addEventListener('change', (e) => {
-                    checkoutBtn.disabled = !e.target.checked;
-                });
-            }
-
-            try {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                authorId = new URLSearchParams(window.location.search).get('id');
-                if (!authorId) throw new Error("URLが正しくありません。");
-
-                const { data: creator } = await supabaseClient.from('creators').select('*').eq('id', authorId).single();
-                if (!creator) throw new Error("指定されたクリエイターが見つかりません。");
-
-                const penname = creator.pen_name || "名無し作者";
-                document.getElementById('authorName').innerText = penname;
-               
-                const { data: links } = await supabaseClient.from('creator_links').select('*').eq('creator_id', authorId).order('created_at');
-                if (links && links.length > 0) {
-                    const linksList = document.getElementById('linksList');
-                    links.forEach(link => {
-                        linksList.innerHTML += `<a href="${link.url}" target="_blank" class="link-item">${link.title} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></a>`;
-                    });
-                    document.getElementById('linksCard').style.display = 'block';
-                }
-
-                const { data: works } = await supabaseClient.from('works').select('*').eq('creator_id', authorId).order('created_at');
-                if (works && works.length > 0) {
-                    const worksList = document.getElementById('worksList');
-                    works.forEach(work => {
-                        worksList.innerHTML += `
-                            <div class="work-option search-target" data-title="${work.title.replace(/"/g, '&quot;')}">
-                                <input type="radio" name="selectedWork" id="work_${work.id}" value="${work.id}">
-                                <label for="work_${work.id}" class="work-label">
-                                    <span class="work-label-title">${work.title}</span>
-                                    <span class="work-label-desc">この作品を指定して応援します。</span>
-                                </label>
-                            </div>`;
-                    });
-
-                    const searchInput = document.getElementById('workSearchInput');
-                    if(searchInput) {
-                        searchInput.addEventListener('input', function(e) {
-                            const searchTerm = e.target.value.toLowerCase();
-                            const targets = document.querySelectorAll('.search-target');
-                            targets.forEach(target => {
-                                const title = target.getAttribute('data-title').toLowerCase();
-                                if (title.includes(searchTerm)) {
-                                    target.style.display = '';
-                                } else {
-                                    target.style.display = 'none';
-                                }
-                            });
-                        });
-                    }
-                }
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-            } catch (error) { showError(error.message); }
-        });
-
-        async function processCheckout() {
-            const btn = document.getElementById('checkoutBtn');
-            const amount = parseInt(document.getElementById('amountInput').value, 10);
-            const selectedWork = document.querySelector('input[name="selectedWork"]:checked').value;
-
-            if (!document.getElementById('agreeTerms').checked) {
-                return alert('利用規約および特定商取引法に基づく表記に同意してください。');
-            }
-
-            if (isNaN(amount) || amount < 100 || amount > 10000) {
-                return alert('100円〜10,000円の範囲で金額を入力してください。');
-            }
-
-            try {
-                const stripe = Stripe(STRIPE_PUBLIC_KEY);
-                btn.disabled = true; btn.innerText = '決済画面へ移動中...';
-
-                const { data: sessionData, error: functionError } = await supabaseClient.functions.invoke('create-checkout', {
-                    body: { amount: amount, authorId: authorId, workId: selectedWork }
-                });
-
-                if (functionError) throw new Error("通信エラー: " + functionError.message);
-                if (sessionData && sessionData.error) throw new Error("決済エラー: " + sessionData.error);
-
-                const checkoutSessionId = sessionData.id || sessionData.sessionId;
-                if (!checkoutSessionId) throw new Error("セッションIDが取得できませんでした。");
-
-                const { error } = await stripe.redirectToCheckout({ sessionId: checkoutSessionId });
-                if (error) throw error;
-            } catch (error) {
-                alert("エラーが発生しました:\n" + error.message);
-                btn.disabled = false; btn.innerText = '支援する';
-            }
+        // リクエスト送信ボタンのアクション（仮実装）
+        function sendSupportRequest() {
+            // ※後にSupabase Edge Functions等で実際にメールを送る処理を書きます
+            alert("作者へ「支援機能をオンにしてほしい！」というリクエストを送信しました。\n連携が完了するまで今しばらくお待ちください！");
         }
+
+        // 支援するボタンのアクション（仮実装）
+        function proceedToCheckout() {
+            const amount = document.getElementById('supportAmount').value;
+            alert(`${amount}円の決済画面(Stripe)へ遷移します！\n※現在テスト環境です`);
+        }
+
+        // 画面読み込み時に初期化処理を実行
+        window.addEventListener('DOMContentLoaded', initProfile);
     </script>
 </body>
 </html>
