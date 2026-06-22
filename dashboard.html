@@ -390,6 +390,37 @@
             let currentUserId = null;
             let editLinkId = null, editWorkId = null;
 
+            // ★ ここから追加：Stripeの連携状態をチェックする関数
+            async function checkStripeStatus(userId) {
+                try {
+                    // ※dashboard.htmlに合わせて、creatorsテーブルを参照するように修正しています
+                    const { data, error } = await supabaseClient
+                        .from('creators')
+                        .select('stripe_account_id')
+                        .eq('id', userId)
+                        .single();
+
+                    if (error && error.code !== 'PGRST116') throw error; // データがない場合のエラーは無視
+
+                    // stripe_account_id が存在すれば「連携済み」、なければ「未連携」
+                    const isStripeLinked = data && data.stripe_account_id;
+
+                    if (isStripeLinked) {
+                        document.getElementById('linked-header').style.display = 'flex';
+                        document.getElementById('linked-card').style.display = 'block';
+                        document.getElementById('unlinked-header').style.display = 'none';
+                        document.getElementById('unlinked-card').style.display = 'none';
+                    } else {
+                        document.getElementById('unlinked-header').style.display = 'flex';
+                        document.getElementById('unlinked-card').style.display = 'block';
+                        document.getElementById('linked-header').style.display = 'none';
+                        document.getElementById('linked-card').style.display = 'none';
+                    }
+                } catch (err) {
+                    console.error('Stripe状態の取得に失敗しました:', err);
+                }
+            }
+
             window.initDashboard = async function() {
                 if (!document.getElementById('dashboard-container')) return;
 
