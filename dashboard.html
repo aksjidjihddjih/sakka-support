@@ -436,7 +436,6 @@
             window.initDashboard = async function() {
                 if (!document.getElementById('dashboard-container')) return;
                 
-                // ★ 2重発火を完全にロックして軽量化
                 if (isDashboardInitializing) return;
                 isDashboardInitializing = true;
 
@@ -445,7 +444,6 @@
                     if (!session) { window.location.href = 'login.html'; isDashboardInitializing = false; return; }
                     currentUserId = session.user.id;
 
-                    // ★ ユーザーIDが取得できたらStripe状態をチェック
                     await checkStripeStatus(currentUserId);
 
                     const { error: upsertErr } = await supabaseClient.from('creators').upsert(
@@ -475,8 +473,18 @@
                         document.getElementById('pennameInput').value = (penname === '未設定' ? "" : penname);
                     }
 
-                    const { data: donations } = await supabaseClient.from('donations').select('net_amount').eq('creator_id', currentUserId).eq('status', 'pending');
-                    currentBalance = donations ? donations.reduce((sum, d) => sum + Number(d.net_amount), 0) : 0;
+                    // ⭐️【修正】ローカルDBを単純合計せず、Edge FunctionからStripe計算済みの正確な残高を取得
+                    try {
+                        const { data: stripeData, error: stripeErr } = await supabaseClient.functions.invoke('get-stripe-transactions', {
+                            body: { creatorId: currentUserId }
+                        });
+                        if (stripeErr) throw stripeErr;
+                        currentBalance = stripeData.availableBalance ?? 0;
+                    } catch (err) {
+                        console.warn("APIから残高を取得できませんでした。0円として処理します:", err);
+                        currentBalance = 0;
+                    }
+
                     const balanceText = document.getElementById('balanceText');
                     if(balanceText) balanceText.innerText = `¥${currentBalance.toLocaleString()}`;
                     
@@ -492,7 +500,7 @@
 
                 } catch (error) { console.error("Error:", error); }
                 finally {
-                    isDashboardInitializing = false; // ★ ロックを解除
+                    isDashboardInitializing = false;
                 }
             };
 
@@ -637,9 +645,10 @@
                 window.openModal('withdrawModal');
             };
 
-            window.executeWithdraw = function() {
+            window.executeWithdraw = async function() {
                 const amountInput = document.getElementById('withdrawAmountInput');
                 const amount = parseInt(amountInput.value, 10);
+                const submitBtn = document.querySelector('#withdrawModal .btn-primary');
                 
                 if (isNaN(amount) || amount <= 0) {
                     return alert("正しい金額を入力してください。");
@@ -648,8 +657,35 @@
                     return alert(`残高（¥${currentBalance.toLocaleString()}）を超える金額は引き出せません。`);
                 }
                 
-                alert(`¥${amount.toLocaleString()} の引き出し申請を受け付けました。\n登録済みのStripe口座へ振り込み処理を行います。`);
-                window.closeModal('withdrawModal');
+                if (!confirm(`¥${amount.toLocaleString()} の引き出し申請を行います。本当によろしいですか？`)) {
+                    return;
+                }
+
+                // ボタンを無効化して2重送信を防ぐ（UX向上）
+                submitBtn.disabled = true;
+                submitBtn.innerText = '処理中...';
+
+                try {
+                    // ⭐️ バックエンドの引き出しAPIを呼び出し
+                    const { data, error } = await supabaseClient.functions.invoke('request-withdrawal', {
+                        body: { userId: currentUserId, requestedAmount: amount }
+                    });
+
+                    if (error) throw error;
+                    if (data && data.error) throw new Error(data.error);
+
+                    alert(`¥${amount.toLocaleString()} の引き出し処理が完了しました。\n連携済みのStripe口座へ振り込まれます。`);
+                    window.closeModal('withdrawModal');
+                    
+                    // ダッシュボードを最新の残高に更新
+                    await window.initDashboard();
+
+                } catch (err) {
+                    alert(`引き出し処理に失敗しました:\n${err.message}`);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = '申請する';
+                }
             };
 
             window.openModal = function(id) { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; };
