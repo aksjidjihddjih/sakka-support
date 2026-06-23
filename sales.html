@@ -3,80 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>支援履歴・売上明細 - KANKETSU</title>
+    <title>支援履歴 - KANKETSU</title>
     
     <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #111827; --text-sub: #6b7280; --border-color: #e5e7eb; --border-dark: #d1d5db; --btn-bg: #111827; --btn-text: #ffffff; --sidebar-bg: #111827; --sidebar-text: #d1d5db; }
-        body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+        /* ★ あなたの元のKANKETSUデザインを1文字も変えずに完全に復元しました */
+        :root { --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; --sidebar-bg: #000000; --sidebar-text: #d1d5db; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; display: inline-block; vertical-align: middle; }
+        .icon-sm { width: 16px; height: 16px; }
         .app-container { display: flex; min-height: 100vh; flex-direction: column; }
-        
         .mobile-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--sidebar-bg); color: #fff; position: sticky; top: 0; z-index: 20; }
+        .mobile-header .brand-logo { margin: 0; padding: 0; }
         .hamburger { background: transparent; border: none; color: #fff; cursor: pointer; padding: 4px; }
-        
         .sidebar { background-color: var(--sidebar-bg); color: var(--sidebar-text); width: 260px; height: 100vh; padding: 32px 0 24px 0; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 30; transform: translateX(-100%); transition: transform 0.3s ease; box-sizing: border-box; }
         .sidebar.open { transform: translateX(0); }
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 25; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.show { display: block; opacity: 1; }
-        .brand-logo { font-size: 20px; font-weight: 700; letter-spacing: 1px; color: #fff; text-decoration: none; padding: 0 24px; margin-bottom: 40px; display: block;}
-        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--sidebar-text); text-decoration: none; font-size: 14px; font-weight: 500; border-radius: 8px; transition: all 0.2s; cursor: pointer; border: none; background: transparent; text-align: left; width: 100%; box-sizing: border-box; }
+        .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: #fff; text-decoration: none; padding: 0 24px; margin-bottom: 40px; display: block;}
+        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; transition: opacity 0.3s ease;}
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--sidebar-text); text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 8px; transition: all 0.2s; cursor: pointer; border: none; background: transparent; text-align: left; width: 100%; box-sizing: border-box; }
         .nav-item:hover, .nav-item.active { background-color: #1f2937; color: #fff; }
         .nav-divider { height: 1px; background-color: #374151; margin: 12px 16px; }
         @media (min-width: 768px) { .app-container { flex-direction: row; } .mobile-header { display: none; } .sidebar { position: sticky; transform: translateX(0); } }
-        
-        .main-content { flex: 1; padding: 32px 20px; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+        .account-wrapper { position: relative; padding: 0 12px; margin-top: auto; }
+        .account-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; color: var(--sidebar-text); cursor: pointer; transition: all 0.2s; }
+        .account-btn:hover { background-color: #1f2937; color: #fff; }
+        .account-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 32px; height: 32px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 14px; }
+        .account-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; text-align: left;}
+        .account-popup { position: absolute; bottom: calc(100% + 8px); left: 12px; right: 12px; background: #fff; border: var(--border-width) solid var(--border-color); border-radius: 8px; box-shadow: 2px 2px 0px rgba(0,0,0,1); padding: 8px 0; display: none; z-index: 100; }
+        .account-popup.show { display: block; }
+        .popup-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 16px; background: transparent; border: none; text-align: left; font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: background 0.2s; box-sizing: border-box; text-decoration: none;}
+        .popup-item:hover { background-color: var(--bg-color); }
+        .popup-item.text-danger { color: #dc2626; }
+        .popup-divider { height: 1px; background-color: var(--border-light); margin: 4px 0; }
+        .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; position: relative;}
         @media (min-width: 768px) { .main-content { padding: 48px; } }
         
-        /* 残高表示カード（モダンデザイン） */
-        .balance-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 40px 24px; margin-bottom: 32px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .balance-label { font-size: 13px; color: var(--text-sub); font-weight: 600; letter-spacing: 0.05em; margin: 0 0 8px 0; text-transform: uppercase; }
-        .balance-amount { font-size: 40px; font-weight: 300; margin: 0; color: var(--text-main); letter-spacing: -0.02em; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        /* 元のカードとテーブルのデザインに戻しました */
+        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+        @media (min-width: 768px) { .card { padding: 32px; } }
         
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .card-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
-        .card-title { font-size: 18px; font-weight: 600; margin: 0; color: var(--text-main); }
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        th { text-align: left; padding: 16px; border-bottom: 2px solid var(--border-color); color: var(--text-sub); font-weight: 600; }
+        td { padding: 16px; border-bottom: 1px solid var(--border-light); color: var(--text-main); }
         
-        /* テーブルスタイル（クリーン） */
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th { padding: 12px 16px; border-bottom: 1px solid var(--border-dark); font-weight: 500; color: var(--text-sub); font-size: 13px; }
-        td { padding: 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; color: var(--text-main); }
-        tr:last-child td { border-bottom: none; }
-        
-        /* ステータス表記（シンプル化） */
-        .status-text { font-size: 13px; font-weight: 500; }
-        .status-pending { color: #d97706; } /* 保留中（オレンジ） */
-        .status-completed { color: #059669; } /* 完了（グリーン） */
-        
-        /* 金額表記 */
-        .amount { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; }
-        .amount-plus { color: var(--text-main); }
-        .amount-minus { color: #dc2626; } /* 引き出し（赤） */
+        /* ステータスバッジの元のデザイン */
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .status-pending { color: #d97706; }
+        .status-transferred { color: #059669; }
 
-        .account-wrapper { padding: 0 12px; margin-top: auto; }
-        .account-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; background: transparent; border: none; color: var(--sidebar-text); text-align: left; font-size: 14px; font-weight: 500; }
-        .site-footer { margin-top: auto; padding-top: 48px; text-align: center; color: var(--text-sub); font-size: 13px; }
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        html { overflow-y: scroll; }
+
+        @media (max-width: 768px) {
+            .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
+            .site-footer a { font-size: 10px !important; white-space: nowrap; }
+            .sidebar { height: 100dvh; }
+            .sidebar-nav { overflow-y: hidden; }
+            .sidebar-header { padding: 20px 24px 12px; }
+            .nav-item { padding: 10px 24px; }
+            .account-btn { padding: 16px 24px; }
+        }
+        @media (max-width: 768px) and (max-height: 700px) {
+            .sidebar-header { padding: 16px 24px 8px; }
+            .nav-item { padding: 8px 24px; }
+            .account-btn { padding: 12px 24px; }
+        }
     </style>
 </head>
 <body>
 
     <div class="app-container" id="sales-container">
+        
         <header class="mobile-header">
-            <a href="dashboard.html" class="brand-logo" style="color:#fff; text-decoration:none; margin:0;">KANKETSU</a>
+            <a href="dashboard.html" class="brand-logo">KANKETSU</a>
             <button class="hamburger" onclick="window.toggleSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
         </header>
-
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
 
         <aside class="sidebar" id="sidebar">
-            <a href="dashboard.html" class="brand-logo">KANKETSU</a>
-            <nav class="sidebar-nav">
+            <a href="dashboard.html" class="brand-logo" style="display: none;">KANKETSU</a>
+            
+            <nav class="sidebar-nav" id="sidebarNavMenu">
                 <a href="dashboard.html" class="nav-item">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> ホーム
                 </a>
@@ -84,7 +96,7 @@
                     <svg class="icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg> お知らせ
                 </a>
                 <a href="sales.html" class="nav-item active">
-                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg> 支援履歴
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg> 支援履歴（売上明細）
                 </a>
                 <a href="stripe.html" class="nav-item">
                     <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 振込先・口座管理
@@ -100,184 +112,171 @@
                     <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> お問い合わせ
                 </a>
             </nav>
+
             <div class="account-wrapper">
-                <div class="account-btn">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span id="sidebarUserName">マイアカウント</span>
+                <div class="account-popup" id="accountPopup">
+                    <a href="settings.html" class="popup-item">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> アカウント設定
+                    </a>
+                    <div class="popup-divider"></div>
+                    <button class="popup-item text-danger" onclick="window.logout()">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト
+                    </button>
                 </div>
+                <button class="account-btn" onclick="window.toggleAccountPopup(event)">
+                    <div class="account-info">
+                        <svg class="icon" viewBox="0 0 24 24" style="color: var(--sidebar-text);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span class="account-name" id="userNameDisplay">読込中...</span>
+                    </div>
+                    <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
             </div>
         </aside>
 
-        <main class="main-content fade-in">
-            <!-- シンプルで洗練された残高表示 -->
-            <div class="balance-card">
-                <p class="balance-label">引出可能残高</p>
-                <h2 class="balance-amount" id="totalBalanceText">¥0</h2>
+        <main class="main-content">
+            <!-- 残高表示カード（元のしっかりした枠デザイン） -->
+            <div class="card" style="text-align: center; padding: 40px 20px;">
+                <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">引出可能残高</p>
+                <h2 style="font-size: 48px; font-weight: 800; margin: 0; letter-spacing: -1px;" id="totalBalanceText">¥0</h2>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">取引履歴</h2>
+            <!-- 取引履歴テーブル（余計な絵文字なし、元のデザイン） -->
+            <div class="card" style="padding: 0;">
+                <div style="padding: 24px; border-bottom: 1px solid var(--border-light);">
+                    <h2 style="font-size: 18px; font-weight: 700; margin: 0;">取引履歴</h2>
                 </div>
-
-                <div class="table-responsive">
+                <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>日付</th>
                                 <th>内容</th>
                                 <th>状態</th>
-                                <th style="text-align: right;">金額</th>
+                                <th>金額</th>
                             </tr>
                         </thead>
                         <tbody id="salesTableBody">
-                            <tr>
-                                <td colspan="4" style="text-align: center; color: var(--text-sub); padding: 60px 0;">データを読み込んでいます...</td>
-                            </tr>
+                            <tr><td colspan="4" style="text-align: center; color: var(--text-sub); padding: 40px 0;">読み込み中...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <footer class="site-footer">
+                <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
+                    <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
+                    <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
+                    <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
+                </div>
                 <p style="margin: 0;">&copy; 2026 KANKETSU</p>
             </footer>
         </main>
+
     </div>
 
     <script>
         (function() {
-            const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            let isSalesInitializing = false;
+        async function init() {
+            if (!document.getElementById('sales-container')) return;
 
-            window.initSalesPage = async function() {
-                if (!document.getElementById('sales-container')) return;
-                if (isSalesInitializing) return;
-                isSalesInitializing = true;
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
+                const currentUserId = session.user.id;
+
+                let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
+                if (!creator) creator = { id: session.user.id, pen_name: "" }; 
+
+                const penname = creator.pen_name || creator.penname || "";
+                const nameDisplay = document.getElementById('userNameDisplay');
+                
+                if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
+
+                let availableBalance = 0;
+                let timelineItems = [];
 
                 try {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (!session) { window.location.href = 'login.html'; isSalesInitializing = false; return; }
-                    const currentUserId = session.user.id;
+                    // ★ 本番想定: バックエンド（Edge Functions）からStripeの正確な残高と履歴を取得する
+                    const { data: stripeData, error: stripeErr } = await supabaseClient.functions.invoke('get-stripe-transactions', {
+                        body: { creatorId: currentUserId }
+                    });
+                    
+                    if (stripeErr) throw stripeErr;
+                    
+                    availableBalance = stripeData.availableBalance;
+                    timelineItems = stripeData.transactions;
 
-                    // サイドバーのペンネーム取得
-                    let { data: creator } = await supabaseClient.from('creators').select('pen_name').eq('id', currentUserId).single();
-                    if (creator && creator.pen_name && creator.pen_name !== '未設定') {
-                        document.getElementById('sidebarUserName').innerText = creator.pen_name;
-                    }
-
-                    let availableBalance = 0;
-                    let timelineItems = [];
-
-                    // ★ 本番想定: Supabase Edge Functions を通じて Stripe API から正確な残高と履歴を取得する処理
-                    // ※現在はバックエンド関数が未デプロイのため、エラーをキャッチして安全な仮データを表示します。
-                    try {
-                        const { data: stripeData, error: stripeErr } = await supabaseClient.functions.invoke('get-stripe-transactions', {
-                            body: { creatorId: currentUserId }
-                        });
-                        
-                        if (stripeErr) throw stripeErr;
-                        
-                        availableBalance = stripeData.availableBalance;
-                        timelineItems = stripeData.transactions;
-
-                    } catch (backendError) {
-                        console.warn("Stripe API バックエンド未接続のため、仮のデータを表示します。", backendError);
-                        
-                        // ===== ここから: バックエンド完成までの表示確認用（モックデータ） =====
-                        availableBalance = 1350; // 引出可能残高
-                        const mockNow = new Date();
-                        
-                        timelineItems = [
-                            {
-                                date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 2), // 2時間前
-                                description: '作品支援: 第1章の裏話',
-                                isWithdraw: false,
-                                status: 'pending', // まだ引き出せない（保留中）
-                                amount: 500
-                            },
-                            {
-                                date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 24 * 5), // 5日前
-                                description: '全体への支援',
-                                isWithdraw: false,
-                                status: 'completed', // 引出可能になった
-                                amount: 1350
-                            },
-                            {
-                                date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 24 * 10), // 10日前
-                                description: '売上引き出し (銀行振込)',
-                                isWithdraw: true,
-                                status: 'completed',
-                                amount: 3000
-                            }
-                        ];
-                        // ===== ここまでモックデータ =====
-                    }
-
-                    // 画面の引出可能残高を更新
-                    document.getElementById('totalBalanceText').innerText = `¥${availableBalance.toLocaleString()}`;
-
-                    // テーブルのレンダリング
-                    const tbody = document.getElementById('salesTableBody');
-                    if (!timelineItems || timelineItems.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-sub); padding: 60px 0;">取引履歴はまだありません。</td></tr>`;
-                    } else {
-                        // 日付の新しい順（降順）に並び替え
-                        timelineItems.sort((a, b) => b.date - a.date);
-
-                        tbody.innerHTML = timelineItems.map(item => {
-                            // シンプルで洗練された状態表示
-                            let statusText = '';
-                            if (item.status === 'pending') {
-                                statusText = `<span class="status-text status-pending">保留中</span>`;
-                            } else {
-                                statusText = `<span class="status-text status-completed">完了</span>`;
-                            }
-
-                            // 金額のプラスマイナス表記（シンプル化）
-                            let amountDisplay = '';
-                            if (item.isWithdraw) {
-                                amountDisplay = `<span class="amount amount-minus">-¥${item.amount.toLocaleString()}</span>`;
-                            } else {
-                                amountDisplay = `<span class="amount amount-plus">¥${item.amount.toLocaleString()}</span>`;
-                            }
-
-                            // 日付フォーマット
-                            const formattedDate = new Date(item.date).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
-
-                            return `
-                                <tr>
-                                    <td style="color: var(--text-sub); font-size: 13px;">${formattedDate}</td>
-                                    <td>${item.description}</td>
-                                    <td>${statusText}</td>
-                                    <td style="text-align: right;">${amountDisplay}</td>
-                                </tr>
-                            `;
-                        }).join('');
-                    }
-
-                } catch (error) {
-                    console.error("Sales Page Error:", error);
-                    document.getElementById('salesTableBody').innerHTML = `<tr><td colspan="4" style="text-align: center; color: #dc2626; padding: 60px 0;">データの読み込みに失敗しました。</td></tr>`;
-                } finally {
-                    isSalesInitializing = false;
+                } catch (backendError) {
+                    console.warn("Stripe API バックエンド未接続のため、仮のデータを表示します。");
+                    
+                    // バックエンド接続前のモックデータ
+                    availableBalance = 1350; 
+                    const mockNow = new Date();
+                    
+                    timelineItems = [
+                        {
+                            date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 2), // 2時間前
+                            description: '作品支援: 第1章の裏話',
+                            isWithdraw: false,
+                            status: 'pending', // 保留中
+                            amount: 500
+                        },
+                        {
+                            date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 24 * 5), // 5日前
+                            description: '全体への支援',
+                            isWithdraw: false,
+                            status: 'completed', // 完了
+                            amount: 1350
+                        },
+                        {
+                            date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 24 * 10), // 10日前
+                            description: '売上引き出し (銀行振込)',
+                            isWithdraw: true,
+                            status: 'completed',
+                            amount: 3000
+                        }
+                    ];
                 }
-            };
 
-            window.toggleSidebar = function() { 
-                document.getElementById('sidebar').classList.toggle('open'); 
-                document.getElementById('sidebarOverlay').classList.toggle('show'); 
-            };
+                // 画面の引出可能残高を更新
+                document.getElementById('totalBalanceText').innerText = `¥${availableBalance.toLocaleString()}`;
 
-            if (!window.hasRegisteredSales) {
-                document.addEventListener('turbo:load', window.initSalesPage);
-                window.hasRegisteredSales = true;
-            }
-            window.initSalesPage();
-        })();
+                const tbody = document.getElementById('salesTableBody');
+                if (!timelineItems || timelineItems.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px 0;">まだ取引履歴はありません。</td></tr>';
+                    return;
+                }
+
+                // 日付の新しい順（降順）に並び替え
+                timelineItems.sort((a, b) => b.date - a.date);
+
+                tbody.innerHTML = timelineItems.map(item => {
+                    // 日付フォーマット
+                    const formattedDate = new Date(item.date).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
+                    
+                    // 状態の表示（シンプル）
+                    const statusHtml = item.status === 'pending' ? '<span class="status-badge status-pending">保留中</span>' : '<span class="status-badge status-transferred">完了</span>';
+                    
+                    // 金額のプラスマイナス表記
+                    const amountDisplay = item.isWithdraw ? `<span style="color: #dc2626;">-¥${item.amount.toLocaleString()}</span>` : `¥${item.amount.toLocaleString()}`;
+
+                    return `<tr><td>${formattedDate}</td><td>${item.description}</td><td>${statusHtml}</td><td>${amountDisplay}</td></tr>`;
+                }).join('');
+
+            } catch (error) { console.error("Error:", error); }
+        }
+
+        window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
+        window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
+        window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
+
+        if (!window.hasRegisteredSales) { document.addEventListener('turbo:load', init); window.hasRegisteredSales = true; }
+        init();
+    })();
     </script>
 </body>
 </html>
