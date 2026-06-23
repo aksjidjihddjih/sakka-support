@@ -76,7 +76,19 @@
 
             <div id="errorMsg" class="error-message"></div>
 
-            <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">ログイン</button>
+            <form id="loginForm" onsubmit="handleFormSubmit(event)">
+                <div class="form-group">
+                    <label>メールアドレス</label>
+                    <input type="email" id="email" class="form-control" placeholder="you@example.com" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label>パスワード</label>
+                    <a href="#" class="forgot-password" onclick="alert('パスワードリセット機能は準備中です。\nお困りの場合はお問い合わせください。')">パスワードを忘れた場合</a>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="loginBtn">ログイン</button>
+            </form>
             
             <div class="signup-link">
                 アカウントをお持ちでない方は <a href="signup.html">無料で登録</a>
@@ -89,12 +101,8 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // セッションチェック（既にログイン済みの場合はダッシュボードへ）
-        supabaseClient.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                window.location.href = 'dashboard.html';
-            }
-        });
+        // ⭐️【修正】開いた瞬間に勝手にダッシュボードへ飛ばすリダイレクトを削除しました。
+        // これにより、別のアカウントでログインしたい場合なども勝手に画面が切り替わらなくなります。
 
         // ソーシャルログイン処理
         async function signInWithProvider(provider) {
@@ -107,6 +115,12 @@
             } catch (error) {
                 alert('エラーが発生しました: ' + error.message);
             }
+        }
+
+        // フォーム送信時のハンドラー（誤作動防止の標準化）
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            handleLogin();
         }
 
         // メールアドレスログイン処理
@@ -134,7 +148,6 @@
                 });
 
                 if (error) {
-                    // Supabaseの「Email not confirmed」エラーを日本語で親切に表示
                     if (error.message.includes('Email not confirmed')) {
                         throw new Error('メールアドレスの認証が完了していません。\n登録時に送信されたメール内のリンクをクリックしてください。');
                     } else if (error.message.includes('Invalid login credentials')) {
@@ -143,7 +156,7 @@
                     throw error;
                 }
 
-                // ログイン成功
+                // ログイン成功時のみ、明示的にダッシュボードへ移動
                 window.location.href = 'dashboard.html';
 
             } catch (error) {
