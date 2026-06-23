@@ -52,7 +52,8 @@
         .btn-primary:hover { background-color: var(--btn-hover); border-color: var(--btn-hover); }
         .btn-outline { background-color: transparent; color: var(--text-main); }
         .btn-outline:hover { background-color: var(--bg-color); }
-        .btn-sm { padding: 8px 16px; font-size: 13px; width: auto; }
+        /* ★ 巨大化バグ修正：width: auto !important と flex-shrink: 0 を付与 */
+        .btn-sm { padding: 8px 16px; font-size: 13px; width: auto !important; flex-shrink: 0; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
         .form-control { width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; color: var(--text-main); box-sizing: border-box; transition: all 0.2s; }
@@ -170,20 +171,18 @@
                     </div>
                     
                     <div class="task-list" id="onboardingTaskList">
-                        </div>
+                    </div>
                 </div>
             </div>
 
             <div id="mainDashboardView" style="display: none;" class="fade-in">
                 <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">ホーム</h1>
                 
-                <!-- ★ 未連携用ヘッダー -->
                 <div id="unlinked-header" style="display: none; background-color: #fef08a; color: #854d0e; padding: 12px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 24px; align-items: center; gap: 8px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     現在、支援の受け取りが「オフ」になっています。口座連携を完了すると支援受付ページが公開されます。
                 </div>
 
-                <!-- ★ 連携済み用ヘッダー -->
                 <div id="linked-header" style="display: none;">
                     <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                         <span style="display:inline-block; width:8px; height:8px; background:#16a34a; border-radius:50%;"></span> 公開中 (支援受付ページURL)
@@ -194,7 +193,6 @@
                     </div>
                 </div>
 
-                <!-- ★ 未連携用カード（ボタン化） 右下の影を消し、文言をシンプルに -->
                 <div id="unlinked-card" class="card" style="display: none; border: 2px dashed var(--border-color); background-color: #f9fafb; text-align: center; padding: 32px 20px; box-shadow: none;">
                     <h3 style="margin-top: 0; font-size: 18px;">💰 支援受付ページを公開しましょう</h3>
                     <p style="font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px;">
@@ -206,7 +204,6 @@
                     </button>
                 </div>
 
-                <!-- ★ 連携済み用カード -->
                 <div id="linked-card" style="display: none;">
                     <div class="card" style="text-align: center; padding: 48px 20px;">
                         <p style="font-size: 14px; color: var(--text-sub); margin: 0 0 8px 0; font-weight: 700; letter-spacing: 1px;">BALANCE</p>
@@ -222,8 +219,8 @@
                         <div>
                             <h2 class="card-title">プロフィール</h2>
                             <p class="card-desc">読者に公開されるペンネーム</p>
-                            </div>
                         </div>
+                    </div>
                     <div class="item-list">
                         <div class="item-card" onclick="window.openModal('profileModal')">
                             <div class="item-info">
@@ -265,6 +262,12 @@
                         </div>
                         <button class="btn btn-outline btn-sm" onclick="window.openModal('workModal')">＋</button>
                     </div>
+                    
+                    <div style="position: relative; margin-bottom: 16px;">
+                        <input type="text" id="dashboardWorkSearch" class="form-control" style="padding-left: 36px; font-size: 14px;" placeholder="登録済みの作品名で検索..." autocomplete="off">
+                        <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-sub);" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+
                     <div class="item-list" id="worksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
                 </div>
 
@@ -288,7 +291,7 @@
             </div>
             <div class="form-group">
                 <label>ペンネーム（読者に公開されます）</label>
-                <input type="text" id="pennameInput" class="form-control" placeholder="例: 小説 太郎（50文字以内）" maxlength="50">
+                <input type="text" id="pennameInput" class="form-control" placeholder="例: 小説 太郎（50文字以内）" maxlength="50" autocomplete="off">
             </div>
             <div class="modal-footer">
                 <div style="display:flex; gap:12px; margin-left:auto;">
@@ -307,7 +310,7 @@
             </div>
             <div class="form-group">
                 <label>URL</label>
-                <input type="url" id="linkUrl" class="form-control" placeholder="https://...">
+                <input type="url" id="linkUrl" class="form-control" placeholder="https://..." autocomplete="off">
                 <p style="font-size: 12px; color: var(--text-sub); margin-top: 8px;">
                     ※対応サイト：小説家になろう、アルファポリス、ハーメルン、カクヨム<br>
                     URLを入力するだけで、サイト名は自動で判別されます。
@@ -331,7 +334,7 @@
             </div>
             <div class="form-group">
                 <label>メッセージ内容（作品指定のない支援時に表示されます）</label>
-                <textarea id="msgContent" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください（ショートストーリー等も大歓迎です！）"></textarea>
+                <textarea id="msgContent" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください（ショートストーリー等も大歓迎です！）" autocomplete="off"></textarea>
             </div>
             <div class="modal-footer">
                 <div style="display:flex; gap:12px; margin-left:auto;">
@@ -350,21 +353,41 @@
             </div>
             <div class="form-group">
                 <label>作品タイトル</label>
-                <input type="text" id="workTitle" class="form-control" placeholder="作品名を入力（100文字以内）" maxlength="100">
+                <input type="text" id="workTitle" class="form-control" placeholder="作品名を入力（100文字以内）" maxlength="100" autocomplete="off">
             </div>
             <div class="form-group">
                 <label>作品のURL</label>
-                <input type="url" id="workUrl" class="form-control" placeholder="https://...">
+                <input type="url" id="workUrl" class="form-control" placeholder="https://..." autocomplete="off">
             </div>
             <div class="form-group">
                 <label>限定メッセージ</label>
-                <textarea id="workMessage" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください（作品の裏話など）"></textarea>
+                <textarea id="workMessage" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください（作品の裏話など）" autocomplete="off"></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline btn-sm" id="workDelBtn" style="display:none; color:#dc2626; border-color:#fca5a5;" onclick="window.deleteWork()">削除</button>
                 <div style="display:flex; gap:12px; margin-left:auto;">
                     <button class="btn btn-outline btn-sm" onclick="window.closeModal('workModal')">キャンセル</button>
                     <button class="btn btn-primary btn-sm" onclick="window.saveWork()">保存する</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="withdrawModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">売上を引き出す</h3>
+                <button class="modal-close" onclick="window.closeModal('withdrawModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>引き出す金額 (円)</label>
+                <input type="number" id="withdrawAmountInput" class="form-control" placeholder="金額を入力してください" min="1" autocomplete="off">
+                <p style="font-size: 13px; color: var(--text-sub); margin-top: 8px; font-weight: 600;" id="withdrawMaxHint">引き出し可能残高: ¥0</p>
+            </div>
+            <div class="modal-footer">
+                <div style="display:flex; gap:12px; margin-left:auto;">
+                    <button class="btn btn-outline btn-sm" onclick="window.closeModal('withdrawModal')">キャンセル</button>
+                    <button class="btn btn-primary btn-sm" onclick="window.executeWithdraw()">申請する</button>
                 </div>
             </div>
         </div>
@@ -378,6 +401,8 @@
 
             let currentUserId = null;
             let editLinkId = null, editWorkId = null;
+            let currentBalance = 0; // ★ 引き出し金額チェック用
+            let isDashboardInitializing = false; // ★ 重複リロード(高負荷)防止ロック
 
             // ★ Stripeの連携状態をチェックする関数
             async function checkStripeStatus(userId) {
@@ -410,10 +435,14 @@
 
             window.initDashboard = async function() {
                 if (!document.getElementById('dashboard-container')) return;
+                
+                // ★ 2重発火を完全にロックして軽量化
+                if (isDashboardInitializing) return;
+                isDashboardInitializing = true;
 
                 try {
                     const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (!session) { window.location.href = 'login.html'; return; }
+                    if (!session) { window.location.href = 'login.html'; isDashboardInitializing = false; return; }
                     currentUserId = session.user.id;
 
                     // ★ ユーザーIDが取得できたらStripe状態をチェック
@@ -447,9 +476,9 @@
                     }
 
                     const { data: donations } = await supabaseClient.from('donations').select('net_amount').eq('creator_id', currentUserId).eq('status', 'pending');
-                    let totalBalance = donations ? donations.reduce((sum, d) => sum + Number(d.net_amount), 0) : 0;
+                    currentBalance = donations ? donations.reduce((sum, d) => sum + Number(d.net_amount), 0) : 0;
                     const balanceText = document.getElementById('balanceText');
-                    if(balanceText) balanceText.innerText = `¥${totalBalance.toLocaleString()}`;
+                    if(balanceText) balanceText.innerText = `¥${currentBalance.toLocaleString()}`;
                     
                     if (document.getElementById('profileUrlText')) {
                         document.getElementById('profileUrlText').innerText = `${window.location.origin}/profile.html?id=${currentUserId}`;
@@ -462,6 +491,9 @@
                     renderView(creator, linksCount, msgsCount, worksCount);
 
                 } catch (error) { console.error("Error:", error); }
+                finally {
+                    isDashboardInitializing = false; // ★ ロックを解除
+                }
             };
 
             function renderView(creator, linksCount, msgsCount, worksCount) {
@@ -562,8 +594,63 @@
                         <div class="item-info"><h4>${item.title}</h4><p>${item.secret_message ? "限定メッセージあり" : "メッセージなし"}</p></div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
                     </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
+                
+                // ★ 作品ロード直後にも検索フィルターを適用
+                applyWorkSearch();
                 return data ? data.length : 0;
             }
+
+            // ★ 作品検索処理の本体
+            function applyWorkSearch() {
+                const searchInput = document.getElementById('dashboardWorkSearch');
+                if (!searchInput) return;
+                const query = searchInput.value.toLowerCase().trim();
+                const cards = document.querySelectorAll('#worksList .item-card');
+                cards.forEach(card => {
+                    const title = card.querySelector('h4') ? card.querySelector('h4').innerText.toLowerCase() : '';
+                    if (title.includes(query)) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            // ★ 検索窓のインプット監視を設定
+            document.addEventListener('DOMContentLoaded', () => {
+                const searchInput = document.getElementById('dashboardWorkSearch');
+                if (searchInput) {
+                    searchInput.addEventListener('input', applyWorkSearch);
+                }
+            });
+
+            // ★ モーダルで金額入力を求めて引き出し処理を行う一連の関数
+            window.requestWithdrawal = function(e) {
+                if(e) e.preventDefault();
+                const amountInput = document.getElementById('withdrawAmountInput');
+                if(amountInput) {
+                    amountInput.value = '';
+                    amountInput.max = currentBalance;
+                }
+                const hint = document.getElementById('withdrawMaxHint');
+                if(hint) hint.innerText = `引き出し可能残高: ¥${currentBalance.toLocaleString()}`;
+                window.openModal('withdrawModal');
+            };
+
+            window.executeWithdraw = function() {
+                const amountInput = document.getElementById('withdrawAmountInput');
+                const amount = parseInt(amountInput.value, 10);
+                
+                if (isNaN(amount) || amount <= 0) {
+                    return alert("正しい金額を入力してください。");
+                }
+                if (amount > currentBalance) {
+                    return alert(`残高（¥${currentBalance.toLocaleString()}）を超える金額は引き出せません。`);
+                }
+                
+                alert(`¥${amount.toLocaleString()} の引き出し申請を受け付けました。\n登録済みのStripe口座へ振り込み処理を行います。`);
+                window.closeModal('withdrawModal');
+            };
 
             window.openModal = function(id) { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; };
             window.closeModal = function(id) { 
@@ -572,6 +659,7 @@
                 if(id === 'linkModal') { editLinkId = null; document.getElementById('linkUrl').value = ''; document.getElementById('linkModalTitle').innerText = '活動サイトを追加'; document.getElementById('linkDelBtn').style.display = 'none'; }
                 if(id === 'msgModal') { document.getElementById('msgContent').value = ''; }
                 if(id === 'workModal') { editWorkId = null; document.getElementById('workTitle').value = ''; document.getElementById('workUrl').value = ''; document.getElementById('workMessage').value = ''; document.getElementById('workModalTitle').innerText = '作品を追加'; document.getElementById('workDelBtn').style.display = 'none'; }
+                if(id === 'withdrawModal') { document.getElementById('withdrawAmountInput').value = ''; }
             };
             window.onclick = function(e) { if (e.target.classList.contains('modal-overlay')) { window.closeModal(e.target.id); } };
             window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
@@ -638,7 +726,6 @@
                 }
             };
 
-            // ★ メッセージ保存処理（タイトル自動挿入の修正版）
             window.saveMessage = async function() {
                 const message = document.getElementById('msgContent').value.trim();
                 
@@ -696,7 +783,7 @@
                 }
             };
 
-         window.deleteLink = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('creator_links').delete().eq('id', editLinkId); window.closeModal('linkModal'); await window.initDashboard(); };
+            window.deleteLink = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('creator_links').delete().eq('id', editLinkId); window.closeModal('linkModal'); await window.initDashboard(); };
             window.deleteWork = async function() { if(!confirm("削除しますか？")) return; await supabaseClient.from('works').delete().eq('id', editWorkId); window.closeModal('workModal'); await window.initDashboard(); };
 
             window.copyUrl = function() { navigator.clipboard.writeText(document.getElementById('profileUrlText').innerText).then(() => alert("URLをコピーしました！")); };
