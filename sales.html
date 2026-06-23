@@ -197,7 +197,7 @@
                 let timelineItems = [];
 
                 try {
-                    // ★ 本番想定: バックエンド（Edge Functions）からStripeの正確な残高と履歴を取得する
+                    // ⭐️ バックエンド（Edge Functions）からStripeの正確な残高と履歴をリアルタイム取得
                     const { data: stripeData, error: stripeErr } = await supabaseClient.functions.invoke('get-stripe-transactions', {
                         body: { creatorId: currentUserId }
                     });
@@ -208,35 +208,9 @@
                     timelineItems = stripeData.transactions;
 
                 } catch (backendError) {
-                    console.warn("Stripe API バックエンド未接続のため、仮のデータを表示します。");
-                    
-                    // バックエンド接続前のモックデータ
-                    availableBalance = 1350; 
-                    const mockNow = new Date();
-                    
-                    timelineItems = [
-                        {
-                            date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 2), // 2時間前
-                            description: '作品支援: 第1章の裏話',
-                            isWithdraw: false,
-                            status: 'pending', // 保留中
-                            amount: 500
-                        },
-                        {
-                            date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 24 * 5), // 5日前
-                            description: '全体への支援',
-                            isWithdraw: false,
-                            status: 'completed', // 完了
-                            amount: 1350
-                        },
-                        {
-                            date: new Date(mockNow.getTime() - 1000 * 60 * 60 * 24 * 10), // 10日前
-                            description: '売上引き出し (銀行振込)',
-                            isWithdraw: true,
-                            status: 'completed',
-                            amount: 3000
-                        }
-                    ];
+                    console.error("取引履歴の取得に失敗しました:", backendError);
+                    document.getElementById('salesTableBody').innerHTML = '<tr><td colspan="4" style="text-align: center; color: #dc2626; padding: 40px 0;">データの読み込みに失敗しました。時間をおいてお試しください。</td></tr>';
+                    return;
                 }
 
                 // 画面の引出可能残高を更新
@@ -244,21 +218,23 @@
 
                 const tbody = document.getElementById('salesTableBody');
                 if (!timelineItems || timelineItems.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px 0;">まだ取引履歴はありません。</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-sub); padding: 40px 0;">まだ取引履歴はありません。</td></tr>';
                     return;
                 }
 
                 // 日付の新しい順（降順）に並び替え
-                timelineItems.sort((a, b) => b.date - a.date);
+                timelineItems.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 tbody.innerHTML = timelineItems.map(item => {
-                    // 日付フォーマット
-                    const formattedDate = new Date(item.date).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
+                    const formattedDate = new Date(item.date).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
                     
-                    // 状態の表示
-                    const statusHtml = item.status === 'pending' ? '<span class="status-badge status-pending">保留中</span>' : '<span class="status-badge status-transferred">完了</span>';
+                    // ⭐️【厳格ルール適用】表示上の状態は「完了」か「保留中」の2択に完全に絞り込む
+                    const isCompleted = item.status === 'completed' || item.status === 'transferred';
+                    const statusHtml = isCompleted 
+                        ? '<span class="status-badge status-transferred">完了</span>' 
+                        : '<span class="status-badge status-pending">保留中</span>';
                     
-                    // 金額のプラスマイナス表記
+                    // 出金(Withdraw)の場合はマイナス表記、支援受領の場合は通常表記
                     const amountDisplay = item.isWithdraw ? `<span style="color: #dc2626;">-¥${item.amount.toLocaleString()}</span>` : `¥${item.amount.toLocaleString()}`;
 
                     return `<tr><td>${formattedDate}</td><td>${item.description}</td><td>${statusHtml}</td><td>${amountDisplay}</td></tr>`;
