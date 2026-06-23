@@ -4,51 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>クリエイター登録 - KANKETSU</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* (既存のスタイルはすべてそのまま維持) */
         :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
         .header { padding: 32px 20px; text-align: center; }
         .brand-logo { font-size: 28px; font-weight: 900; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
         .container { max-width: 440px; margin: 0 auto 40px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
-        
         .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 40px 32px; box-shadow: 4px 4px 0px rgba(0,0,0,1); text-align: center;}
         .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 8px 0; }
         .card p.desc { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; }
-
-        /* ソーシャルボタン */
         .social-btn { display: flex; justify-content: center; align-items: center; gap: 12px; width: 100%; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; background: #fff; color: var(--text-main); margin-bottom: 12px; text-decoration: none; }
         .social-btn:hover { background-color: #f3f4f6; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
-        
         .divider { display: flex; align-items: center; text-align: center; margin: 24px 0; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-light); }
         .divider span { padding: 0 16px; color: var(--text-sub); font-size: 12px; font-weight: 600; }
-
         .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
         .form-control { width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #f9fafb; color: var(--text-main); box-sizing: border-box; transition: all 0.2s; outline: none; }
         .form-control:focus { border-color: var(--border-color); background-color: #fff; }
-
-        /* 利用規約チェックボックス */
         .terms-check { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 24px; text-align: left; background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid var(--border-light); }
         .terms-check input { margin-top: 3px; cursor: pointer; accent-color: var(--text-main); width: 16px; height: 16px; }
         .terms-check label { font-size: 12px; color: var(--text-sub); line-height: 1.5; cursor: pointer; }
         .terms-check a { color: var(--text-main); font-weight: 700; }
-
         .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 14px 24px; font-size: 15px; font-weight: 800; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; }
         .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
         .btn-primary:hover { background-color: var(--btn-hover); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-
         .login-link { margin-top: 24px; font-size: 14px; color: var(--text-sub); }
         .login-link a { color: var(--text-main); font-weight: 700; text-decoration: none; }
         .login-link a:hover { text-decoration: underline; }
-
-        /* メール送信完了画面用 */
         #successState { display: none; text-align: center; }
         #successState svg { width: 64px; height: 64px; color: #16a34a; margin-bottom: 16px; }
-        
         .error-message { color: #dc2626; font-size: 13px; font-weight: 600; margin-top: 8px; display: none; text-align: left;}
+        
+        /* ⭐️ Turnstile用微調整 */
+        .turnstile-wrap { margin-bottom: 20px; display: flex; justify-content: center; }
     </style>
 </head>
 <body>
@@ -86,11 +79,18 @@
 
                 <div class="form-group">
                     <label>メールアドレス</label>
-                    <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
+                    <input type="email" id="email" class="form-control" placeholder="you@example.com" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label>パスワード (6文字以上)</label>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" autocomplete="new-password" required>
+                </div>
+
+                <div class="turnstile-wrap">
+                    <div class="cf-turnstile" 
+                         data-sitekey="1x00000000000000000000AA" 
+                         data-callback="onTurnstileVerify"
+                         data-expired-callback="onTurnstileExpire"></div>
                 </div>
 
                 <div class="terms-check">
@@ -116,10 +116,31 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 同意チェックボックスの制御
+        let turnstileToken = null; // ⭐️ トークンを保持する変数
+
+        // ⭐️ Turnstile認証成功時に呼ばれるコールバック
+        window.onTurnstileVerify = function(token) {
+            turnstileToken = token;
+            validateFormState();
+        };
+
+        // ⭐️ Turnstileの有効期限が切れた場合
+        window.onTurnstileExpire = function() {
+            turnstileToken = null;
+            validateFormState();
+        };
+
+        // 同意チェックボックスのイベント
         document.getElementById('agreeTerms').addEventListener('change', function() {
-            document.getElementById('signupBtn').disabled = !this.checked;
+            validateFormState();
         });
+
+        // ⭐️【条件強化】規約同意とBOT認証の両方がクリアされた時だけボタンを有効化
+        function validateFormState() {
+            const isAgreed = document.getElementById('agreeTerms').checked;
+            const isHuman = turnstileToken !== null;
+            document.getElementById('signupBtn').disabled = !(isAgreed && isHuman);
+        }
 
         // ソーシャルログイン処理
         async function signInWithProvider(provider) {
@@ -156,37 +177,47 @@
                 errorMsg.style.display = 'block';
                 return;
             }
+            if (!turnstileToken) {
+                errorMsg.innerText = 'セキュリティ認証が完了していません。';
+                errorMsg.style.display = 'block';
+                return;
+            }
 
             btn.disabled = true;
             btn.innerText = '送信中...';
 
             try {
-                // SignUp実行
+                // ⭐️ Supabaseの標準Authフローに、セキュリティトークンを乗せて送信
                 const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
+                    options: {
+                        captchaToken: turnstileToken // これだけで裏側の検証が自動実行されます
+                    }
                 });
 
                 if (error) throw error;
 
-                // もし既に登録済みのメールアドレスの場合
                 if (data.user && data.user.identities && data.user.identities.length === 0) {
                     throw new Error("このメールアドレスは既に登録されています。");
                 }
 
-                // メール認証が必須の場合（推奨設定）、sessionはnullになります
                 if (!data.session) {
-                    // 送信完了画面に切り替え
                     document.getElementById('formState').style.display = 'none';
                     document.getElementById('successState').style.display = 'block';
                 } else {
-                    // メール認証を必須にしていない場合（そのままログイン）
                     window.location.href = 'dashboard.html';
                 }
 
             } catch (error) {
                 errorMsg.innerText = error.message;
                 errorMsg.style.display = 'block';
+                
+                // 失敗した場合はセキュリティの都合上、Turnstileをリセットして再入力を求める
+                if (window.turnstile) turnstile.reset();
+                turnstileToken = null;
+                validateFormState();
+                
                 btn.disabled = false;
                 btn.innerText = 'アカウントを作成';
             }
