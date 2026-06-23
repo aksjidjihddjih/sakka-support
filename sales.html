@@ -3,162 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>支援履歴 - KANKETSU</title>
+    <title>支援履歴・売上明細 - KANKETSU</title>
     
     <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* ★全ファイルで完全に統一されたCSS */
+        /* 全ファイル共通のKANKETSUデザインシステム */
         :root { --bg-color: #f3f4f6; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; --sidebar-bg: #000000; --sidebar-text: #d1d5db; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; -webkit-font-smoothing: antialiased; }
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; display: inline-block; vertical-align: middle; }
-        .icon-sm { width: 16px; height: 16px; }
         .app-container { display: flex; min-height: 100vh; flex-direction: column; }
         .mobile-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--sidebar-bg); color: #fff; position: sticky; top: 0; z-index: 20; }
-        .mobile-header .brand-logo { margin: 0; padding: 0; }
         .hamburger { background: transparent; border: none; color: #fff; cursor: pointer; padding: 4px; }
         .sidebar { background-color: var(--sidebar-bg); color: var(--sidebar-text); width: 260px; height: 100vh; padding: 32px 0 24px 0; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 30; transform: translateX(-100%); transition: transform 0.3s ease; box-sizing: border-box; }
         .sidebar.open { transform: translateX(0); }
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 25; display: none; opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.show { display: block; opacity: 1; }
         .brand-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: #fff; text-decoration: none; padding: 0 24px; margin-bottom: 40px; display: block;}
-        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; transition: opacity 0.3s ease;}
+        .sidebar-nav { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--sidebar-text); text-decoration: none; font-size: 14px; font-weight: 600; border-radius: 8px; transition: all 0.2s; cursor: pointer; border: none; background: transparent; text-align: left; width: 100%; box-sizing: border-box; }
         .nav-item:hover, .nav-item.active { background-color: #1f2937; color: #fff; }
         .nav-divider { height: 1px; background-color: #374151; margin: 12px 16px; }
         @media (min-width: 768px) { .app-container { flex-direction: row; } .mobile-header { display: none; } .sidebar { position: sticky; transform: translateX(0); } }
-        .account-wrapper { position: relative; padding: 0 12px; margin-top: auto; }
-        .account-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; color: var(--sidebar-text); cursor: pointer; transition: all 0.2s; }
-        .account-btn:hover { background-color: #1f2937; color: #fff; }
-        .account-info { display: flex; align-items: center; gap: 12px; }
-        .avatar { width: 32px; height: 32px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 14px; }
-        .account-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; text-align: left;}
-        .account-popup { position: absolute; bottom: calc(100% + 8px); left: 12px; right: 12px; background: #fff; border: var(--border-width) solid var(--border-color); border-radius: 8px; box-shadow: 2px 2px 0px rgba(0,0,0,1); padding: 8px 0; display: none; z-index: 100; }
-        .account-popup.show { display: block; }
-        .popup-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 16px; background: transparent; border: none; text-align: left; font-size: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: background 0.2s; box-sizing: border-box; text-decoration: none;}
-        .popup-item:hover { background-color: var(--bg-color); }
-        .popup-item.text-danger { color: #dc2626; }
-        .popup-divider { height: 1px; background-color: var(--border-light); margin: 4px 0; }
-        .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; position: relative;}
+        
+        /* メイン・カード */
+        .main-content { flex: 1; padding: 32px 20px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
         @media (min-width: 768px) { .main-content { padding: 48px; } }
         .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
-        @media (min-width: 768px) { .card { padding: 32px; } }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+        .card-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
         .card-title { font-size: 18px; font-weight: 700; margin: 0; }
-        .card-desc { font-size: 13px; color: var(--text-sub); margin: 4px 0 0 0; }
-        .btn { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 12px 24px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); box-sizing: border-box; text-decoration: none;}
-        .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
-        .btn-primary:hover { background-color: var(--btn-hover); border-color: var(--btn-hover); }
-        .btn-outline { background-color: transparent; color: var(--text-main); }
-        .btn-outline:hover { background-color: var(--bg-color); }
-        .btn-sm { padding: 8px 16px; font-size: 13px; width: auto; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
-        .form-control { width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; color: var(--text-main); box-sizing: border-box; transition: all 0.2s; }
-        .form-control:focus { outline: none; border-color: var(--border-color); box-shadow: 0 0 0 1px var(--border-color); }
-        textarea.form-control { resize: vertical; min-height: 120px; }
-        .share-box { display: flex; align-items: center; border: 1px solid var(--border-light); border-radius: 8px; padding: 4px; background: #f9fafb;}
-        .share-url { flex: 1; padding: 8px 12px; font-size: 14px; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: all;}
-        .item-list { display: flex; flex-direction: column; gap: 12px; }
-        .item-card { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-light); border-radius: 8px; background-color: #fff; transition: background-color 0.2s ease, border-color 0.2s ease; cursor: pointer;}
-        .item-card:hover { border-color: var(--border-color); background-color: #f9fafb; }
-        .item-info h4 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; }
-        .item-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.2s ease; }
-        .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 12px; padding: 32px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; box-sizing: border-box; margin: 20px;}
-        .modal-overlay.show .modal-content { transform: translateY(0); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .modal-title { font-size: 18px; font-weight: 600; margin: 0; }
-        .modal-close { background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer; line-height: 1; }
-        .modal-close:hover { color: var(--text-main); }
-        .modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; border-top: 1px solid var(--border-light); padding-top: 24px; }
+        
+        /* テーブルスタイル */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { padding: 12px; border-bottom: 2px solid var(--border-color); font-weight: 700; color: var(--text-main); }
+        td { padding: 16px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+        
+        /* ステータスバッジ */
+        .badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; border: 1px solid var(--border-color); }
+        .badge-success { background-color: #e6f4ea; color: #137333; border-color: #34a853; }
+        .badge-warning { background-color: #fef7e0; color: #b06000; border-color: #fbbc04; }
+        
+        /* プラス・マイナス表記の色 */
+        .amount-plus { color: var(--text-main); font-weight: 700; }
+        .amount-minus { color: #dc2626; font-weight: 700; }
+
+        .account-wrapper { padding: 0 12px; margin-top: auto; }
+        .account-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; background: transparent; border: none; color: var(--sidebar-text); text-align: left; font-size: 14px; font-weight: 600; }
         .site-footer { margin-top: auto; padding-top: 48px; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-sub); font-size: 13px; }
-        
-        .table-container { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
-        th { text-align: left; padding: 16px; border-bottom: 2px solid var(--border-color); color: var(--text-sub); font-weight: 600; }
-        td { padding: 16px; border-bottom: 1px solid var(--border-light); color: var(--text-main); }
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-        .status-pending { background-color: #fef3c7; color: #92400e; }
-        .status-transferred { background-color: #d1fae5; color: #065f46; }
-        html { overflow-y: scroll; }
-        /* スマホ向けフッター1列化（文字サイズを最小にして横に並べる） */
-        @media (max-width: 768px) {
-            .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
-            .site-footer a { font-size: 10px !important; white-space: nowrap; }
-        }
-                /* ★ スマホ向け：サイドバーを1画面に収め、スライド（スクロール）を禁止する調整 */
-        @media (max-width: 768px) {
-            /* スマホのアドレスバー等の高さを除いた「正確な画面の高さ」を取得して合わせる */
-            .sidebar { height: 100dvh; }
-            
-            /* 上下にスライドできないようにスクロールをロック */
-            .sidebar-nav { overflow-y: hidden; }
-            
-            /* メニュー全体の無駄なスペース（上下の余白）を少しずつ削って圧縮 */
-            .sidebar-header { padding: 20px 24px 12px; }
-            .nav-item { padding: 10px 24px; }
-            .account-btn { padding: 16px 24px; }
-        }
-        
-        /* （※念のため）画面の縦幅が極端に小さいスマホでも確実に入るようにする安全装置 */
-        @media (max-width: 768px) and (max-height: 700px) {
-            .sidebar-header { padding: 16px 24px 8px; }
-            .nav-item { padding: 8px 24px; }
-            .account-btn { padding: 12px 24px; }
-        }
-        /* スマホ向けのテーブル最適化（横スクロール禁止・自動折り返し） */
-@media (max-width: 768px) {
-    .table-wrap { overflow-x: hidden !important; }
-    table { table-layout: fixed; width: 100%; }
-    
-    /* スマホ画面に合わせて余白と文字サイズを縮小し、強制的に折り返す */
-    th, td { 
-        white-space: normal !important; 
-        word-break: break-word; 
-        padding: 12px 6px !important; 
-        font-size: 12px !important; 
-    }
-}
-                /* ★ テーブルを囲む枠の「影（浮き上がり）」と「太い黒線」を無効化し、シンプルな薄い線にする */
-        .card { 
-            border: 1px solid #d1d5db !important; 
-            box-shadow: none !important; 
-            border-radius: 8px !important;
-        }
-        
-        .table-wrap {
-            border: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* 表の中の線（ヘッダー下の太い線など）もすべて薄いグレーに統一してスッキリさせる */
-        table, th, td {
-            border: 1px solid var(--border-light) !important;
-        }
-        @media (max-width: 768px) {
-            /* 1列目（日時）：無駄な余白を削って丁度いい幅にする */
-            th:nth-child(1), td:nth-child(1) {
-                word-break: keep-all !important; 
-                overflow-wrap: normal !important;
-                width: 23% !important; 
-            }
-            /* 2〜4列目（金額系）：均等に少しずつ幅を持たせる */
-            th:nth-child(2), td:nth-child(2),
-            th:nth-child(3), td:nth-child(3) {
-                width: 16% !important;
-            }
-            th:nth-child(4), td:nth-child(4) {
-                width: 19% !important;
-            }
-            /* 5列目（状態）：幅を広げつつ、絶対に改行させない */
-            th:nth-child(5), td:nth-child(5) {
-                width: 26% !important;
-                white-space: nowrap !important;
-            }
-        }
     </style>
 </head>
 <body>
@@ -166,15 +59,15 @@
     <div class="app-container" id="sales-container">
         
         <header class="mobile-header">
-            <a href="dashboard.html" class="brand-logo">KANKETSU</a>
+            <a href="dashboard.html" class="brand-logo" style="color:#fff; text-decoration:none;">KANKETSU</a>
             <button class="hamburger" onclick="window.toggleSidebar()"><svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
         </header>
+
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleSidebar()"></div>
 
         <aside class="sidebar" id="sidebar">
-            <a href="dashboard.html" class="brand-logo" style="display: none;">KANKETSU</a>
-            
-            <nav class="sidebar-nav" id="sidebarNavMenu">
+            <a href="dashboard.html" class="brand-logo">KANKETSU</a>
+            <nav class="sidebar-nav">
                 <a href="dashboard.html" class="nav-item">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> ホーム
                 </a>
@@ -185,7 +78,7 @@
                     <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="9" x2="12" y2="22"></line><polyline points="6 3 12 9 18 3"></polyline><line x1="6" y1="13" x2="18" y2="13"></line><line x1="6" y1="17" x2="18" y2="17"></line></svg> 支援履歴（売上明細）
                 </a>
                 <a href="stripe.html" class="nav-item">
-                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> 振込先・口座管理
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" height="10"></line></svg> 振込先・口座管理
                 </a>
                 <div class="nav-divider"></div>
                 <a href="guide.html" class="nav-item">
@@ -198,105 +91,184 @@
                     <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> お問い合わせ
                 </a>
             </nav>
-
             <div class="account-wrapper">
-                <div class="account-popup" id="accountPopup">
-                    <a href="settings.html" class="popup-item">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> アカウント設定
-                    </a>
-                    <div class="popup-divider"></div>
-                    <button class="popup-item text-danger" onclick="window.logout()">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> ログアウト
-                    </button>
+                <div class="account-btn">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span id="sidebarUserName">マイアカウント</span>
                 </div>
-                <button class="account-btn" onclick="window.toggleAccountPopup(event)">
-                    <div class="account-info">
-                        <svg class="icon" viewBox="0 0 24 24" style="color: var(--sidebar-text);"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span class="account-name" id="userNameDisplay">読込中...</span>
-                    </div>
-                    <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
             </div>
         </aside>
 
-        <main class="main-content">
-            <h1 style="font-size: 24px; margin-top: 0; margin-bottom: 24px;">支援履歴（売上明細）</h1>
-            
-            <div class="card" style="padding: 0;">
-                <div class="table-container">
+        <main class="main-content fade-in">
+            <div class="card" style="text-align: center; padding: 32px 20px;">
+                <p style="font-size: 13px; color: var(--text-sub); margin: 0 0 4px 0; font-weight: 700; letter-spacing: 1px;">CURRENT BALANCE</p>
+                <h2 style="font-size: 36px; font-weight: 800; margin: 0; letter-spacing: -1px;" id="totalBalanceText">¥0</h2>
+                <p style="font-size: 11px; color: var(--text-sub); margin: 8px 0 0 0;">※現在の残高 ＝ 支援金の総額 − 引き出し済みの総額</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">支援履歴・売上明細</h2>
+                    <p style="font-size: 13px; color: var(--text-sub); margin: 4px 0 0 0;">読者からの支援および売上の引き出し履歴がタイムライン順に表示されます。</p>
+                </div>
+
+                <div class="table-responsive">
                     <table>
                         <thead>
-                            <tr><th>日時</th><th>支援金額</th><th>手数料(10%)</th><th>手取り額</th><th>状態</th></tr>
+                            <tr>
+                                <th>日時</th>
+                                <th>内容 / 対象作品</th>
+                                <th>状態</th>
+                                <th style="text-align: right;">金額 (ネット金額)</th>
+                            </tr>
                         </thead>
                         <tbody id="salesTableBody">
-                            <tr><td colspan="5" style="text-align: center; color: var(--text-sub);">読み込み中...</td></tr>
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-sub); padding: 40px 0;">履歴を読み込み中...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <footer class="site-footer">
-    <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
-        <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
-        <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
-        <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
-    </div>
-    <p style="margin: 0;">&copy; 2026 KANKETSU</p>
-</footer>
+                <p style="margin: 0;">&copy; 2026 KANKETSU</p>
+            </footer>
         </main>
-
     </div>
 
     <script>
         (function() {
-        const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const SUPABASE_URL = 'https://cfeejhwshvluyecqvgjd.supabase.co';
+            const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
+            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function init() {
-            if (!document.getElementById('sales-container')) return;
+            let currentUserId = null;
+            let isSalesInitializing = false;
 
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) { window.location.href = 'login.html'; return; }
+            window.initSalesPage = async function() {
+                if (!document.getElementById('sales-container')) return;
+                if (isSalesInitializing) return;
+                isSalesInitializing = true;
 
-                // ★DASHBOARDと全く同じ取得ロジック
-                let { data: creator } = await supabaseClient.from('creators').select('*').eq('id', session.user.id).single();
-                if (!creator) creator = { id: session.user.id, pen_name: "" }; 
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (!session) { window.location.href = 'login.html'; isSalesInitializing = false; return; }
+                    currentUserId = session.user.id;
 
-                const penname = creator.pen_name || creator.penname || "";
-                const nameDisplay = document.getElementById('userNameDisplay');
-                const avatarDisplay = document.getElementById('userAvatar');
-                
-                if(nameDisplay) nameDisplay.innerText = (penname === '未設定' ? "" : penname) || "未設定";
-                if(avatarDisplay) avatarDisplay.innerText = (penname && penname !== '未設定') ? penname.charAt(0) : "？";
+                    // サイドバーのペンネーム取得
+                    let { data: creator } = await supabaseClient.from('creators').select('pen_name').eq('id', currentUserId).single();
+                    if (creator && creator.pen_name && creator.pen_name !== '未設定') {
+                        document.getElementById('sidebarUserName').innerText = creator.pen_name;
+                    }
 
-                // 売上履歴の取得
-                const { data: donations } = await supabaseClient.from('donations').select('*').eq('creator_id', session.user.id).order('created_at', { ascending: false });
-                const tbody = document.getElementById('salesTableBody');
-                if (!tbody) return;
+                    // 1. 読者からの支援履歴（Donations）を取得
+                    const { data: donations, error: donErr } = await supabaseClient
+                        .from('donations')
+                        .select('*, works(title)')
+                        .eq('creator_id', currentUserId);
+                    
+                    if (donErr) throw donErr;
 
-                if (!donations || donations.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">まだ支援履歴はありません。</td></tr>';
-                    return;
+                    // 2. 将来的に連動する「引き出し履歴（Withdrawals）」を取得（現在はテストモックをブレンド）
+                    // 本番環境やテーブル作成後は、ここを実際のテーブル参照（supabaseClient.from('withdrawals')...）に書き換えてください。
+                    const mockWithdrawals = [
+                        // テスト用に過去に引き出しを行った履歴のシミュレートデータ
+                        { id: 'w1', created_at: '2026-06-20T12:00:00Z', amount: 3000, status: 'completed', type: 'withdraw' }
+                    ];
+
+                    // データを1つのタイムラインに結合してソートするロジック
+                    let timelineItems = [];
+
+                    // 支援金をプラスデータとして追加
+                    if (donations) {
+                        donations.forEach(d => {
+                            timelineItems.push({
+                                date: new Date(d.created_at),
+                                displayDate: new Date(d.created_at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute:'2-digit' }),
+                                description: d.works ? `📖 支援: ${d.works.title}` : '🤝 全体への支援 (作品指定なし)',
+                                isWithdraw: false,
+                                status: d.status, // 'pending'（保留中） or 'completed'（完了）
+                                amount: Number(d.net_amount)
+                            });
+                        });
+                    }
+
+                    // 引き出し履歴をマイナスデータとして追加
+                    mockWithdrawals.forEach(w => {
+                        timelineItems.push({
+                            date: new Date(w.created_at),
+                            displayDate: new Date(w.created_at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute:'2-digit' }),
+                            description: '💰 売上の引き出し（銀行振込）',
+                            isWithdraw: true,
+                            status: w.status,
+                            amount: Number(w.amount)
+                        });
+                    });
+
+                    // 日付の新しい順（降順）に並び替え
+                    timelineItems.sort((a, b) => b.date - a.date);
+
+                    // 3. 計算：残高の算出（プラスの総和 − マイナスの総和）
+                    let totalPlus = timelineItems.filter(i => !i.isWithdraw).reduce((sum, i) => sum + i.amount, 0);
+                    let totalMinus = timelineItems.filter(i => i.isWithdraw).reduce((sum, i) => sum + i.amount, 0);
+                    let currentBalance = totalPlus - totalMinus;
+
+                    // 画面の合計金額（残高）を更新
+                    document.getElementById('totalBalanceText').innerText = `¥${currentBalance.toLocaleString()}`;
+
+                    // 4. テーブルのレンダリング
+                    const tbody = document.getElementById('salesTableBody');
+                    if (timelineItems.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-sub); padding: 40px 0;">売上・支援履歴はまだありません。</td></tr>`;
+                    } else {
+                        tbody.innerHTML = timelineItems.map(item => {
+                            // 状態（ステータス）の判定
+                            let statusBadge = '';
+                            if (item.status === 'pending') {
+                                statusBadge = `<span class="badge badge-warning">保留中</span>`;
+                            } else {
+                                statusBadge = `<span class="badge badge-success">完了</span>`;
+                            }
+
+                            // 金額のプラスマイナス表記切り替え
+                            let amountDisplay = '';
+                            if (item.isWithdraw) {
+                                amountDisplay = `<span class="amount-minus">-¥${item.amount.toLocaleString()}</span>`;
+                            } else {
+                                amountDisplay = `<span class="amount-plus">+¥${item.amount.toLocaleString()}</span>`;
+                            }
+
+                            return `
+                                <tr>
+                                    <td style="color: var(--text-sub); font-size: 13px;">${item.displayDate}</td>
+                                    <td style="font-weight: 600;">${item.description}</td>
+                                    <td>${statusBadge}</td>
+                                    <td style="text-align: right;">${amountDisplay}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+
+                } catch (error) {
+                    console.error("Sales Page Error:", error);
+                    document.getElementById('salesTableBody').innerHTML = `<tr><td colspan="4" style="text-align: center; color: #dc2626; padding: 40px 0;">データの読み込みに失敗しました。</td></tr>`;
+                } finally {
+                    isSalesInitializing = false;
                 }
+            };
 
-                tbody.innerHTML = donations.map(d => {
-                    const date = new Date(d.created_at).toLocaleString('ja-JP', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
-                    const statusHtml = d.status === 'pending' ? '<span class="status-badge status-pending">引出可能</span>' : '<span class="status-badge status-transferred">振込済</span>';
-                    return `<tr><td>${date}</td><td>¥${d.amount.toLocaleString()}</td><td>-¥${d.fee.toLocaleString()}</td><td><strong>¥${d.net_amount.toLocaleString()}</strong></td><td>${statusHtml}</td></tr>`;
-                }).join('');
+            window.toggleSidebar = function() { 
+                document.getElementById('sidebar').classList.toggle('open'); 
+                document.getElementById('sidebarOverlay').classList.toggle('show'); 
+            };
 
-            } catch (error) { console.error("Error:", error); }
-        }
-
-        window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
-        window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
-        window.logout = async function() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; };
-
-        if (!window.hasRegisteredSales) { document.addEventListener('turbo:load', init); window.hasRegisteredSales = true; }
-        init();
-    })();
+            if (!window.hasRegisteredSales) {
+                document.addEventListener('turbo:load', window.initSalesPage);
+                window.hasRegisteredSales = true;
+            }
+            window.initSalesPage();
+        })();
     </script>
 </body>
 </html>
