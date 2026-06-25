@@ -702,7 +702,7 @@
                 if(id === 'profileModal') { document.getElementById('pennameInput').value = document.getElementById('userNameDisplay').innerText; }
                 if(id === 'linkModal') { editLinkId = null; document.getElementById('linkUrl').value = ''; document.getElementById('linkModalTitle').innerText = '活動サイトを追加'; document.getElementById('linkDelBtn').style.display = 'none'; }
                 if(id === 'msgModal') { document.getElementById('msgContent').value = ''; }
-                if(id === 'workModal') { editWorkId = null; document.getElementById('workTitle').value = ''; document.getElementById('workUrl').value = ''; document.getElementById('workMessage').value = ''; document.getElementById('workModalTitle').innerText = '作品を追加'; document.getElementById('workDelBtn').style.display = 'none'; }
+                if(id === 'workModal') { editWorkId = null; document.getElementById('workTitle').value = ''; document.getElementById('workMessage').value = ''; document.getElementById('workModalTitle').innerText = '作品を追加'; document.getElementById('workDelBtn').style.display = 'none'; }
                 if(id === 'withdrawModal') { document.getElementById('withdrawAmountInput').value = ''; }
             };
             window.onclick = function(e) { if (e.target.classList.contains('modal-overlay')) { window.closeModal(e.target.id); } };
@@ -711,7 +711,8 @@
 
             window.editLink = function(id, url) { editLinkId = id; document.getElementById('linkUrl').value = url; document.getElementById('linkModalTitle').innerText = '活動サイトを編集'; document.getElementById('linkDelBtn').style.display = 'block'; window.openModal('linkModal'); };
             window.editMessage = function(content) { document.getElementById('msgContent').value = content; window.openModal('msgModal'); };
-            window.editWork = function(id, title, url, msg) { editWorkId = id; document.getElementById('workTitle').value = title; document.getElementById('workUrl').value = url; document.getElementById('workMessage').value = msg; document.getElementById('workModalTitle').innerText = '作品を編集'; document.getElementById('workDelBtn').style.display = 'block'; window.openModal('workModal'); };
+            // 作品の編集モーダルを開く処理（URLの読み込みをパス）
+            window.editWork = function(id, title, url, msg) { editWorkId = id; document.getElementById('workTitle').value = title; document.getElementById('workMessage').value = msg; document.getElementById('workModalTitle').innerText = '作品を編集'; document.getElementById('workDelBtn').style.display = 'block'; window.openModal('workModal'); };
 
             window.saveProfile = async function() {
                 const penname = document.getElementById('pennameInput').value.trim();
@@ -728,6 +729,7 @@
                 await window.initDashboard(); 
             };
 
+            // 活動サイトリンクの保存（★即座に画面を更新するように修正）
             window.saveLink = async function() {
                 const url = document.getElementById('linkUrl').value.trim();
                 if(!url) return alert("URLを入力してください。");
@@ -761,12 +763,40 @@
                     if (error) throw error;
                     document.getElementById('linkUrl').value = '';
                     closeModal('linkModal');
-                    loadLinks();
+                    // ⭐️ loadLinks() から initDashboard() に変更し、初期状態でも即座に進捗を反映
+                    await window.initDashboard(); 
                 } catch (error) {
                     alert("エラーが発生しました: " + error.message);
                 } finally {
                     btn.disabled = false;
                     btn.innerText = '保存する';
+                }
+            };
+
+            // 作品の保存（★URLの必須チェックを撤廃し、空文字で安全に保存）
+            window.saveWork = async function() {
+                const title = document.getElementById('workTitle').value.trim();
+                const secret_message = document.getElementById('workMessage').value.trim();
+                const work_url = ""; // ⭐️ 画面から消したため、内部で空文字を固定セット（DBエラー防止）
+                
+                if(!title || !secret_message) {
+                    return alert("タイトルと限定メッセージを入力してください。");
+                }
+                
+                if(title.length > 100) return alert("作品名は100文字以内で入力してください。");
+                if(secret_message.length < 10) return alert("限定メッセージは10文字以上で入力してください。");
+                if(secret_message.length > 10000) return alert("限定メッセージは10,000文字以内で入力してください。");
+                
+                const promise = editWorkId 
+                    ? supabaseClient.from('works').update({ title, work_url, secret_message }).eq('id', editWorkId) 
+                    : supabaseClient.from('works').insert([{ creator_id: currentUserId, title, work_url, secret_message }]);
+                
+                const { error } = await promise;
+                if (error) {
+                    alert("エラー: " + error.message);
+                } else { 
+                    window.closeModal('workModal'); 
+                    await window.initDashboard(); 
                 }
             };
 
