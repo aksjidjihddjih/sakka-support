@@ -119,12 +119,17 @@
                 <div style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 12px; background: #f9fafb; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-light);">
                     <input type="checkbox" id="agreeTerms" style="margin-top: 3px; cursor: pointer; width: 16px; height: 16px; accent-color: var(--text-main);">
                     <label for="agreeTerms" style="font-size: 12px; color: var(--text-sub); line-height: 1.5; cursor: pointer; user-select: none;">
-                        <a href="terms.html" target="_blank" style="color: var(--text-main); font-weight: 700;">利用規約</a> および <a href="tokushoho.html" target="_blank" style="color: var(--text-main); font-weight: 700;">特定商取引法に基づく表記</a> に同意します。<br>
-                        ※デジタルコンテンツの性質上、決済後の返金はできません。
+                        <a href="terms.html" target="_blank" style="color: var(--text-main); font-weight: 700;">利用規約</a>、<a href="privacy.html" target="_blank" style="color: var(--text-main); font-weight: 700;">プライバシーポリシー</a> および <a href="tokushoho.html" target="_blank" style="color: var(--text-main); font-weight: 700;">特定商取引法に基づく表記</a> に同意します。<br>
+                        <span style="color: #6b7280; font-size: 11px;">※未成年の方は、必ず保護者の同意を得た上でご注文ください（決済完了をもって同意したものとみなされます）。</span><br>
+                        <span style="color: #6b7280; font-size: 11px;">※デジタルコンテンツの性質上、決済手続き完了後の返品・返金はできません。</span>
                     </label>
                 </div>
 
-                <button class="btn btn-primary" id="checkoutBtn" onclick="processCheckout()" disabled>クレジットカードで支援する</button>
+                <button class="btn btn-primary" id="checkoutBtn" onclick="processCheckout()" disabled>同意して決済へ進む</button>
+                
+                <p style="font-size: 11px; color: #9ca3af; text-align: center; margin: 8px 0 0 0; line-height: 1.4;">
+                    未成年者の決済は保護者の同意が必要です。成人の方が決済される場合、追加の操作は不要です。
+                </p>
             </div>
         </div>
     </div>
