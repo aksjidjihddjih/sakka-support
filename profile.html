@@ -237,6 +237,7 @@
 
             try {
                 const stripe = Stripe(STRIPE_PUBLIC_KEY);
+                // 変更：文言を「決済画面へ移動中...」に統一
                 btn.disabled = true; btn.innerText = '決済画面へ移動中...';
 
                 const { data: sessionData, error: functionError } = await supabaseClient.functions.invoke('create-checkout', {
@@ -253,7 +254,8 @@
                 if (error) throw error;
             } catch (error) {
                 alert("エラーが発生しました:\n" + error.message);
-                btn.disabled = false; btn.innerText = 'クレジットカードで支援する';
+                // 変更：エラーで戻ってきたときのボタン名も統一
+                btn.disabled = false; btn.innerText = '同意して決済へ進む';
             }
         }
     </script>
