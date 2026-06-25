@@ -90,6 +90,30 @@
         .btn-outline:hover { background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
         
         .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
+        /* ★ スマホ向けの設定（余白を限界まで絞り、文章の横幅を確保する調整） */
+        @media (max-width: 768px) {
+            /* 全体の外側余白を20pxから12pxに圧縮 */
+            .container { margin: 24px auto; padding: 0 12px; }
+            
+            /* カードの内側余白を32pxから16pxに狭めて横幅を確保 */
+            .message-card { padding: 24px 16px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+            
+            /* メッセージヘッダーの無駄な下余白を微調整 */
+            .msg-header { margin-bottom: 16px; }
+
+            /* 本文エリアの余白を24pxから16pxに絞り、文字サイズをWeb小説に最適な14pxに調整 */
+            .msg-content { padding: 16px; font-size: 14px; line-height: 1.75; }
+
+            /* 注意書きボックスの余白も最適化 */
+            .warning-box { padding: 12px; font-size: 12px; }
+            
+            /* ボタンの上マージンを少し詰める */
+            .btn { margin-top: 24px; width: 100%; }
+
+            /* 既存のフッター1列ロック処理 */
+            .footer-links { flex-wrap: nowrap !important; gap: 8px !important; }
+            .footer-links a { font-size: 10px !important; white-space: nowrap !important; }
+        }
     </style>
 </head>
 <body>
