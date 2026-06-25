@@ -514,7 +514,15 @@
                 if (msgsCount > 0) completedCount++;
                 if (worksCount > 0) completedCount++;
 
-                const isCompleted = completedCount === 4;
+                // ⭐️ 一度でも4つのタスクを全てクリアした実績（フラグ）をユーザーIDごとにブラウザへ保存
+                const localStorageKey = 'kanketsu_onboarding_done_' + currentUserId;
+                if (completedCount === 4) {
+                    localStorage.setItem(localStorageKey, 'true');
+                }
+                const hasOnboardingDonePast = localStorage.getItem(localStorageKey) === 'true';
+
+                // ⭐️ 修正：過去に突破済みであり、作品以外の必須3項目が維持されていれば、作品が0個になってもダッシュボードを表示し続ける
+                const isCompleted = (completedCount === 4) || (completedCount === 3 && hasOnboardingDonePast && worksCount === 0);
 
                 const onboardingView = document.getElementById('onboardingView');
                 const mainDashboardView = document.getElementById('mainDashboardView');
