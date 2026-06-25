@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ご利用ガイド - KANKETSU</title>
+    <style>
+        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
+        
+        .header { padding: 24px 20px 0 20px; max-width: 840px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .container { max-width: 840px; margin: 0 auto; padding: 20px 20px 60px 20px; flex: 1; width: 100%; box-sizing: border-box; }
+        .card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 32px; box-shadow: 2px 2px 0px rgba(0,0,0,1); text-align: left; }
+        
+        .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 24px 0; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; }
+        .card h2 { font-size: 16px; font-weight: 700; margin: 32px 0 12px 0; color: var(--text-main); border-left: 3px solid var(--text-main); padding-left: 8px; }
+        .card p { font-size: 14px; color: var(--text-sub); margin: 0 0 16px 0; line-height: 1.8; }
+        .card ul { font-size: 14px; color: var(--text-sub); margin: 0 0 16px 0; padding-left: 20px; line-height: 1.8; }
+        .card li { margin-bottom: 6px; }
+
+        .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
+        .footer-links { margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; }
+        .footer-links a { color: var(--text-sub); text-decoration: none; font-weight: 600; }
+        .footer-links a:hover { color: var(--text-main); }
+
+        .btn-inline { display: inline-flex; justify-content: center; align-items: center; padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 6px; cursor: pointer; border: var(--border-width) solid var(--border-color); text-decoration: none; color: var(--text-main); background: #fff; box-shadow: 1.5px 1.5px 0px rgba(0,0,0,1); transition: all 0.2s; margin-top: 8px; }
+        .btn-inline:hover { transform: translate(-1px, -1px); box-shadow: 2.5px 2.5px 0px rgba(0,0,0,1); }
+
+        @media (max-width: 768px) {
+            .card { padding: 20px; }
+            .card h1 { font-size: 18px; margin-bottom: 16px; padding-bottom: 12px; }
+            .card h2 { font-size: 14px; }
+            .card p, .card ul { font-size: 13px; }
+            .footer-links { flex-wrap: nowrap !important; gap: 8px !important; }
+            .footer-links a { font-size: 10px !important; white-space: nowrap !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-sub); text-decoration: none; font-size: 14px; font-weight: 700;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            ホーム
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h1>KANKETSU ご利用ガイド</h1>
+            <p>KANKETSUは、お気に入りのWeb小説クリエイターの活動や作品の完結を直接応援できる、シンプルでクリーンな支援プラットフォームです。</p>
+            
+            <h2>読者・ファンの方へ</h2>
+            <p>面倒な会員登録の手続きなしに、クレジットカードを使って手軽に作者を直接支援できます。</p>
+            <ul>
+                <li><strong>支援の方法：</strong>作者の公式SNS等に設置されたリンクからプロフィールページを開き、作品名と支援金額を選択して「クレジットカードで支援する」を押してください。</li>
+                <li><strong>支援の特典：</strong>決済完了後の画面にて、作者が設定した「限定メッセージ」や「作品の裏話」をその場で読むことができます。</li>
+            </ul>
+
+            <h2>クリエイターの方へ</h2>
+            <p>文字数制限やお礼メッセージを設定するだけで、今すぐあなた専用の支援受付ページを開設できます。</p>
+            <ul>
+                <li>初期費用や月額費用は一切かかりません（支援金受領時にのみ、システム手数料として10%が差し引かれます）。</li>
+                <li>コメント機能やプレッシャーになる仕組みがないため、自分のペースで執筆を続けられます。</li>
+            </ul>
+            <a href="signup.html" class="btn-inline">クリエイター登録（無料）をしてみる</a>
+
+            <h2>よくある質問 (FAQ)</h2>
+            <p><strong>Q. 決済後に返金やキャンセルはできますか？</strong><br>A. デジタルコンテンツという商品の性質上、支援完了後の返金・変更・キャンセルには応じられません。金額等をご確認の上でお手続きください。</p>
+            <p><strong>Q. クレジットカード情報はサイト側に保存されますか？</strong><br>A. いいえ。決済は世界的な決済インフラ「Stripe」の安全なシステムを介して直接処理されるため、当サービス側にカード番号が保管されることは一切ありません。</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="tokushoho.html">特定商取引法に基づく表記</a>
+            <a href="terms.html">利用規約</a>
+            <a href="privacy.html">プライバシーポリシー</a>
+        </div>
+        <p style="margin: 0;">&copy; 2026 KANKETSU</p>
+    </footer>
+</body>
+</html>
