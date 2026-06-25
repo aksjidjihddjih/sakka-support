@@ -3,107 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KANKETSU - 作家と読者をつなぐサポートプラットフォーム</title>
+    <title>KANKETSU - クリエイター支援プラットフォーム</title>
     <style>
-        :root { --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563; --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px; --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151; --accent-reader: #eff6ff; --accent-author: #fef2f2; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; }
+        :root {
+            --bg-color: #f9fafb; --card-bg: #ffffff; --text-main: #000000; --text-sub: #4b5563;
+            --border-color: #000000; --border-light: #e5e7eb; --border-width: 1.5px;
+            --btn-bg: #000000; --btn-text: #ffffff; --btn-hover: #374151;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6;}
         
-        /* ヘッダー */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: var(--border-width) solid var(--border-color); background: #fff; }
-        .brand-logo { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
-        .nav-links a { text-decoration: none; color: var(--text-main); font-weight: 700; margin-left: 20px; font-size: 14px; }
-        .nav-links a.btn-nav { border: var(--border-width) solid var(--border-color); padding: 8px 16px; border-radius: 6px; background: #000; color: #fff; box-shadow: 2px 2px 0px #000; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 24px 40px; background: transparent; }
+        .brand-logo { font-size: 24px; font-weight: 800; letter-spacing: 1px; color: var(--text-main); text-decoration: none; }
+        
+        .btn { display: inline-flex; justify-content: center; align-items: center; padding: 12px 24px; font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: var(--border-width) solid var(--border-color); text-decoration: none; box-sizing: border-box; }
+        .btn-primary { background-color: var(--btn-bg); color: var(--btn-text); }
+        .btn-primary:hover { background-color: var(--btn-hover); transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+        .btn-outline { background-color: transparent; color: var(--text-main); }
+        .btn-outline:hover { background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
 
-        .hero { text-align: center; padding: 60px 20px 40px 20px; }
-        .hero h1 { font-size: 36px; font-weight: 900; margin-bottom: 12px; }
-        .hero p { color: var(--text-sub); font-size: 16px; margin-bottom: 40px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 60px 20px; flex: 1; text-align: center; width: 100%; box-sizing: border-box; }
+        
+        .hero h1 { font-size: 48px; font-weight: 900; margin-bottom: 24px; line-height: 1.3; letter-spacing: -1px; }
+        /* ★ PCで中央寄せが崩れないように margin: 0 auto を復活させました */
+        .hero p { font-size: 18px; color: var(--text-sub); margin: 0 auto 48px auto; white-space: nowrap; text-align: center; }
+        .sp-br { display: none; }
+        .hero-btn { font-size: 16px; padding: 16px 32px; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; }
+        .cards-wrap { display: flex; gap: 24px; text-align: left; flex-wrap: wrap; justify-content: center;}
+        .card { flex: 1; min-width: 300px; background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 40px; box-shadow: 4px 4px 0px rgba(0,0,0,1); box-sizing: border-box; }
+        .card h2 { font-size: 20px; font-weight: 800; margin: 0 0 16px 0; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; display: flex; align-items: center; gap: 8px;}
         
-        /* ⭐️ 読者・作者カードセクションのリデザイン */
-        .roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 60px; }
-        @media (max-width: 768px) { .roles-grid { grid-template-columns: 1fr; } }
-        
-        .role-card { background-color: var(--card-bg); border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 40px 32px; box-shadow: 6px 6px 0px rgba(0,0,0,1); display: flex; flex-direction: column; justify-content: space-between; text-align: left; }
-        .role-card.reader { background-color: var(--accent-reader); }
-        .role-card.author { background-color: var(--accent-author); }
-        
-        .role-badge { display: inline-block; padding: 4px 12px; font-size: 12px; font-weight: 800; border: var(--border-width) solid var(--border-color); border-radius: 20px; background: #fff; margin-bottom: 16px; width: fit-content; }
-        .role-card h2 { font-size: 24px; font-weight: 900; margin: 0 0 12px 0; }
-        .role-card p { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; flex-grow: 1; }
-        
-        .card-actions { display: flex; flex-direction: column; gap: 12px; }
-        .btn-card { display: inline-flex; justify-content: center; align-items: center; width: 100%; padding: 12px; font-size: 14px; font-weight: 800; border-radius: 8px; cursor: pointer; border: var(--border-width) solid var(--border-color); box-sizing: border-box; text-decoration: none; text-align: center; transition: all 0.2s; }
-        .btn-main { background-color: var(--btn-bg); color: var(--btn-text); box-shadow: 3px 3px 0px #000; }
-        .btn-main:hover { background-color: var(--btn-hover); transform: translate(-1px, -1px); box-shadow: 4px 4px 0px #000; }
-        .btn-sub { background-color: #ffffff; color: var(--text-main); box-shadow: 3px 3px 0px #000; }
-        .btn-sub:hover { background-color: #f3f4f6; transform: translate(-1px, -1px); box-shadow: 4px 4px 0px #000; }
+        .icon { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; display: inline-block;}
 
-        /* ⭐️ 確実に入れるべきお問い合わせセクション */
-        .contact-section { background: #fff; border: var(--border-width) solid var(--border-color); border-radius: 12px; padding: 40px; box-shadow: 6px 6px 0px rgba(0,0,0,1); margin-bottom: 60px; text-align: center; }
-        .contact-section h2 { font-size: 24px; font-weight: 900; margin-top: 0; }
-        .contact-section p { color: var(--text-sub); font-size: 14px; margin-bottom: 24px; }
-        .btn-contact { max-width: 240px; margin: 0 auto; }
+        .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
+        .footer-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 24px; margin-bottom: 24px; }
+        .footer a { color: var(--text-sub); text-decoration: none; font-weight: 600;}
+        .footer a:hover { color: var(--text-main); }
 
-        .footer { text-align: center; padding: 40px 20px; border-top: 1px solid var(--border-light); font-size: 13px; color: var(--text-sub); }
+        /* ★ スマートフォン向けレスポンシブ対応 */
+        @media (max-width: 768px) {
+            .header { padding: 16px 20px; }
+            .brand-logo { font-size: 20px; }
+            .header .btn { padding: 8px 16px; font-size: 13px; }
+            
+            .container { padding: 40px 20px; }
+            .hero h1 { font-size: 32px; margin-bottom: 20px; }
+            .hero p { font-size: 14px; margin-bottom: 32px; white-space: normal; line-height: 1.8; }
+            .sp-br { display: block; }
+            .hero-btn { width: 100%; font-size: 15px; }
+            
+            .cards-wrap { margin-top: 40px; gap: 20px; flex-direction: column; }
+            .card { padding: 24px 20px; width: 100%; min-width: 0; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
+            .card h2 { font-size: 18px; }
+            
+            .footer { padding: 32px 10px; }
+            /* ★ スマホではフッターリンクを横1列にし、文字サイズを10pxまで小さくして収める */
+            .footer-links { flex-direction: row; flex-wrap: nowrap; gap: 8px; justify-content: center; margin-bottom: 20px; align-items: center; }
+            .footer a { font-size: 10px; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <a href="index.html" class="brand-logo">KANKETSU</a>
-        <div class="nav-links">
-            <a href="login.html">ログイン</a>
-            <a href="signup.html" class="btn-nav">無料で登録</a>
-        </div>
-    </div>
-
-    <div class="hero">
-        <h1>作家活動を、もっとシンプルに、もっと近く。</h1>
-        <p>KANKETSUは、創作活動の継続とファンとの繋がりを最大化するプラットフォームです。</p>
+        <a href="login.html" class="btn btn-outline">ログイン</a>
     </div>
 
     <div class="container">
-        <!-- ⭐️ 読者・作者カードセクション -->
-        <div class="roles-grid">
-            <!-- 読者向けカード -->
-            <div class="role-card reader">
-                <div>
-                    <span class="role-badge">READER</span>
-                    <h2>読者として楽しむ</h2>
-                    <p>大好きな作家の限定コンテンツをいち早くチェックしたり、直接メッセージや支援を送って活動をリアルタイムに支えることができます。</p>
-                </div>
-                <div class="card-actions">
-                    <a href="signup.html?role=reader" class="btn-card btn-main">読者アカウントを作る</a>
-                    <!-- ⭐️ 分割した読者向けガイドへの動線 -->
-                    <a href="guide.html?type=reader" class="btn-card btn-sub">読者向け使い方ガイド ➔</a>
-                </div>
-            </div>
-
-            <!-- 作者向けカード -->
-            <div class="role-card author">
-                <div>
-                    <span class="role-badge">AUTHOR</span>
-                    <h2>作者として届ける</h2>
-                    <p>ファンクラブの開設、限定作品の公開、進捗報告など、クリエイターとしての収益化やファンコミュニティの運営をワンストップで行えます。</p>
-                </div>
-                <div class="card-actions">
-                    <a href="signup.html?role=author" class="btn-card btn-main">作者アカウントを作る</a>
-                    <!-- ⭐️ 分割した作者向けガイドへの動線 -->
-                    <a href="guide.html?type=author" class="btn-card btn-sub">作者向け使い方ガイド ➔</a>
-                </div>
-            </div>
+        <div class="hero">
+            <h1>大好きな作品の<br>「続き」を応援しよう。</h1>
+            <!-- PCでは1行、スマホでは「ための、」の後に改行が入ります -->
+            <p>KANKETSUは、Web小説クリエイターのための、<br class="sp-br">最もシンプルでクリーンな支援プラットフォームです。</p>
+            <a href="auth.html" class="btn btn-primary hero-btn">クリエイターとして無料で登録</a>
         </div>
 
-        <!-- ⭐️ お問い合わせセクションを追加 -->
-        <div class="contact-section">
-            <h2>何かご不明な点はありますか？</h2>
-            <p>機能についてのご質問や、導入に関するご相談など、お気軽にお問い合わせください。</p>
-            <a href="contact.html" class="btn-card btn-main btn-contact">お問い合わせフォームへ</a>
+        <div class="cards-wrap" style="margin-top: 64px;">
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    読者・ファンの方へ
+                </h2>
+                <p style="color: var(--text-sub); font-size: 15px;">面倒な会員登録は一切不要。クレジットカードから簡単に作者を直接支援できます。支援の特典として、作者が設定した「限定裏話」などを読むことができます。</p>
+                <div style="border: 1.5px dashed #9ca3af; border-radius: 8px; padding: 16px; margin-top: 24px; background-color: transparent; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #dc2626;">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span style="font-size: 14px; font-weight: 800; color: #dc2626;">なりすましにご注意ください</span>
+                    </div>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-sub); line-height: 1.6;">
+                        当サイトには検索機能がありません。支援ページへは、必ず作者本人の公式SNS等のリンクからアクセスしてください。
+                    </p>
+                </div>
+            </div>
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    クリエイターの方へ
+                </h2>
+                <p style="color: var(--text-sub); font-size: 15px;">ファンからの支援を直接受け取ることができます。コメント機能などはないため、執筆のプレッシャーになることはありません。<br><br>口座登録は売上を引き出す時でOK。今すぐ支援受付を開始できます。</p>
+            </div>
         </div>
     </div>
 
     <div class="footer">
-        <p>&copy; 2026 KANKETSU. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="tokushoho.html">特定商取引法に基づく表記</a>
+            <a href="terms.html">利用規約</a>
+            <a href="privacy.html">プライバシーポリシー</a>
+        </div>
+        <p style="margin: 0;">&copy; 2026 KANKETSU</p>
     </div>
 </body>
 </html>
