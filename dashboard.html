@@ -52,7 +52,6 @@
         .btn-primary:hover { background-color: var(--btn-hover); border-color: var(--btn-hover); }
         .btn-outline { background-color: transparent; color: var(--text-main); }
         .btn-outline:hover { background-color: var(--bg-color); }
-        /* ★ 巨大化バグ修正：width: auto !important と flex-shrink: 0 を付与 */
         .btn-sm { padding: 8px 16px; font-size: 13px; width: auto !important; flex-shrink: 0; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
@@ -86,11 +85,6 @@
             .sidebar-header { padding: 20px 24px 12px; }
             .nav-item { padding: 10px 24px; }
             .account-btn { padding: 16px 24px; }
-        }
-        @media (max-width: 768px) and (max-height: 700px) {
-            .sidebar-header { padding: 16px 24px 8px; }
-            .nav-item { padding: 8px 24px; }
-            .account-btn { padding: 12px 24px; }
         }
     </style>
 </head>
@@ -345,7 +339,7 @@
         </div>
     </div>
 
-<div class="modal-overlay" id="workModal">
+    <div class="modal-overlay" id="workModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="workModalTitle">作品を追加</h3>
@@ -397,10 +391,9 @@
 
             let currentUserId = null;
             let editLinkId = null, editWorkId = null;
-            let currentBalance = 0; // ★ 引き出し金額チェック用
-            let isDashboardInitializing = false; // ★ 重複リロード(高負荷)防止ロック
+            let currentBalance = 0; 
+            let isDashboardInitializing = false; 
 
-            // ★ Stripeの連携状態をチェックする関数
             async function checkStripeStatus(userId) {
                 try {
                     const { data, error } = await supabaseClient
@@ -442,7 +435,7 @@
 
                     await checkStripeStatus(currentUserId);
 
-                    const { error: upsertErr } = await supabaseClient.from('creators').upsert(
+                    await supabaseClient.from('creators').upsert(
                         { 
                             id: currentUserId, 
                             pen_name: '未設定',
@@ -469,7 +462,6 @@
                         document.getElementById('pennameInput').value = (penname === '未設定' ? "" : penname);
                     }
 
-                    // ⭐️【修正】ローカルDBを単純合計せず、Edge FunctionからStripe計算済みの正確な残高を取得
                     try {
                         const { data: stripeData, error: stripeErr } = await supabaseClient.functions.invoke('get-stripe-transactions', {
                             body: { creatorId: currentUserId }
@@ -510,14 +502,12 @@
                 if (msgsCount > 0) completedCount++;
                 if (worksCount > 0) completedCount++;
 
-                // ⭐️ 一度でも4つのタスクを全てクリアした実績（フラグ）をユーザーIDごとにブラウザへ保存
                 const localStorageKey = 'kanketsu_onboarding_done_' + currentUserId;
                 if (completedCount === 4) {
                     localStorage.setItem(localStorageKey, 'true');
                 }
                 const hasOnboardingDonePast = localStorage.getItem(localStorageKey) === 'true';
 
-                // ⭐️ 修正：過去に突破済みであり、作品以外の必須3項目が維持されていれば、作品が0個になってもダッシュボードを表示し続ける
                 const isCompleted = (completedCount === 4) || (completedCount === 3 && hasOnboardingDonePast && worksCount === 0);
 
                 const onboardingView = document.getElementById('onboardingView');
@@ -554,6 +544,7 @@
                     `;
                 }
             }
+
             function getTaskHtml(isDone, title, modalId) {
                 if (isDone) {
                     return `
@@ -601,18 +592,17 @@
                 const { data } = await supabaseClient.from('works').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
                 const list = document.getElementById('worksList');
                 if(!list) return 0;
+                // ⭐️【修正】onclick内の引数から古い work_url データの痕跡を完全に排除
                 list.innerHTML = data && data.length > 0 ? data.map(item => `
-                    <div class="item-card" onclick="window.editWork('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.work_url.replace(/'/g, "\\'")}', '${item.secret_message ? item.secret_message.replace(/'/g, "\\'").replace(/\n/g, "\\n") : ''}')">
+                    <div class="item-card" onclick="window.editWork('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.secret_message ? item.secret_message.replace(/'/g, "\\'").replace(/\n/g, "\\n") : ''}')">
                         <div class="item-info"><h4>${item.title}</h4><p>${item.secret_message ? "限定メッセージあり" : "メッセージなし"}</p></div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
                     </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
                 
-                // ★ 作品ロード直後にも検索フィルターを適用
                 applyWorkSearch();
                 return data ? data.length : 0;
             }
 
-            // ★ 作品検索処理の本体
             function applyWorkSearch() {
                 const searchInput = document.getElementById('dashboardWorkSearch');
                 if (!searchInput) return;
@@ -628,7 +618,6 @@
                 });
             }
 
-            // ★ 検索窓のインプット監視を設定
             document.addEventListener('DOMContentLoaded', () => {
                 const searchInput = document.getElementById('dashboardWorkSearch');
                 if (searchInput) {
@@ -636,7 +625,6 @@
                 }
             });
 
-            // ★ モーダルで金額入力を求めて引き出し処理を行う一連の関数
             window.requestWithdrawal = function(e) {
                 if(e) e.preventDefault();
                 const amountInput = document.getElementById('withdrawAmountInput');
@@ -665,12 +653,10 @@
                     return;
                 }
 
-                // ボタンを無効化して2重送信を防ぐ（UX向上）
                 submitBtn.disabled = true;
                 submitBtn.innerText = '処理中...';
 
                 try {
-                    // ⭐️ バックエンドの引き出しAPIを呼び出し
                     const { data, error } = await supabaseClient.functions.invoke('request-withdrawal', {
                         body: { userId: currentUserId, requestedAmount: amount }
                     });
@@ -680,8 +666,6 @@
 
                     alert(`¥${amount.toLocaleString()} の引き出し処理が完了しました。\n連携済みのStripe口座へ振り込まれます。`);
                     window.closeModal('withdrawModal');
-                    
-                    // ダッシュボードを最新の残高に更新
                     await window.initDashboard();
 
                 } catch (err) {
@@ -707,8 +691,16 @@
 
             window.editLink = function(id, url) { editLinkId = id; document.getElementById('linkUrl').value = url; document.getElementById('linkModalTitle').innerText = '活動サイトを編集'; document.getElementById('linkDelBtn').style.display = 'block'; window.openModal('linkModal'); };
             window.editMessage = function(content) { document.getElementById('msgContent').value = content; window.openModal('msgModal'); };
-            // 作品の編集モーダルを開く処理（URLの読み込みをパス）
-            window.editWork = function(id, title, url, msg) { editWorkId = id; document.getElementById('workTitle').value = title; document.getElementById('workMessage').value = msg; document.getElementById('workModalTitle').innerText = '作品を編集'; document.getElementById('workDelBtn').style.display = 'block'; window.openModal('workModal'); };
+            
+            // ⭐️【修正】作品の編集モーダルを開く処理（引数とロジックから作品URLの痕跡を完全に完全消去）
+            window.editWork = function(id, title, msg) { 
+                editWorkId = id; 
+                document.getElementById('workTitle').value = title; 
+                document.getElementById('workMessage').value = msg; 
+                document.getElementById('workModalTitle').innerText = '作品を編集'; 
+                document.getElementById('workDelBtn').style.display = 'block'; 
+                window.openModal('workModal'); 
+            };
 
             window.saveProfile = async function() {
                 const penname = document.getElementById('pennameInput').value.trim();
@@ -725,7 +717,6 @@
                 await window.initDashboard(); 
             };
 
-            // 活動サイトリンクの保存（★即座に画面を更新するように修正）
             window.saveLink = async function() {
                 const url = document.getElementById('linkUrl').value.trim();
                 if(!url) return alert("URLを入力してください。");
@@ -759,7 +750,6 @@
                     if (error) throw error;
                     document.getElementById('linkUrl').value = '';
                     closeModal('linkModal');
-                    // ⭐️ loadLinks() から initDashboard() に変更し、初期状態でも即座に進捗を反映
                     await window.initDashboard(); 
                 } catch (error) {
                     alert("エラーが発生しました: " + error.message);
@@ -769,11 +759,11 @@
                 }
             };
 
-            // 作品の保存（★URLの必須チェックを撤廃し、空文字で安全に保存）
+            // ⭐️【修正一本化】URL不要の正しいsaveWork関数のみを残し、末尾に存在した古い重複関数を完全に抹殺
             window.saveWork = async function() {
                 const title = document.getElementById('workTitle').value.trim();
                 const secret_message = document.getElementById('workMessage').value.trim();
-                const work_url = ""; // ⭐️ 画面から消したため、内部で空文字を固定セット（DBエラー防止）
+                const work_url = ""; // データベースのエラーを防ぐため、内部処理で空文字を安全に送信
                 
                 if(!title || !secret_message) {
                     return alert("タイトルと限定メッセージを入力してください。");
@@ -824,32 +814,6 @@
                 } finally {
                     btn.disabled = false;
                     btn.innerText = '保存する';
-                }
-            };
-
-            window.saveWork = async function() {
-                const title = document.getElementById('workTitle').value.trim();
-                const work_url = document.getElementById('workUrl').value.trim();
-                const secret_message = document.getElementById('workMessage').value.trim();
-                
-                if(!title || !work_url || !secret_message) {
-                    return alert("タイトル、URL、限定メッセージの全てを入力してください。");
-                }
-                
-                if(title.length > 100) return alert("作品名は100文字以内で入力してください。");
-                if(secret_message.length < 10) return alert("限定メッセージは10文字以上で入力してください。");
-                if(secret_message.length > 10000) return alert("限定メッセージは10,000文字以内で入力してください。");
-                
-                const promise = editWorkId 
-                    ? supabaseClient.from('works').update({ title, work_url, secret_message }).eq('id', editWorkId) 
-                    : supabaseClient.from('works').insert([{ creator_id: currentUserId, title, work_url, secret_message }]);
-                
-                const { error } = await promise;
-                if (error) {
-                    alert("エラー: " + error.message);
-                } else { 
-                    window.closeModal('workModal'); 
-                    await window.initDashboard(); 
                 }
             };
 
