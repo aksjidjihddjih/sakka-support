@@ -188,7 +188,7 @@
                 </div>
 
                 <div id="unlinked-card" class="card" style="display: none; border: 2px dashed var(--border-color); background-color: #f9fafb; text-align: center; padding: 32px 20px; box-shadow: none;">
-                    <h3 style="margin-top: 0; font-size: 18px;">💰 支援受付ページを公開しましょう</h3>
+                    <h3 style="margin-top: 0; font-size: 18px;">支援受付ページを公開しましょう</h3>
                     <p style="font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 24px;">
                         支援を受け取るための専用ページ（URL）を発行するには、Stripeの口座連携が必要です。<br>
                         安全な取引のため、連携（本人確認）を完了させて読者にURLを公開しましょう！
@@ -250,6 +250,7 @@
                 </div>
 
                 <!-- 変更：作品と専用メッセージから「作品と執筆ノート」へ -->
+                <!-- 作品と執筆ノートカード -->
                 <div class="card">
                     <div class="card-header">
                         <div>
@@ -257,6 +258,11 @@
                             <p class="card-desc">特定の作品に対する支援に対して公開される専用の執筆ノート</p>
                         </div>
                         <button class="btn btn-outline btn-sm" onclick="window.openModal('workModal')">＋</button>
+                    </div>
+                    
+                    <!-- 💡 UIUX工夫：文字ノイズにせず、機会損失を防ぐミニバナー -->
+                    <div style="background: #fffbeb; border: 1px solid #fef3c7; color: #b45309; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 16px; line-height: 1.5;">
+                        共通ノートだけでも支援自体は可能ですが、支援を逃さないためにすべての作品の設定を推奨します
                     </div>
                     
                     <div style="position: relative; margin-bottom: 16px;">
