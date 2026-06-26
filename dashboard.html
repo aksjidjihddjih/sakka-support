@@ -237,22 +237,24 @@
                     <div class="item-list" id="linksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
                 </div>
 
+                <!-- 変更：共通お礼メッセージから「共通執筆ノート」へ -->
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <h2 class="card-title">支援へのお礼メッセージ</h2>
-                            <p class="card-desc">作品指定がない支援に対する共通メッセージ</p>
+                            <h2 class="card-title">共通執筆ノート（お礼メッセージ）</h2>
+                            <p class="card-desc">作品指定がない支援に対して読者に公開される共通の執筆ノート</p>
                         </div>
                         <button class="btn btn-outline btn-sm" onclick="window.openModal('msgModal')">＋</button>
                     </div>
                     <div class="item-list" id="messagesList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
                 </div>
 
+                <!-- 変更：作品と専用メッセージから「作品と執筆ノート」へ -->
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <h2 class="card-title">作品と専用メッセージ</h2>
-                            <p class="card-desc">特定の作品に対する支援と、その限定の裏話など</p>
+                            <h2 class="card-title">作品と執筆ノート</h2>
+                            <p class="card-desc">特定の作品に対する支援に対して公開される専用の執筆ノート</p>
                         </div>
                         <button class="btn btn-outline btn-sm" onclick="window.openModal('workModal')">＋</button>
                     </div>
@@ -320,15 +322,16 @@
         </div>
     </div>
     
+    <!-- 変更：共通執筆ノートモーダル -->
     <div class="modal-overlay" id="msgModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="msgModalTitle">お礼メッセージを設定</h3>
+                <h3 class="modal-title" id="msgModalTitle">共通執筆ノートを設定</h3>
                 <button class="modal-close" onclick="window.closeModal('msgModal')">&times;</button>
             </div>
             <div class="form-group">
-                <label>メッセージ内容（作品指定のない支援時に表示されます）</label>
-                <textarea id="msgContent" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください（ショートストーリー等も大歓迎です！）" autocomplete="off"></textarea>
+                <label>ノート内容（作品指定のない支援時に表示されます）</label>
+                <textarea id="msgContent" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください。&#10;（例：裏設定、裏話、制作秘話、ボツ案、作者コメント、近況報告など、作品や作者に関連するものなら内容の縛りなく何でも大歓迎です！）" autocomplete="off"></textarea>
             </div>
             <div class="modal-footer">
                 <div style="display:flex; gap:12px; margin-left:auto;">
@@ -339,10 +342,11 @@
         </div>
     </div>
 
+    <!-- 変更：作品執筆ノートモーダル -->
     <div class="modal-overlay" id="workModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="workModalTitle">作品を追加</h3>
+                <h3 class="modal-title" id="workModalTitle">作品と執筆ノートを追加</h3>
                 <button class="modal-close" onclick="window.closeModal('workModal')">&times;</button>
             </div>
             <div class="form-group">
@@ -350,34 +354,14 @@
                 <input type="text" id="workTitle" class="form-control" placeholder="作品名を入力（100文字以内）" maxlength="100" autocomplete="off">
             </div>
             <div class="form-group">
-                <label>限定メッセージ</label>
-                <textarea id="workMessage" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください（作品の裏話など）" autocomplete="off"></textarea>
+                <label>執筆ノート（この作品への支援時に表示されます）</label>
+                <textarea id="workMessage" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください。&#10;（例：この作品の裏設定、裏話、制作秘話、ボツ案、作者コメント、近況報告など自由にご活用ください！）" autocomplete="off"></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline btn-sm" id="workDelBtn" style="display:none; color:#dc2626; border-color:#fca5a5;" onclick="window.deleteWork()">削除</button>
                 <div style="display:flex; gap:12px; margin-left:auto;">
                     <button class="btn btn-outline btn-sm" onclick="window.closeModal('workModal')">キャンセル</button>
                     <button class="btn btn-primary btn-sm" onclick="window.saveWork()">保存する</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="withdrawModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">売上を引き出す</h3>
-                <button class="modal-close" onclick="window.closeModal('withdrawModal')">&times;</button>
-            </div>
-            <div class="form-group">
-                <label>引き出す金額 (円)</label>
-                <input type="number" id="withdrawAmountInput" class="form-control" placeholder="金額を入力してください" min="1" autocomplete="off">
-                <p style="font-size: 13px; color: var(--text-sub); margin-top: 8px; font-weight: 600;" id="withdrawMaxHint">引き出し可能残高: ¥0</p>
-            </div>
-            <div class="modal-footer">
-                <div style="display:flex; gap:12px; margin-left:auto;">
-                    <button class="btn btn-outline btn-sm" onclick="window.closeModal('withdrawModal')">キャンセル</button>
-                    <button class="btn btn-primary btn-sm" onclick="window.executeWithdraw()">申請する</button>
                 </div>
             </div>
         </div>
@@ -536,11 +520,12 @@
                     document.getElementById('onboardingPercent').innerText = `${percent}%`;
                     document.getElementById('onboardingProgressBar').style.width = `${percent}%`;
 
+                    // 変更：タスク一覧の案内文言を「執筆ノート」に変更
                     document.getElementById('onboardingTaskList').innerHTML = `
                         ${getTaskHtml(hasPenName, 'ペンネームを設定する', 'profileModal')}
                         ${getTaskHtml(linksCount > 0, '活動サイトリンクを追加する', 'linkModal')}
-                        ${getTaskHtml(msgsCount > 0, '支援へのお礼メッセージを設定する', 'msgModal')}
-                        ${getTaskHtml(worksCount > 0, '作品を追加する', 'workModal')}
+                        ${getTaskHtml(msgsCount > 0, '共通執筆ノートを設定する', 'msgModal')}
+                        ${getTaskHtml(worksCount > 0, '作品と執筆ノートを追加する', 'workModal')}
                     `;
                 }
             }
@@ -588,14 +573,14 @@
                 return data ? data.length : 0;
             }
 
+            // 修正箇所①：作品一覧の表示（「限定メッセージあり」から変更）
             async function loadWorks() {
                 const { data } = await supabaseClient.from('works').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
                 const list = document.getElementById('worksList');
                 if(!list) return 0;
-                // ⭐️【修正】onclick内の引数から古い work_url データの痕跡を完全に排除
                 list.innerHTML = data && data.length > 0 ? data.map(item => `
                     <div class="item-card" onclick="window.editWork('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.secret_message ? item.secret_message.replace(/'/g, "\\'").replace(/\n/g, "\\n") : ''}')">
-                        <div class="item-info"><h4>${item.title}</h4><p>${item.secret_message ? "限定メッセージあり" : "メッセージなし"}</p></div>
+                        <div class="item-info"><h4>${item.title}</h4><p>${item.secret_message ? "執筆ノートあり" : "執筆ノートなし"}</p></div>
                         <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
                     </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
                 
@@ -677,12 +662,13 @@
             };
 
             window.openModal = function(id) { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; };
+            // 修正箇所②：モーダルを閉じたときの初期化タイトル
             window.closeModal = function(id) { 
                 document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; 
                 if(id === 'profileModal') { document.getElementById('pennameInput').value = document.getElementById('userNameDisplay').innerText; }
                 if(id === 'linkModal') { editLinkId = null; document.getElementById('linkUrl').value = ''; document.getElementById('linkModalTitle').innerText = '活動サイトを追加'; document.getElementById('linkDelBtn').style.display = 'none'; }
                 if(id === 'msgModal') { document.getElementById('msgContent').value = ''; }
-                if(id === 'workModal') { editWorkId = null; document.getElementById('workTitle').value = ''; document.getElementById('workMessage').value = ''; document.getElementById('workModalTitle').innerText = '作品を追加'; document.getElementById('workDelBtn').style.display = 'none'; }
+                if(id === 'workModal') { editWorkId = null; document.getElementById('workTitle').value = ''; document.getElementById('workMessage').value = ''; document.getElementById('workModalTitle').innerText = '作品と執筆ノートを追加'; document.getElementById('workDelBtn').style.display = 'none'; }
                 if(id === 'withdrawModal') { document.getElementById('withdrawAmountInput').value = ''; }
             };
             window.onclick = function(e) { if (e.target.classList.contains('modal-overlay')) { window.closeModal(e.target.id); } };
@@ -692,16 +678,15 @@
             window.editLink = function(id, url) { editLinkId = id; document.getElementById('linkUrl').value = url; document.getElementById('linkModalTitle').innerText = '活動サイトを編集'; document.getElementById('linkDelBtn').style.display = 'block'; window.openModal('linkModal'); };
             window.editMessage = function(content) { document.getElementById('msgContent').value = content; window.openModal('msgModal'); };
             
-            // ⭐️【修正】作品の編集モーダルを開く処理（引数とロジックから作品URLの痕跡を完全に完全消去）
+            // 修正箇所③：作品編集を開いたときのタイトル
             window.editWork = function(id, title, msg) { 
                 editWorkId = id; 
                 document.getElementById('workTitle').value = title; 
                 document.getElementById('workMessage').value = msg; 
-                document.getElementById('workModalTitle').innerText = '作品を編集'; 
+                document.getElementById('workModalTitle').innerText = '作品と執筆ノートを編集'; 
                 document.getElementById('workDelBtn').style.display = 'block'; 
                 window.openModal('workModal'); 
             };
-
             window.saveProfile = async function() {
                 const penname = document.getElementById('pennameInput').value.trim();
                 
