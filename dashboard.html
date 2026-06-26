@@ -237,6 +237,7 @@
                     <div class="item-list" id="linksList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
                 </div>
 
+                <!-- 変更：共通お礼メッセージから「共通執筆ノート」へ -->
                 <div class="card">
                     <div class="card-header">
                         <div>
@@ -248,6 +249,8 @@
                     <div class="item-list" id="messagesList"><p style="font-size: 14px; color: var(--text-sub);">読込中...</p></div>
                 </div>
 
+                <!-- 変更：作品と専用メッセージから「作品と執筆ノート」へ -->
+                <!-- 作品と執筆ノートカード -->
                 <div class="card">
                     <div class="card-header">
                         <div>
@@ -257,8 +260,9 @@
                         <button class="btn btn-outline btn-sm" onclick="window.openModal('workModal')">＋</button>
                     </div>
                     
+                    <!-- 💡 UIUX工夫：文字ノイズにせず、機会損失を防ぐミニバナー -->
                     <div style="background: #fffbeb; border: 1px solid #fef3c7; color: #b45309; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 16px; line-height: 1.5;">
-                        共通ノートだけでも支援自体は可能ですが、支援を逃さないためにすべての作品に設定を推奨します
+                        共通ノートだけでも支援自体は可能ですが、支援を逃さないためにすべての作品の設定を推奨します
                     </div>
                     
                     <div style="position: relative; margin-bottom: 16px;">
@@ -324,6 +328,7 @@
         </div>
     </div>
     
+    <!-- 変更：共通執筆ノートモーダル -->
     <div class="modal-overlay" id="msgModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -343,7 +348,7 @@
         </div>
     </div>
 
-    <!-- 変更：作品執筆ノートモーダル（ここにマイクロコピー付きのコードが入っています） -->
+    <!-- 変更：作品執筆ノートモーダル -->
     <div class="modal-overlay" id="workModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -357,37 +362,12 @@
             <div class="form-group">
                 <label>執筆ノート（この作品への支援時に表示されます）</label>
                 <textarea id="workMessage" class="form-control" placeholder="10文字以上、10,000文字以内でご記入ください。&#10;（例：この作品の裏設定、裏話、制作秘話、ボツ案、作者コメント、近況報告など自由にご活用ください！）" autocomplete="off"></textarea>
-                
-                <!-- 💡 UIUX工夫：入力欄のすぐ下に優しく理由を添えるマイクロコピー -->
-                <p style="font-size: 11px; color: #6b7280; margin-top: 8px; line-height: 1.5; padding-left: 2px;">
-                    ※未設定の場合、共通ノートで支援受付は可能ですが、<strong>その作品が支援ページに表示されなくなります。</strong>作品のファンからの支援機会を逃さないよう、一言だけでも設定をおすすめします。
-                </p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline btn-sm" id="workDelBtn" style="display:none; color:#dc2626; border-color:#fca5a5;" onclick="window.deleteWork()">削除</button>
                 <div style="display:flex; gap:12px; margin-left:auto;">
                     <button class="btn btn-outline btn-sm" onclick="window.closeModal('workModal')">キャンセル</button>
                     <button class="btn btn-primary btn-sm" onclick="window.saveWork()">保存する</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="withdrawModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">売上を引き出す</h3>
-                <button class="modal-close" onclick="window.closeModal('withdrawModal')">&times;</button>
-            </div>
-            <div class="form-group">
-                <label>引き出す金額 (円)</label>
-                <input type="number" id="withdrawAmountInput" class="form-control" placeholder="金額を入力してください" min="1" autocomplete="off">
-                <p style="font-size: 13px; color: var(--text-sub); margin-top: 8px; font-weight: 600;" id="withdrawMaxHint">引き出し可能残高: ¥0</p>
-            </div>
-            <div class="modal-footer">
-                <div style="display:flex; gap:12px; margin-left:auto;">
-                    <button class="btn btn-outline btn-sm" onclick="window.closeModal('withdrawModal')">キャンセル</button>
-                    <button class="btn btn-primary btn-sm" onclick="window.executeWithdraw()">申請する</button>
                 </div>
             </div>
         </div>
@@ -546,6 +526,7 @@
                     document.getElementById('onboardingPercent').innerText = `${percent}%`;
                     document.getElementById('onboardingProgressBar').style.width = `${percent}%`;
 
+                    // 変更：タスク一覧の案内文言を「執筆ノート」に変更
                     document.getElementById('onboardingTaskList').innerHTML = `
                         ${getTaskHtml(hasPenName, 'ペンネームを設定する', 'profileModal')}
                         ${getTaskHtml(linksCount > 0, '活動サイトリンクを追加する', 'linkModal')}
@@ -598,6 +579,7 @@
                 return data ? data.length : 0;
             }
 
+            // 修正箇所①：作品一覧の表示（「限定メッセージあり」から変更）
             async function loadWorks() {
                 const { data } = await supabaseClient.from('works').select('*').eq('creator_id', currentUserId).order('created_at', { ascending: false });
                 const list = document.getElementById('worksList');
@@ -686,6 +668,7 @@
             };
 
             window.openModal = function(id) { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; };
+            // 修正箇所②：モーダルを閉じたときの初期化タイトル
             window.closeModal = function(id) { 
                 document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; 
                 if(id === 'profileModal') { document.getElementById('pennameInput').value = document.getElementById('userNameDisplay').innerText; }
@@ -701,6 +684,7 @@
             window.editLink = function(id, url) { editLinkId = id; document.getElementById('linkUrl').value = url; document.getElementById('linkModalTitle').innerText = '活動サイトを編集'; document.getElementById('linkDelBtn').style.display = 'block'; window.openModal('linkModal'); };
             window.editMessage = function(content) { document.getElementById('msgContent').value = content; window.openModal('msgModal'); };
             
+            // 修正箇所③：作品編集を開いたときのタイトル
             window.editWork = function(id, title, msg) { 
                 editWorkId = id; 
                 document.getElementById('workTitle').value = title; 
@@ -766,10 +750,11 @@
                 }
             };
 
+            // ⭐️【修正一本化】URL不要の正しいsaveWork関数のみを残し、末尾に存在した古い重複関数を完全に抹殺
             window.saveWork = async function() {
                 const title = document.getElementById('workTitle').value.trim();
                 const secret_message = document.getElementById('workMessage').value.trim();
-                const work_url = ""; 
+                const work_url = ""; // データベースのエラーを防ぐため、内部処理で空文字を安全に送信
                 
                 if(!title || !secret_message) {
                     return alert("タイトルと限定メッセージを入力してください。");
@@ -838,3 +823,4 @@
     </script>
 </body>
 </html>
+
