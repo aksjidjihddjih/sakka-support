@@ -14,7 +14,6 @@
         
         .container { max-width: 640px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; text-align: center; }
         
-        /* ★ チェックマークの背景を緑色に変更 */
         .success-icon { width: 64px; height: 64px; background: #16a34a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; }
         
         h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px 0; }
@@ -54,7 +53,6 @@
         .msg-title-en { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--text-sub); line-height: 1; margin-bottom: 4px;}
         .msg-title { font-size: 16px; font-weight: 800; margin: 0; line-height: 1;}
 
-        /* ★ 余白を均等にし、引用符の装飾（::before）を削除 */
         .msg-content { 
             font-size: 15px; 
             line-height: 1.8; 
@@ -90,28 +88,17 @@
         .btn-outline:hover { background-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0px rgba(0,0,0,1); }
         
         .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
-        /* ★ スマホ向けの設定（余白を限界まで絞り、文章の横幅を確保する調整） */
+        
         @media (max-width: 768px) {
-            /* 全体の外側余白を20pxから12pxに圧縮 */
             .container { margin: 24px auto; padding: 0 12px; }
-            
-            /* カードの内側余白を32pxから16pxに狭めて横幅を確保 */
             .message-card { padding: 24px 16px; box-shadow: 2px 2px 0px rgba(0,0,0,1); }
-            
-            /* メッセージヘッダーの無駄な下余白を微調整 */
             .msg-header { margin-bottom: 16px; }
-
-            /* 本文エリアの余白を24pxから16pxに絞り、文字サイズをWeb小説に最適な14pxに調整 */
             .msg-content { padding: 16px; font-size: 14px; line-height: 1.75; }
-
-            /* 注意書きボックスの余白も最適化 */
             .warning-box { padding: 12px; font-size: 12px; }
-            
-            /* ボタンの上マージンを少し詰める */
             .btn { margin-top: 24px; width: 100%; }
 
-            /* 既存のフッター1列ロック処理 */
-            .footer-links { flex-wrap: nowrap !important; gap: 8px !important; }
+            /* フッター1列ロック処理 */
+            .footer-links { flex-wrap: nowrap !important; gap: 8px !important; justify-content: center !important; }
             .footer-links a { font-size: 10px !important; white-space: nowrap !important; }
         }
     </style>
@@ -156,7 +143,8 @@
     </div>
 
     <footer class="footer">
-        <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
+        <!-- 💡 クラス名を追記し、スマホで縮小されるように修正 -->
+        <div class="footer-links" style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
             <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
             <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
             <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
