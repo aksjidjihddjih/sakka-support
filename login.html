@@ -42,9 +42,16 @@
         .signup-link a:hover { text-decoration: underline; }
 
         .error-message { color: #dc2626; font-size: 13px; font-weight: 600; margin-top: 8px; display: none; text-align: left; background: #fee2e2; padding: 12px; border-radius: 8px; border: 1px solid #fca5a5; margin-bottom: 20px;}
-        
-        /* ⭐️ 修正点2: Turnstile用のレイアウトスタイルを追加 */
         .turnstile-wrap { margin-bottom: 20px; display: flex; justify-content: center; }
+
+        /* ⭐️ パスワード表示トグル用スタイル */
+        .input-wrapper { position: relative; width: 100%; }
+        .pwd-toggle-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 0; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; z-index: 2;}
+        .pwd-toggle-btn:hover { color: var(--text-main); }
+        .pwd-toggle-btn svg { width: 20px; height: 20px; }
+        .form-control.pwd-input { padding-right: 44px; }
+        /* ブラウザ標準の目玉マークを強制非表示 */
+        input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
     </style>
 </head>
 <body>
@@ -75,10 +82,16 @@
                     <label>メールアドレス</label>
                     <input type="email" id="email" class="form-control" placeholder="you@example.com" autocomplete="username" required>
                 </div>
+
                 <div class="form-group">
                     <label>パスワード</label>
                     <a href="#" class="forgot-password" onclick="alert('パスワードリセット機能は準備中です。\nお困りの場合はお問い合わせください。')">パスワードを忘れた場合</a>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••" autocomplete="current-password" required>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="form-control pwd-input" placeholder="••••••••" autocomplete="current-password" required>
+                        <button type="button" class="pwd-toggle-btn" onclick="togglePassword('password', this)" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="turnstile-wrap">
@@ -102,27 +115,35 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let turnstileToken = null; // ⭐️ トークンを保持する変数
+        let turnstileToken = null;
 
-        // ⭐️ 修正点6: Turnstile認証成功時に呼ばれる処理
+        // ⭐️ パスワードの表示・非表示切り替え用関数
+        window.togglePassword = function(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+            }
+        };
+
         window.onTurnstileVerify = function(token) {
             turnstileToken = token;
             validateFormState();
         };
 
-        // ⭐️ 修正点7: 有効期限が切れた場合の処理
         window.onTurnstileExpire = function() {
             turnstileToken = null;
             validateFormState();
         };
 
-        // ⭐️ 修正点8: 判定状態を見てログインボタンのロックを解除
         function validateFormState() {
             const isHuman = turnstileToken !== null;
             document.getElementById('loginBtn').disabled = !isHuman;
         }
 
-        // ソーシャルログイン処理
         async function signInWithProvider(provider) {
             try {
                 const { data, error } = await supabaseClient.auth.signInWithOAuth({
@@ -135,13 +156,11 @@
             }
         }
 
-        // フォーム送信時のハンドラー
         function handleFormSubmit(e) {
             e.preventDefault();
             handleLogin();
         }
 
-        // メールアドレスログイン処理
         async function handleLogin() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
@@ -165,7 +184,6 @@
             btn.innerText = 'ログイン中...';
 
             try {
-                // ⭐️ 修正点9: signInWithPassword関数に captchaToken を乗せてSupabaseへ送信！
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password,
@@ -189,7 +207,6 @@
                 errorMsg.innerText = error.message;
                 errorMsg.style.display = 'block';
                 
-                // ⭐️ 修正点10: 失敗した場合はセキュリティのためTurnstileをリセットして再入力を求める
                 if (window.turnstile) turnstile.reset();
                 turnstileToken = null;
                 validateFormState();
