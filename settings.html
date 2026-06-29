@@ -104,10 +104,31 @@
             <div class="card">
                 <h2 class="card-title">ログイン情報</h2>
                 <div style="margin-bottom: 24px;">
-                    <label style="display:block; font-size: 13px; font-weight: 600; margin-bottom: 8px;">メールアドレス</label>
+                    <label style="display:block; font-size: 13px; font-weight: 700; margin-bottom: 8px;">メールアドレス</label>
                     <input type="text" id="userEmail" class="form-control" style="background: #f9fafb; cursor: not-allowed; color: var(--text-sub);" value="読み込み中..." disabled>
                 </div>
-                <button class="btn btn-outline" style="max-width: 200px;" onclick="alert('パスワードのリセットメールを送信する機能は準備中です。')">パスワードを変更する</button>
+
+                <div style="border-top: 1px solid var(--border-light); margin-top: 24px; padding-top: 24px; text-align: left;">
+                    <h3 style="font-size: 14px; font-weight: 700; margin: 0 0 16px 0;">パスワードの変更</h3>
+                    <form id="passwordForm" onsubmit="window.changePassword(event)">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px;">新しいパスワード</label>
+                            <input type="password" id="newPassword" class="form-control" placeholder="8文字以上（英大・小文字、数字必須）" required autocomplete="new-password">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px;">新しいパスワード（確認）</label>
+                            <input type="password" id="confirmPassword" class="form-control" placeholder="もう一度入力してください" required autocomplete="new-password">
+                        </div>
+                        <button type="submit" id="pwdBtn" class="btn btn-outline" style="max-width: 220px;">パスワードを変更する</button>
+                    </form>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-light); margin-top: 24px; padding-top: 24px; text-align: left;">
+                    <h3 style="font-size: 14px; font-weight: 700; margin: 0 0 8px 0;">メールアドレスの変更について</h3>
+                    <p style="color: var(--text-sub); font-size: 13px; margin: 0 0 4px 0; line-height: 1.6;">
+                        売上情報の保護、およびアカウントの乗っ取りを防止するため、メールアドレスの変更は画面からは行えません。変更をご希望の場合は、恐れ入りますが <a href="inquiry.html" style="color: var(--text-main); font-weight: 700; text-decoration: underline;">お問い合わせ</a> より直接申請を行ってください。
+                    </p>
+                </div>
             </div>
 
             <div class="card" style="border-color: #fca5a5;">
@@ -155,6 +176,48 @@
             } catch (error) { console.error("Error:", error); }
         }
 
+        // ★ 高セキュリティ基準のパスワード変更バリデーション＆送信処理
+        window.changePassword = async function(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('pwdBtn');
+
+            // 脆弱性対策1: タイポによる締め出し（次回ログイン不可事故）を防ぐための二重一致チェック
+            if (newPassword !== confirmPassword) {
+                alert('新しいパスワードと確認用のパスワードが一致しません。');
+                return;
+            }
+
+            // 脆弱性対策2: 8文字以上、かつ英大文字・英小文字・数字の混在を厳格に要求するバリデーション
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(newPassword)) {
+                alert('セキュリティ強化のため、パスワードは以下のすべての条件を満たす必要があります：\n\n・8文字以上であること\n・英語の大文字、小文字、数字がすべて最低1文字以上含まれていること');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = '変更処理中...';
+
+            try {
+                // Supabase Auth の安全なユーザーパスワード更新
+                const { error } = await supabaseClient.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) throw error;
+
+                alert('パスワードは安全に更新されました。');
+                document.getElementById('passwordForm').reset();
+
+            } catch (error) {
+                alert('パスワードの変更に失敗しました。\n' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'パスワードを変更する';
+            }
+        };
+
         // ★ 退会機能の処理
         window.processWithdrawal = async function() {
             if (!confirm('本当に退会しますか？\nこの操作は取り消せません。作品や設定など、すべての情報が完全に削除されます。')) {
@@ -166,14 +229,12 @@
             btn.innerText = '退会処理中...';
 
             try {
-                // Supabaseで作成した削除関数を呼び出す
                 const { error } = await supabaseClient.rpc('delete_current_user');
-                
                 if (error) throw error;
 
                 alert('退会処理が完了しました。ご利用ありがとうございました。');
                 await supabaseClient.auth.signOut();
-                window.location.href = 'index.html'; // トップページへ戻る
+                window.location.href = 'index.html';
 
             } catch (error) {
                 alert('退会処理に失敗しました。\n' + error.message);
