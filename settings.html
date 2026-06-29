@@ -62,6 +62,14 @@
             .nav-item { padding: 8px 24px; }
             .account-btn { padding: 12px 24px; }
         }
+        
+        /* ⭐️ パスワード表示トグル用スタイル */
+        .input-wrapper { position: relative; width: 100%; }
+        .pwd-toggle-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; padding: 0; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; z-index: 2;}
+        .pwd-toggle-btn:hover { color: var(--text-main); }
+        .pwd-toggle-btn svg { width: 20px; height: 20px; }
+        .form-control.pwd-input { padding-right: 44px; }
+        input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
     </style>
 </head>
 <body>
@@ -111,14 +119,26 @@
                 <div style="border-top: 1px solid var(--border-light); margin-top: 24px; padding-top: 24px; text-align: left;">
                     <h3 style="font-size: 14px; font-weight: 700; margin: 0 0 16px 0;">パスワードの変更</h3>
                     <form id="passwordForm" onsubmit="window.changePassword(event)">
+                        
                         <div style="margin-bottom: 16px;">
                             <label style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px;">新しいパスワード</label>
-                            <input type="password" id="newPassword" class="form-control" placeholder="8文字以上（英大・小文字、数字必須）" required autocomplete="new-password">
+                            <div class="input-wrapper">
+                                <input type="password" id="newPassword" class="form-control pwd-input" placeholder="8文字以上（英大・小文字、数字必須）" required autocomplete="new-password">
+                                <button type="button" class="pwd-toggle-btn" onclick="togglePassword('newPassword', this)" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                         </div>
                         <div style="margin-bottom: 20px;">
                             <label style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px;">新しいパスワード（確認）</label>
-                            <input type="password" id="confirmPassword" class="form-control" placeholder="もう一度入力してください" required autocomplete="new-password">
+                            <div class="input-wrapper">
+                                <input type="password" id="confirmPassword" class="form-control pwd-input" placeholder="もう一度入力してください" required autocomplete="new-password">
+                                <button type="button" class="pwd-toggle-btn" onclick="togglePassword('confirmPassword', this)" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                         </div>
+
                         <button type="submit" id="pwdBtn" class="btn btn-outline" style="max-width: 220px;">パスワードを変更する</button>
                     </form>
                 </div>
@@ -154,6 +174,18 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // ⭐️ パスワードの表示・非表示切り替え用関数
+        window.togglePassword = function(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+            } else {
+                input.type = 'password';
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+            }
+        };
+
         async function init() {
             if (!document.getElementById('settings-container')) return;
 
@@ -176,20 +208,17 @@
             } catch (error) { console.error("Error:", error); }
         }
 
-        // ★ 高セキュリティ基準のパスワード変更バリデーション＆送信処理
         window.changePassword = async function(e) {
             e.preventDefault();
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const btn = document.getElementById('pwdBtn');
 
-            // 脆弱性対策1: タイポによる締め出し（次回ログイン不可事故）を防ぐための二重一致チェック
             if (newPassword !== confirmPassword) {
                 alert('新しいパスワードと確認用のパスワードが一致しません。');
                 return;
             }
 
-            // 脆弱性対策2: 8文字以上、かつ英大文字・英小文字・数字の混在を厳格に要求するバリデーション
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             if (!passwordRegex.test(newPassword)) {
                 alert('セキュリティ強化のため、パスワードは以下のすべての条件を満たす必要があります：\n\n・8文字以上であること\n・英語の大文字、小文字、数字がすべて最低1文字以上含まれていること');
@@ -200,7 +229,6 @@
             btn.innerText = '変更処理中...';
 
             try {
-                // Supabase Auth の安全なユーザーパスワード更新
                 const { error } = await supabaseClient.auth.updateUser({
                     password: newPassword
                 });
@@ -209,6 +237,10 @@
 
                 alert('パスワードは安全に更新されました。');
                 document.getElementById('passwordForm').reset();
+                
+                // 表示状態をパスワードに戻す
+                document.getElementById('newPassword').type = 'password';
+                document.getElementById('confirmPassword').type = 'password';
 
             } catch (error) {
                 alert('パスワードの変更に失敗しました。\n' + error.message);
@@ -218,7 +250,6 @@
             }
         };
 
-        // ★ 退会機能の処理
         window.processWithdrawal = async function() {
             if (!confirm('本当に退会しますか？\nこの操作は取り消せません。作品や設定など、すべての情報が完全に削除されます。')) {
                 return;
