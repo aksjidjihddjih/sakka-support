@@ -151,11 +151,25 @@
                 </div>
             </div>
 
-            <div class="card" style="border-color: #fca5a5;">
-                <h2 class="card-title" style="color: #dc2626;">危険な操作</h2>
-                <p class="card-desc" style="margin-bottom: 16px;">一度アカウントを退会すると、作品情報や設定などすべてのデータが消去され、復元することはできません。</p>
-                <button id="withdrawBtn" class="btn btn-outline" style="color: #dc2626; border-color: #fca5a5; max-width: 200px;" onclick="window.processWithdrawal()">アカウントを退会する</button>
-            </div>
+            <!-- 💡 変更後：危険な操作カード -->
+<div class="card" style="border-color: #fca5a5;">
+    <h2 class="card-title" style="color: #dc2626;">危険な操作</h2>
+    <p class="card-desc" style="margin-bottom: 16px;">一度アカウントを退会すると、作品情報や設定などすべてのデータが消去され、復元することはできません。</p>
+    
+    <!-- 💡 安全のための本人確認パスワード欄を追加 -->
+    <div style="margin-bottom: 20px; text-align: left; max-width: 320px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #dc2626;">本人確認のためパスワードを入力してください</label>
+        <div class="input-wrapper">
+            <input type="password" id="withdrawPassword" class="form-control pwd-input" placeholder="現在のパスワード" style="border-color: #fca5a5;">
+            <button type="button" class="pwd-toggle-btn" onclick="togglePassword('withdrawPassword', this)" tabindex="-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+        </div>
+    </div>
+
+    <button id="withdrawBtn" class="btn btn-outline" style="color: #dc2626; border-color: #fca5a5; max-width: 200px;" onclick="window.processWithdrawal()">アカウントを退会する</button>
+</div>
+
             
             <footer class="site-footer">
                 <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
@@ -250,29 +264,54 @@
             }
         };
 
-        window.processWithdrawal = async function() {
-            if (!confirm('本当に退会しますか？\nこの操作は取り消せません。作品や設定など、すべての情報が完全に削除されます。')) {
-                return;
-            }
+        // ★ 退会機能の処理（セキュリティ強化版）
+window.processWithdrawal = async function() {
+    const passwordInput = document.getElementById('withdrawPassword');
+    const password = passwordInput.value;
 
-            const btn = document.getElementById('withdrawBtn');
-            btn.disabled = true;
-            btn.innerText = '退会処理中...';
+    if (!password) {
+        alert('本人確認のため、パスワードを入力してください。');
+        return;
+    }
 
-            try {
-                const { error } = await supabaseClient.rpc('delete_current_user');
-                if (error) throw error;
+    if (!confirm('本当に退会しますか？\nこの操作は取り消せません。作品や設定など、すべての情報が完全に削除されます。')) {
+        return;
+    }
 
-                alert('退会処理が完了しました。ご利用ありがとうございました。');
-                await supabaseClient.auth.signOut();
-                window.location.href = 'index.html';
+    const btn = document.getElementById('withdrawBtn');
+    btn.disabled = true;
+    btn.innerText = '退会処理中...';
 
-            } catch (error) {
-                alert('退会処理に失敗しました。\n' + error.message);
-                btn.disabled = false;
-                btn.innerText = 'アカウントを退会する';
-            }
-        };
+    try {
+        // 💡 悪意ある第三者をハジく関門：現在のセッションのメアドと、入力されたパスワードで再認証（ログインテスト）を行う
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        const { error: loginError } = await supabaseClient.auth.signInWithPassword({
+            email: session.user.email,
+            password: password
+        });
+
+        // パスワードが間違っていれば、ここで即座に処理を遮断して第三者をハジく
+        if (loginError) {
+            throw new Error('本人確認に失敗しました。パスワードが正しくありません。');
+        }
+
+        // パスワードが一致した場合のみ、実際の削除関数を実行する
+        const { error } = await supabaseClient.rpc('delete_current_user');
+        if (error) throw error;
+
+        alert('退会処理が完了しました。ご利用ありがとうございました。');
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+
+    } catch (error) {
+        alert('退会処理に失敗しました。\n' + error.message);
+        btn.disabled = false;
+        btn.innerText = 'アカウントを退会する';
+        passwordInput.value = '';
+    }
+};
+
 
         window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
         window.toggleAccountPopup = function(e) { e.stopPropagation(); document.getElementById('accountPopup').classList.toggle('show'); };
