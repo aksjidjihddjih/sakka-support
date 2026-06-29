@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>お問い合わせ - KANKETSU</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -38,6 +39,10 @@
 
         .site-footer { padding: 40px 20px; text-align: center; border-top: 1px solid var(--border-light); margin-top: auto; }
         
+        /* 💡 お知らせ・FAQ誘導バナーのスタイル */
+        .faq-banner { background-color: #f3f4f6; border: 1px solid var(--border-light); border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; line-height: 1.5; color: var(--text-sub); }
+        .faq-banner a { color: var(--text-main); font-weight: 700; text-decoration: underline; }
+        
         @media (max-width: 768px) {
             .site-footer { font-size: 10px !important; padding-left: 5px; padding-right: 5px; }
             .site-footer a { font-size: 10px !important; white-space: nowrap; }
@@ -59,6 +64,11 @@
             <h1>お問い合わせ</h1>
             <p class="desc">システムに関するご質問や不具合等は、以下のフォームよりお送りください。</p>
             
+            <div class="faq-banner">
+                <strong>【送信される前にご確認ください】</strong><br>
+                多くのお問い合わせについては、<a href="about.html">ご利用ガイド ＆ よくある質問 (FAQ)</a> にて解決方法をご案内しております。お問い合わせの前に、ぜひ一度ご確認ください。
+            </div>
+
             <div class="form-group">
                 <label>返信用メールアドレス <span style="color: #dc2626;">*</span></label>
                 <input type="email" id="inquiryEmail" class="form-control" placeholder="you@example.com" required>
@@ -79,7 +89,14 @@
                 <textarea id="inquiryMessage" class="form-control" placeholder="できるだけ詳細にご記入ください。" required></textarea>
             </div>
             
-            <button id="submitBtn" class="btn btn-primary" onclick="submitReaderInquiry()">送信する</button>
+            <div style="margin-bottom: 24px; display: flex; justify-content: center;">
+                <div class="cf-turnstile" 
+                     data-sitekey="0x4AAAAAADpftKeLBvaOQqcA" 
+                     data-callback="onTurnstileVerify"
+                     data-expired-callback="onTurnstileExpire"></div>
+            </div>
+
+            <button id="submitBtn" class="btn btn-primary" onclick="submitReaderInquiry()" disabled>送信する</button>
         </div>
     </div>
 
@@ -97,6 +114,17 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // 💡 BOT判定ロジック
+        let turnstileToken = null;
+        window.onTurnstileVerify = function(token) {
+            turnstileToken = token;
+            document.getElementById('submitBtn').disabled = false;
+        };
+        window.onTurnstileExpire = function() {
+            turnstileToken = null;
+            document.getElementById('submitBtn').disabled = true;
+        };
+
         async function submitReaderInquiry() {
             const emailInput = document.getElementById('inquiryEmail');
             const typeSelect = document.getElementById('inquiryType');
@@ -109,6 +137,9 @@
 
             if (!email || !message) {
                 return alert('返信用メールアドレスと内容を入力してください。');
+            }
+            if (!turnstileToken) {
+                return alert('セキュリティ認証が完了していません。');
             }
 
             btn.disabled = true;
@@ -128,10 +159,12 @@
                 
                 // 送信後は内容だけクリアして連続送信を防ぐ
                 messageInput.value = '';
+                if (window.turnstile) turnstile.reset();
+                turnstileToken = null;
+                document.getElementById('submitBtn').disabled = true;
 
             } catch (error) {
                 alert('送信に失敗しました。時間をおいて再度お試しください。\n' + error.message);
-            } finally {
                 btn.disabled = false;
                 btn.innerText = '送信する';
             }
