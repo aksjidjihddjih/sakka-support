@@ -185,10 +185,18 @@
                 document.getElementById('secretMessage').innerText = data.message;
                 document.getElementById('btnHome').href = `profile.html?id=${data.authorId}`;
 
-                // 💡 バックエンドから期限（expireDate等）が送られてきた場合のみ表示する処理
+                // 🌟 閲覧期限を YYYY/MM/DD HH:mm 形式に綺麗にフォーマットして表示
                 if (data.expireDate) {
                     const display = document.getElementById('expireDisplay');
-                    display.innerText = `閲覧可能期限: ${data.expireDate}`;
+                    const d = new Date(data.expireDate);
+                    
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const h = String(d.getHours()).padStart(2, '0');
+                    const min = String(d.getMinutes()).padStart(2, '0');
+                    
+                    display.innerText = `閲覧可能期限: ${y}/${m}/${day} ${h}:${min} まで`;
                     display.style.display = 'block';
                 }
 
@@ -200,6 +208,18 @@
                 `;
             }
         };
+
+        // 🌟 簡易スクリーンショット・覗き見防止システム（技術的カバー）
+        // ブラウザからフォーカスが外れた（タスク画面を開いた、スクショのショートカットを押した等）瞬間に画面を非表示にします。
+        const hideScreen = () => { document.body.style.opacity = '0'; };
+        const showScreen = () => { document.body.style.opacity = '1'; };
+        
+        window.addEventListener('blur', hideScreen);
+        window.addEventListener('focus', showScreen);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) hideScreen();
+            else showScreen();
+        });
     </script>
 </body>
 </html>
