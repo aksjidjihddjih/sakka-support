@@ -97,7 +97,6 @@
             .warning-box { padding: 12px; font-size: 12px; }
             .btn { margin-top: 24px; width: 100%; }
 
-            /* フッター1列ロック処理 */
             .footer-links { flex-wrap: nowrap !important; gap: 8px !important; justify-content: center !important; }
             .footer-links a { font-size: 10px !important; white-space: nowrap !important; }
         }
@@ -126,6 +125,8 @@
                 </div>
             </div>
             
+            <div id="expireDisplay" style="font-size: 12px; color: #dc2626; font-weight: bold; margin-bottom: 12px; text-align: right; display: none;"></div>
+
             <div id="secretMessage" class="msg-content">読み込み中...</div>
             
         </div>
@@ -143,7 +144,6 @@
     </div>
 
     <footer class="footer">
-        <!-- 💡 クラス名を追記し、スマホで縮小されるように修正 -->
         <div class="footer-links" style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
             <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
             <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
@@ -184,6 +184,13 @@
 
                 document.getElementById('secretMessage').innerText = data.message;
                 document.getElementById('btnHome').href = `profile.html?id=${data.authorId}`;
+
+                // 💡 バックエンドから期限（expireDate等）が送られてきた場合のみ表示する処理
+                if (data.expireDate) {
+                    const display = document.getElementById('expireDisplay');
+                    display.innerText = `閲覧可能期限: ${data.expireDate}`;
+                    display.style.display = 'block';
+                }
 
             } catch (err) {
                 document.getElementById('secretMessage').innerHTML = `
