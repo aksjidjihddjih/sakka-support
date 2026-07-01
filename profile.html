@@ -126,7 +126,7 @@
                     <input type="checkbox" id="agreeTerms" style="margin-top: 3px; cursor: pointer; width: 16px; height: 16px; accent-color: var(--text-main);">
                     <label for="agreeTerms" style="font-size: 12px; color: var(--text-sub); line-height: 1.5; cursor: pointer; user-select: none;">
                         <a href="terms.html" target="_blank" style="color: var(--text-main); font-weight: 700;">利用規約</a>・<a href="privacy.html" target="_blank" style="color: var(--text-main); font-weight: 700;">プライバシーポリシー</a>・<a href="tokushoho.html" target="_blank" style="color: var(--text-main); font-weight: 700;">特定商取引法に基づく表記</a> に同意し、未成年の場合は保護者の同意を得た上で決済します。</strong><br>
-                        <span style="color: #dc2626; font-weight: 700; font-size: 11px; display: block; margin-top: 6px;">※限定メッセージのスクリーンショット撮影・無断転載は固く禁じられています。</span>
+                        <span style="color: #dc2626; font-weight: 700; font-size: 11px; display: block; margin-top: 6px;">※執筆ノートのスクリーンショット撮影・無断転載は固く禁じられています。</span>
                         <span style="color: #6b7280; font-size: 11px; display: block; margin-top: 2px;">※デジタルコンテンツの性質上、返金はできません。</span>
                     </label>
                 </div>
@@ -198,7 +198,7 @@
                 if (!authorId) throw new Error("URLが正しくありません。");
 
                 const { data: creator } = await supabaseClient.from('creators').select('*').eq('id', authorId).single();
-                if (!creator) throw new Error("指定されたクリエイターが見つかりません。");
+                if (!creator) throw new Error("指定された作家が見つかりません。");
 
                 const penname = creator.pen_name || "名無し作者";
                 document.getElementById('authorName').innerText = penname;
