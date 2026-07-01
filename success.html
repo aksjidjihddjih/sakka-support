@@ -160,13 +160,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
 
-        if (sessionId) {
-            window.history.replaceState(null, '', window.location.pathname);
-        }
+        // 🚨 犯人だった「URLから session_id を消す処理」をここから削除しました
 
         window.onload = async function() {
             if (!sessionId) {
-                document.getElementById('secretMessage').innerHTML = '<span style="color: var(--text-sub);">不正なアクセス、または既にメッセージを表示済みです。<br>セキュリティ保護のため、メッセージの再表示はできません。</span>';
+                document.getElementById('secretMessage').innerHTML = '<span style="color: var(--text-sub);">決済情報が見つかりません。</span>';
                 return;
             }
 
