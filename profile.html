@@ -121,16 +121,19 @@
                     <span id="periodDisplay" style="font-size: 16px; font-weight: 800; color: #15803d;">- 日間</span>
                 </div>
 
-                <div style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 12px; background: #f9fafb; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-light);">
+                <!-- 💡 同意事項に「未成年の保護者同意」を統合したクリーンなUI -->
+                <div style="margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; background: #f9fafb; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-light);">
                     <input type="checkbox" id="agreeTerms" style="margin-top: 3px; cursor: pointer; width: 16px; height: 16px; accent-color: var(--text-main);">
                     <label for="agreeTerms" style="font-size: 12px; color: var(--text-sub); line-height: 1.5; cursor: pointer; user-select: none;">
-                        <a href="terms.html" target="_blank" style="color: var(--text-main); font-weight: 700;">利用規約</a>、<a href="privacy.html" target="_blank" style="color: var(--text-main); font-weight: 700;">プライバシーポリシー</a> および <a href="tokushoho.html" target="_blank" style="color: var(--text-main); font-weight: 700;">特定商取引法に基づく表記</a> に同意します。<br>
-                        <span style="color: #dc2626; font-weight: 700; font-size: 11px;">※限定メッセージのスクリーンショット撮影・無断転載は固く禁じられています。</span><br>
-                        <span style="color: #6b7280; font-size: 11px;">※デジタルコンテンツの性質上、返金はできません。</span>
+                        <a href="terms.html" target="_blank" style="color: var(--text-main); font-weight: 700;">利用規約</a>・<a href="privacy.html" target="_blank" style="color: var(--text-main); font-weight: 700;">プライバシーポリシー</a>・<a href="tokushoho.html" target="_blank" style="color: var(--text-main); font-weight: 700;">特定商取引法に基づく表記</a> に同意し、<strong style="color: var(--text-main);">未成年の場合は保護者の同意を得た上で決済します。</strong><br>
+                        <span style="color: #dc2626; font-weight: 700; font-size: 11px; display: block; margin-top: 6px;">※限定メッセージのスクリーンショット撮影・無断転載は固く禁じられています。</span>
+                        <span style="color: #6b7280; font-size: 11px; display: block; margin-top: 2px;">※デジタルコンテンツの性質上、返金はできません。</span>
                     </label>
                 </div>
 
                 <button class="btn btn-primary" id="checkoutBtn" onclick="processCheckout()" disabled>同意して決済へ進む</button>
+                
+                <!-- 🗑️ ここにあったボタン下の冗長な <p> タグ（未成年者は〜）は完全に削除しました -->
                 
                 <p style="font-size: 11px; color: #9ca3af; text-align: center; margin: 8px 0 0 0; line-height: 1.4;">
                     未成年者の決済は保護者の同意が必要です。成人の方が決済される場合、追加の操作は不要です。
