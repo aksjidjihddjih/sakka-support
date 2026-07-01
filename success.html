@@ -208,18 +208,6 @@
                 `;
             }
         };
-
-        // 🌟 簡易スクリーンショット・覗き見防止システム（技術的カバー）
-        // ブラウザからフォーカスが外れた（タスク画面を開いた、スクショのショートカットを押した等）瞬間に画面を非表示にします。
-        const hideScreen = () => { document.body.style.opacity = '0'; };
-        const showScreen = () => { document.body.style.opacity = '1'; };
-        
-        window.addEventListener('blur', hideScreen);
-        window.addEventListener('focus', showScreen);
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) hideScreen();
-            else showScreen();
-        });
     </script>
 </body>
 </html>
