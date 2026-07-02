@@ -581,7 +581,6 @@
                 list.innerHTML = data && data.length > 0 ? data.map(item => `
                     <div class="item-card" onclick="window.editLink('${item.id}', '${item.url.replace(/'/g, "\\'")}')">
                         <div class="item-info"><h4>${item.title}</h4><p>${item.url}</p></div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
                     </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
                 return data ? data.length : 0;
             }
@@ -593,7 +592,6 @@
                 list.innerHTML = data && data.length > 0 ? `
                     <div class="item-card" onclick="window.editMessage('${data[0].content.replace(/'/g, "\\'").replace(/\n/g, "\\n")}')">
                         <div class="item-info"><p style="color: var(--text-main); font-weight: 600;">${data[0].content.length > 60 ? data[0].content.substring(0, 60) + '...' : data[0].content}</p></div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
                     </div>` : '<p style="font-size: 14px; color: var(--text-sub);">設定されていません。</p>';
                 return data ? data.length : 0;
             }
@@ -606,7 +604,6 @@
                 list.innerHTML = data && data.length > 0 ? data.map(item => `
                     <div class="item-card" onclick="window.editWork('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.secret_message ? item.secret_message.replace(/'/g, "\\'").replace(/\n/g, "\\n") : ''}')">
                         <div class="item-info"><h4>${item.title}</h4><p>${item.secret_message ? "執筆ノートあり" : "執筆ノートなし"}</p></div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub);">編集</div>
                     </div>`).join('') : '<p style="font-size: 14px; color: var(--text-sub);">登録されていません。</p>';
                 
                 applyWorkSearch();
