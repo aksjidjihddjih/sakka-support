@@ -15,7 +15,7 @@
         .card h1 { font-size: 22px; font-weight: 800; margin: 0 0 24px 0; border-bottom: 2px solid var(--border-color); padding-bottom: 16px; }
         .card h2 { font-size: 16px; font-weight: 700; margin: 32px 0 12px 0; color: var(--text-main); border-left: 3px solid var(--text-main); padding-left: 8px; }
         .card p { font-size: 14px; color: var(--text-sub); margin: 0 0 16px 0; line-height: 1.8; }
-        .card ul { font-size: 14px; color: var(--text-sub); margin: 0 0 16px 0; padding-left: 20px; line-height: 1.8; }
+        .card ul, .card ol { font-size: 14px; color: var(--text-sub); margin: 0 0 16px 0; padding-left: 20px; line-height: 1.8; }
         .card li { margin-bottom: 6px; }
 
         .footer { padding: 40px 20px; text-align: center; font-size: 13px; color: var(--text-sub); border-top: 1px solid var(--border-light); margin-top: auto;}
@@ -26,11 +26,15 @@
         .btn-inline { display: inline-flex; justify-content: center; align-items: center; padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 6px; cursor: pointer; border: var(--border-width) solid var(--border-color); text-decoration: none; color: var(--text-main); background: #fff; box-shadow: 1.5px 1.5px 0px rgba(0,0,0,1); transition: all 0.2s; margin-top: 8px; }
         .btn-inline:hover { transform: translate(-1px, -1px); box-shadow: 2.5px 2.5px 0px rgba(0,0,0,1); }
 
+        .warning-box { background-color: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; margin: 24px 0; }
+        .warning-box strong { color: #dc2626; display: block; margin-bottom: 8px; }
+        .warning-box p { margin: 0; font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+
         @media (max-width: 768px) {
             .card { padding: 20px; }
             .card h1 { font-size: 18px; margin-bottom: 16px; padding-bottom: 12px; }
             .card h2 { font-size: 14px; }
-            .card p, .card ul { font-size: 13px; }
+            .card p, .card ul, .card ol { font-size: 13px; }
             .footer-links { flex-wrap: nowrap !important; gap: 8px !important; }
             .footer-links a { font-size: 10px !important; white-space: nowrap !important; }
         }
@@ -47,34 +51,74 @@
     <div class="container">
         <div class="card">
             <h1>KANKETSU ご利用ガイド</h1>
-            <p>KANKETSUは、お気に入りのWeb小説クリエイターの活動や作品の完結を直接応援できる、シンプルでクリーンな支援プラットフォームです。</p>
+            <p>KANKETSUは、お気に入りのWeb小説作家の活動や作品の完結を直接応援できる、シンプルでクリーンな支援プラットフォームです。</p>
+
+            <div class="warning-box">
+                <strong>【なりすましにご注意ください】</strong>
+                <p>
+                    KANKETSUにはサイト内の検索機能がありません。支援ページへは、必ず応援したい作者本人が公式SNSや小説投稿サイト等で公開しているリンクからアクセスしてください。<br><br>
+                    見知らぬ相手から直接「支援してください」とDM等で送られてきた不審なリンクには絶対にアクセスしないでください。不審なページを発見した場合は、<a href="inquiry.html" style="color: var(--text-main); font-weight: bold;">お問い合わせフォーム</a>よりご報告をお願いいたします。
+                </p>
+            </div>
             
             <h2>読者・ファンの方へ</h2>
-            <p>面倒な会員登録の手続きなしに、クレジットカードを使って手軽に作者を直接支援できます。</p>
+            <p>面倒な会員登録の手続きなしに、クレジットカード等を使って手軽に作者を直接支援できます。</p>
             <ul>
-                <li><strong>支援の方法：</strong>作者の公式SNS等に設置されたリンクからプロフィールページを開き、作品名と支援金額を選択して「クレジットカードで支援する」を押してください。</li>
-                <li><strong>支援の特典：</strong>決済完了後の画面にて、作者が設定した「限定メッセージ」や「作品の裏話」をその場で読むことができます。</li>
+                <li><strong>支援の方法：</strong><br>
+                作者の公式SNS等に設置されたリンクからプロフィールページを開き、作品名を選びます。支援金額は <strong>100円〜10,000円の範囲内（100円単位）</strong> で自由に設定可能です。</li>
+                
+                <li style="margin-top: 12px;"><strong>支援の特典：</strong><br>
+                決済完了後、作者が設定した「執筆ノート（限定メッセージや裏話など）」を閲覧することができます。<br>
+                執筆ノートは支援金額に応じた期間内であれば何度でも読み返すことができます。<br>
+                <br>
+                ・ 100円 → 1日間閲覧可能<br>
+                ・ 1,000円 → 10日間閲覧可能<br>
+                ・ 10,000円 → 100日間閲覧可能<br>
+                <span style="font-size: 12px;">（100円の支援につき1日間、最大100日間）</span><br>
+                <br>
+                ※閲覧期限はお支払い完了後の画面に表示されます。期限を過ぎると自動的に非表示となります。<br>
+                <span style="color: #dc2626; font-weight: bold;">※本コンテンツのスクリーンショット撮影・保存、およびSNS等への無断転載は固く禁じられています。</span></li>
             </ul>
 
-            <h2>クリエイターの方へ</h2>
-            <p>文字数制限やお礼メッセージを設定するだけで、今すぐあなた専用の支援受付ページを開設できます。</p>
+            <h2>作家の方へ</h2>
+            <p>以下の4ステップで、今すぐ支援受付を開始できます。</p>
+            <ol>
+                <li><strong>ペンネームの設定</strong>（読者に公開されます）</li>
+                <li><strong>活動サイトのURL登録</strong></li>
+                <li><strong>執筆ノートの設定</strong>（支援者だけが閲覧できるメッセージです）</li>
+                <li><strong>Stripe口座の連携</strong>（支援金を受け取るための銀行口座設定です）</li>
+            </ol>
             <ul>
-                <li>初期費用や月額費用は一切かかりません（支援金受領時にのみ、システム手数料として10%が差し引かれます）。</li>
-                <li>コメント機能やプレッシャーになる仕組みがないため、自分のペースで執筆を続けられます。</li>
+                <li>初期費用や月額費用は一切かかりません。支援金受領時にのみ、システム利用料として支援額の10%が差し引かれます（これにはStripeの決済手数料も含まれます）。</li>
+                <li>コメント機能・支援者数の公開・メッセージ機能などはなく、執筆のプレッシャーになる仕組みは意図的に排除しているため、自分のペースで執筆を続けられます。</li>
             </ul>
-            <a href="signup.html" class="btn-inline">クリエイター登録（無料）をしてみる</a>
+            <a href="signup.html" class="btn-inline">作家登録（無料）をしてみる</a>
 
             <h2>よくある質問 (FAQ)</h2>
-            <p><strong>Q. 決済後に返金やキャンセルはできますか？</strong><br>A. デジタルコンテンツという商品の性質上、支援完了後の返金・変更・キャンセルには応じられません。金額等をご確認の上でお手続きください。</p>
-            <p><strong>Q. クレジットカード情報はサイト側に保存されますか？</strong><br>A. いいえ。決済は世界的な決済インフラ「Stripe」の安全なシステムを介して直接処理されるため、当サービス側にカード番号が保管されることは一切ありません。</p>
+            <p><strong>Q. 決済後に返金やキャンセルはできますか？</strong><br>
+            A. 執筆ノートはデジタルコンテンツという商品の性質上、原則として決済完了後の返金・変更・キャンセルには応じられません。金額等をご確認の上でお手続きください。ただし、当方の技術的障害により執筆ノートが正常に表示されなかった場合に限り、支援から14日以内にお問い合わせフォームよりご連絡ください。当方の調査結果に基づき個別に対応いたします。</p>
+            
+            <p><strong>Q. 執筆ノートはいつまで読めますか？</strong><br>
+            A. 支援金額に応じた期間内（100円の支援につき1日間）であれば何度でも読み返すことができます。閲覧期限はお支払い完了後の画面に表示され、期限を過ぎると自動的に閲覧できなくなります。</p>
+
+            <p><strong>Q. 支援したことは作者にわかりますか？（匿名で支援できますか）</strong><br>
+            A. 支援者の氏名・メールアドレス・支援金額等の個人情報が作者に開示されることは一切ありません。完全に匿名で支援を行うことができます。また、KANKETSUには支援者から作者へメッセージを送る機能もありません。</p>
+
+            <p><strong>Q. 支援すれば作品が必ず更新・完結されますか？</strong><br>
+            A. KANKETSUにおける支援は、あくまで作家の創作活動への「応援」を目的とするものであり、特定の作品の更新頻度や完結を保証・約束するものではありません。支援を理由に更新を強要する行為は利用規約で固く禁止されています。</p>
+
+            <p><strong>Q. どの決済手段が使えますか？</strong><br>
+            A. Stripeが対応する各種クレジットカード（Visa、Mastercard、American Express、JCBなど）に加え、一部のモバイル決済（PayPayなど）がご利用いただけます。※サイト側にカード番号等の情報が保存されることは一切ありません。</p>
         </div>
     </div>
 
     <footer class="footer">
         <div class="footer-links">
+            <a href="about.html">ご利用ガイド</a>
             <a href="tokushoho.html">特定商取引法に基づく表記</a>
             <a href="terms.html">利用規約</a>
             <a href="privacy.html">プライバシーポリシー</a>
+            <a href="inquiry.html">お問い合わせ</a>
         </div>
         <p style="margin: 0;">&copy; 2026 KANKETSU</p>
     </footer>
