@@ -76,12 +76,15 @@
             
             <div class="form-group">
                 <label>お問い合わせの種類 <span style="color: #dc2626;">*</span></label>
-                <select id="inquiryType" class="form-control" style="appearance: auto;">
-                    <option value="使い方について">使い方について</option>
-                    <option value="決済・支援について">決済・支援について</option>
-                    <option value="不具合の報告">不具合の報告</option>
-                    <option value="その他">その他</option>
-                </select>
+                <!-- お問い合わせの種類の <select> の中身を差し替え -->
+        <select id="inquiryType" class="form-control" required>
+            <option value="" disabled selected>選択してください</option>
+            <option value="使い方について">使い方について</option>
+            <option value="決済・返金について">決済・返金について</option>
+            <option value="なりすまし・不正の報告">なりすまし・不正の報告</option>
+            <option value="不具合の報告">不具合の報告</option>
+            <option value="その他">その他</option>
+        </select>
             </div>
             
             <div class="form-group">
@@ -105,6 +108,7 @@
             <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
             <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
             <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
+            <a href="about.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">お問い合わせ</a>
         </div>
         <p style="margin: 0; color: var(--text-sub); font-size: 13px;">&copy; 2026 KANKETSU</p>
     </div>
@@ -155,7 +159,20 @@
 
                 if (error) throw error;
 
-                alert('お問い合わせを受け付けました。\n内容を確認次第、入力いただいたメールアドレスへご返信いたします。');
+                <div id="successMessage" style="display: none; background-color: var(--card-bg, #ffffff); border: 2px solid var(--border-color, #000000); border-radius: 12px; padding: 32px; text-align: center; box-shadow: 4px 4px 0px rgba(0,0,0,1);">
+            <div style="width: 48px; height: 48px; background: #16a34a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h3 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 800; color: var(--text-main, #000000);">送信が完了しました</h3>
+            <p style="font-size: 14px; color: var(--text-sub, #4b5563); margin-bottom: 24px; line-height: 1.6;">
+                ご返信まで通常3〜5営業日いただいております。<br>
+                返信はご入力のメールアドレスへお送りします。
+            </p>
+            <div style="background: #f9fafb; border: 1px solid var(--border-light, #e5e7eb); border-radius: 8px; padding: 16px; text-align: left; font-size: 12px; color: var(--text-sub, #4b5563);">
+                <strong style="color: var(--text-main, #000000); display: block; margin-bottom: 4px;">【決済・返金についてお問い合わせいただいた方へ】</strong>
+                お問い合わせの調査には決済記録の確認が必要なため、通常よりお時間をいただく場合がございます。あらかじめご了承ください。
+            </div>
+        </div>
                 
                 // 送信後は内容だけクリアして連続送信を防ぐ
                 messageInput.value = '';
