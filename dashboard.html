@@ -374,6 +374,7 @@
         </div>
     </div>
 
+        <!-- 売上引き出しモーダル -->
     <div class="modal-overlay" id="withdrawModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -382,7 +383,26 @@
             </div>
             <div class="form-group">
                 <label>引き出し金額（円）</label>
-                <input type="number" id="withdrawAmountInput" class="form-control" placeholder="例: 1000" min="1" autocomplete="off">
+                <!-- 💡 入力されるたびに calcWithdraw() が走って金額を計算します -->
+                <input type="number" id="withdrawAmountInput" class="form-control" placeholder="最低 1,000円 から引き出し可能" min="1000" autocomplete="off" oninput="window.calcWithdraw()">
+                
+                <!-- 💡 リアルタイム明細パネル -->
+                <div style="margin-top: 12px; padding: 16px; background: #f9fafb; border: 1px solid var(--border-light); border-radius: 8px; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--text-sub);">残高から引き出す額</span>
+                        <span id="calcInputAmount" style="font-weight: 600;">¥0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #dc2626;">振込手数料（一律）</span>
+                        <span style="color: #dc2626; font-weight: 600;">-¥250</span>
+                    </div>
+                    <div style="height: 1px; background: var(--border-light); margin: 12px 0;"></div>
+                    <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 15px;">
+                        <span>実際に振り込まれる金額</span>
+                        <span id="calcFinalAmount" style="color: #16a34a;">¥0</span>
+                    </div>
+                </div>
+                
                 <p id="withdrawMaxHint" style="font-size: 12px; color: var(--text-sub); margin-top: 8px;">引き出し可能残高: ¥0</p>
             </div>
             <div class="modal-footer">
@@ -393,6 +413,7 @@
             </div>
         </div>
     </div>
+
 
     <script>
         (function() {
@@ -646,19 +667,40 @@
                 window.openModal('withdrawModal');
             };
 
+            // 💡 リアルタイム計算用の関数を追加
+            window.calcWithdraw = function() {
+                const input = document.getElementById('withdrawAmountInput').value;
+                const amount = parseInt(input, 10) || 0;
+                document.getElementById('calcInputAmount').innerText = `¥${amount.toLocaleString()}`;
+                
+                const finalAmount = amount - 250;
+                const finalEl = document.getElementById('calcFinalAmount');
+                
+                if (finalAmount > 0 && amount >= 1000) {
+                    finalEl.innerText = `¥${finalAmount.toLocaleString()}`;
+                    finalEl.style.color = '#16a34a';
+                } else {
+                    finalEl.innerText = `¥0`;
+                    finalEl.style.color = '#dc2626';
+                }
+            };
+
+            // 💡 申請実行の関数をより厳格なルールにアップデート
             window.executeWithdraw = async function() {
                 const amountInput = document.getElementById('withdrawAmountInput');
                 const amount = parseInt(amountInput.value, 10);
                 const submitBtn = document.querySelector('#withdrawModal .btn-primary');
                 
-                if (isNaN(amount) || amount <= 0) {
-                    return alert("正しい金額を入力してください。");
+                if (isNaN(amount) || amount < 1000) {
+                    return alert("引き出しは1,000円以上から可能です。");
                 }
                 if (amount > currentBalance) {
                     return alert(`残高（¥${currentBalance.toLocaleString()}）を超える金額は引き出せません。`);
                 }
                 
-                if (!confirm(`¥${amount.toLocaleString()} の引き出し申請を行います。本当によろしいですか？`)) {
+                const finalAmount = amount - 250;
+                
+                if (!confirm(`残高から ¥${amount.toLocaleString()} を引き出します。\n振込手数料(¥250)を差し引いた【 ¥${finalAmount.toLocaleString()} 】が銀行口座に振り込まれます。\n本当によろしいですか？`)) {
                     return;
                 }
 
@@ -673,7 +715,7 @@
                     if (error) throw error;
                     if (data && data.error) throw new Error(data.error);
 
-                    alert(`¥${amount.toLocaleString()} の引き出し処理が完了しました。\n連携済みのStripe口座へ振り込まれます。`);
+                    alert(`引き出し処理が完了しました。\n連携済みのStripe口座へ ¥${finalAmount.toLocaleString()} が振り込まれます。`);
                     window.closeModal('withdrawModal');
                     await window.initDashboard();
 
@@ -684,7 +726,6 @@
                     submitBtn.innerText = '申請する';
                 }
             };
-
             window.openModal = function(id) { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; };
             // 修正箇所②：モーダルを閉じたときの初期化タイトル
             window.closeModal = function(id) { 
@@ -693,7 +734,7 @@
                 if(id === 'linkModal') { editLinkId = null; document.getElementById('linkUrl').value = ''; document.getElementById('linkModalTitle').innerText = '活動サイトを追加'; document.getElementById('linkDelBtn').style.display = 'none'; }
                 if(id === 'msgModal') { document.getElementById('msgContent').value = ''; }
                 if(id === 'workModal') { editWorkId = null; document.getElementById('workTitle').value = ''; document.getElementById('workMessage').value = ''; document.getElementById('workModalTitle').innerText = '作品と執筆ノートを追加'; document.getElementById('workDelBtn').style.display = 'none'; }
-                if(id === 'withdrawModal') { document.getElementById('withdrawAmountInput').value = ''; }
+                if(id === 'withdrawModal') { document.getElementById('withdrawAmountInput').value = ''; window.calcWithdraw(); }
             };
             window.onclick = function(e) { if (e.target.classList.contains('modal-overlay')) { window.closeModal(e.target.id); } };
             window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('show'); };
