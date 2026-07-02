@@ -39,7 +39,6 @@
 
         .site-footer { padding: 40px 20px; text-align: center; border-top: 1px solid var(--border-light); margin-top: auto; }
         
-        /* 💡 お知らせ・FAQ誘導バナーのスタイル */
         .faq-banner { background-color: #f3f4f6; border: 1px solid var(--border-light); border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; line-height: 1.5; color: var(--text-sub); }
         .faq-banner a { color: var(--text-main); font-weight: 700; text-decoration: underline; }
         
@@ -60,13 +59,17 @@
             戻る
         </a>
 
-        <div class="card">
+        <div class="card" id="formCard">
             <h1>お問い合わせ</h1>
             <p class="desc">システムに関するご質問や不具合等は、以下のフォームよりお送りください。</p>
             
             <div class="faq-banner">
-                <strong>【送信される前にご確認ください】</strong><br>
-                多くのお問い合わせについては、<a href="about.html">ご利用ガイド ＆ よくある質問 (FAQ)</a> にて解決方法をご案内しております。お問い合わせの前に、ぜひ一度ご確認ください。
+                <strong style="color: var(--text-main);">【送信される前にご確認ください】</strong><br>
+                <ul style="margin: 8px 0 0 0; padding-left: 20px; color: var(--text-sub);">
+                    <li style="margin-bottom: 4px;">多くのお問い合わせについては、<a href="about.html">ご利用ガイド ＆ よくある質問 (FAQ)</a> にて解決方法をご案内しております。</li>
+                    <li style="margin-bottom: 4px;">なりすましや不正な支援誘導を発見した場合は、カテゴリ「なりすまし・不正の報告」を選択し、<strong>該当のURLやSNS情報</strong>をご記入ください。</li>
+                    <li>お問い合わせには、通常<strong>3〜5営業日以内</strong>にご登録のメールアドレスへご返信いたします。</li>
+                </ul>
             </div>
 
             <div class="form-group">
@@ -76,15 +79,15 @@
             
             <div class="form-group">
                 <label>お問い合わせの種類 <span style="color: #dc2626;">*</span></label>
-                <!-- お問い合わせの種類の <select> の中身を差し替え -->
-        <select id="inquiryType" class="form-control" required>
-            <option value="" disabled selected>選択してください</option>
-            <option value="使い方について">使い方について</option>
-            <option value="決済・返金について">決済・返金について</option>
-            <option value="なりすまし・不正の報告">なりすまし・不正の報告</option>
-            <option value="不具合の報告">不具合の報告</option>
-            <option value="その他">その他</option>
-        </select>
+                <!-- 💡 Claudeの指摘通り、カテゴリを具体的かつ必要なものに差し替えました -->
+                <select id="inquiryType" class="form-control" style="appearance: auto;">
+                    <option value="" disabled selected>選択してください</option>
+                    <option value="使い方について">使い方について</option>
+                    <option value="決済・返金について">決済・返金について</option>
+                    <option value="なりすまし・不正の報告">なりすまし・不正の報告</option>
+                    <option value="不具合の報告">不具合の報告</option>
+                    <option value="その他">その他</option>
+                </select>
             </div>
             
             <div class="form-group">
@@ -101,14 +104,33 @@
 
             <button id="submitBtn" class="btn btn-primary" onclick="submitReaderInquiry()" disabled>送信する</button>
         </div>
+
+        <!-- 💡 Claudeの指摘通り、送信完了画面（決済系の場合は追加の案内）を実装しました -->
+        <div id="successCard" style="display: none; background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 12px; padding: 40px 32px; text-align: center; box-shadow: 4px 4px 0px rgba(0,0,0,1);">
+            <div style="width: 48px; height: 48px; background: #16a34a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <h2 style="font-size: 20px; font-weight: 800; margin: 0 0 16px 0;">送信が完了しました</h2>
+            <p style="font-size: 14px; color: var(--text-sub); margin-bottom: 24px;">
+                ご返信まで通常<strong>3〜5営業日</strong>いただいております。<br>
+                返信はご入力のメールアドレスへお送りします。
+            </p>
+            <div id="paymentWarning" style="display: none; background: #f9fafb; border: 1px solid var(--border-light); border-radius: 8px; padding: 16px; text-align: left; font-size: 12px; color: var(--text-sub);">
+                <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">【決済・返金についてお問い合わせいただいた方へ】</strong>
+                お問い合わせの調査には、Stripe側の決済記録の確認が必要なため、通常よりお時間をいただく場合がございます。あらかじめご了承ください。
+            </div>
+            <a href="index.html" class="btn btn-primary" style="margin-top: 24px; width: auto;">トップページへ戻る</a>
+        </div>
     </div>
 
+    <!-- 💡 他のページと同じリンク構成を持つフッターに差し替えました -->
     <div class="site-footer">
         <div style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 16px;">
+            <a href="about.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">ご利用ガイド</a>
             <a href="tokushoho.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">特定商取引法に基づく表記</a>
             <a href="terms.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">利用規約</a>
             <a href="privacy.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">プライバシーポリシー</a>
-            <a href="about.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">お問い合わせ</a>
+            <a href="inquiry.html" style="color: var(--text-sub); text-decoration: none; font-weight: 600; font-size: 13px;" onmouseover="this.style.color='var(--text-main)';" onmouseout="this.style.color='var(--text-sub)';">お問い合わせ</a>
         </div>
         <p style="margin: 0; color: var(--text-sub); font-size: 13px;">&copy; 2026 KANKETSU</p>
     </div>
@@ -118,7 +140,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_UTcLPc5ZZambRYLGwst-jw_kvhFyS7m';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 💡 BOT判定ロジック
         let turnstileToken = null;
         window.onTurnstileVerify = function(token) {
             turnstileToken = token;
@@ -139,8 +160,8 @@
             const type = typeSelect.value;
             const message = messageInput.value.trim();
 
-            if (!email || !message) {
-                return alert('返信用メールアドレスと内容を入力してください。');
+            if (!email || !type || !message) {
+                return alert('すべての必須項目を入力・選択してください。');
             }
             if (!turnstileToken) {
                 return alert('セキュリティ認証が完了していません。');
@@ -150,7 +171,6 @@
             btn.innerText = '送信中...';
 
             try {
-                // 読者はログインしていないため、user_id は記録しません（空になります）
                 const { error } = await supabaseClient.from('inquiries').insert([{
                     email: email,
                     inquiry_type: type,
@@ -159,26 +179,19 @@
 
                 if (error) throw error;
 
-                <div id="successMessage" style="display: none; background-color: var(--card-bg, #ffffff); border: 2px solid var(--border-color, #000000); border-radius: 12px; padding: 32px; text-align: center; box-shadow: 4px 4px 0px rgba(0,0,0,1);">
-            <div style="width: 48px; height: 48px; background: #16a34a; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            <h3 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 800; color: var(--text-main, #000000);">送信が完了しました</h3>
-            <p style="font-size: 14px; color: var(--text-sub, #4b5563); margin-bottom: 24px; line-height: 1.6;">
-                ご返信まで通常3〜5営業日いただいております。<br>
-                返信はご入力のメールアドレスへお送りします。
-            </p>
-            <div style="background: #f9fafb; border: 1px solid var(--border-light, #e5e7eb); border-radius: 8px; padding: 16px; text-align: left; font-size: 12px; color: var(--text-sub, #4b5563);">
-                <strong style="color: var(--text-main, #000000); display: block; margin-bottom: 4px;">【決済・返金についてお問い合わせいただいた方へ】</strong>
-                お問い合わせの調査には決済記録の確認が必要なため、通常よりお時間をいただく場合がございます。あらかじめご了承ください。
-            </div>
-        </div>
+                // 💡 送信完了の処理：アラートではなく、送信完了画面に切り替える
+                document.getElementById('formCard').style.display = 'none';
+                document.getElementById('successCard').style.display = 'block';
                 
-                // 送信後は内容だけクリアして連続送信を防ぐ
+                // 決済系の問い合わせだった場合のみ、追加の案内文を表示する
+                if (type === '決済・返金について') {
+                    document.getElementById('paymentWarning').style.display = 'block';
+                }
+
+                // フォームのクリア（念のため）
                 messageInput.value = '';
                 if (window.turnstile) turnstile.reset();
                 turnstileToken = null;
-                document.getElementById('submitBtn').disabled = true;
 
             } catch (error) {
                 alert('送信に失敗しました。時間をおいて再度お試しください。\n' + error.message);
